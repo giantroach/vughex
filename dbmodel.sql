@@ -1,8 +1,8 @@
 
 -- ------
 -- BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
--- Vughex implementation : © <Your name here> <Your email address here>
--- 
+-- Vughex implementation : © Tomoki Motohashi <tomoki.motohashi@takoashi.com>
+--
 -- This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
 -- See http://en.boardgamearena.com/#!doc/Studio for more information.
 -- -----
@@ -33,3 +33,12 @@
 -- Example 2: add a custom field to the standard "player" table
 -- ALTER TABLE `player` ADD `player_my_custom_field` INT UNSIGNED NOT NULL DEFAULT '0';
 
+CREATE TABLE IF NOT EXISTS `cards` (
+  `card_id` INT(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  `card_type` varchar(16) NOT NULL,
+  `card_type_arg` TINYINT UNSIGNED NOT NULL,
+  `card_location` VARCHAR(16) NOT NULL,
+  `card_location_arg` int(11)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
+
+-- ALTER TABLE `player` ADD `player_side` VARCHAR(16);
