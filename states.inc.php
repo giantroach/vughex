@@ -2,7 +2,7 @@
 /**
  *------
  * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
- * Vughex implementation : © <Your name here> <Your email address here>
+ * Vughex implementation : © Tomoki Motohashi <tomoki.motohashi@takoashi.com>
  *
  * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
@@ -58,19 +58,43 @@ $machinestates = array(
         "description" => "",
         "type" => "manager",
         "action" => "stGameSetup",
-        "transitions" => array( "" => 2 )
+        "transitions" => ["roundSetup" => 2]
     ),
 
     // Note: ID=2 => your first state
 
-    2 => array(
+    2 => [
+        "name" => "roundSetup",
+        "type" => "game",
+        "action" => "stRoundSetup",
+        "updateGameProgression" => true,
+        "transitions" => ["playerTurn" => 3]
+    ],
+
+    3 => [
         "name" => "playerTurn",
         "description" => clienttranslate('${actplayer} must play a card or pass'),
         "descriptionmyturn" => clienttranslate('${you} must play a card or pass'),
         "type" => "activeplayer",
-        "possibleactions" => array( "playCard", "pass" ),
-        "transitions" => array( "playCard" => 2, "pass" => 2 )
-    ),
+        "possibleactions" => ["playCard", "pass", "eclipse"],
+        "transitions" => ["nextPlayer" => 4, "zombiePass" => 4]
+    ],
+
+    4 => [
+        "name" => "nextPlayer",
+        "type" => "game",
+        "action" => "stNextPlayer",
+        "updateGameProgression" => true,
+        "transitions" => ["playerTurn" => 3, "endRound" => 10]
+    ],
+
+    10 => [
+        "name" => "endRound",
+        "type" => "game",
+        "action" => "stEndRound",
+        "updateGameProgression" => true,
+        "transitions" => ["roundSetup" => 2, "endGame" => 99]
+    ],
 
 /*
     Examples:

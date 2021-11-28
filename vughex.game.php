@@ -2,7 +2,7 @@
  /**
   *------
   * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
-  * Vughex implementation : © <Your name here> <Your email address here>
+  * Vughex implementation : © Tomoki Motohashi <tomoki.motohashi@takoashi.com>
   *
   * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
   * See http://en.boardgamearena.com/#!doc/Studio for more information.
@@ -32,14 +32,18 @@ class Vughex extends Table
         // Note: afterwards, you can get/set the global variables with getGameStateValue/setGameStateInitialValue/setGameStateValue
         parent::__construct();
 
-        self::initGameStateLabels( array(
+        self::initGameStateLabels(array(
             //    "my_first_global_variable" => 10,
             //    "my_second_global_variable" => 11,
             //      ...
             //    "my_first_game_variant" => 100,
             //    "my_second_game_variant" => 101,
             //      ...
-        ) );
+        ));
+
+        // create instance specifying card module
+        $this->cards = self::getNew("module.common.deck");
+        $this->cards->init("cards"); // specify cards table and init
     }
 
     protected function getGameName( )
@@ -55,7 +59,7 @@ class Vughex extends Table
       In this method, you must setup the game according to the game rules, so that
       the game is ready to be played.
     */
-    protected function setupNewGame( $players, $options = array() )
+    protected function setupNewGame($players, $options = array())
     {
         // Set the colors of the players with HTML color code
         // The default below is red/green/blue/orange/brown
@@ -67,14 +71,13 @@ class Vughex extends Table
         // Note: if you added some extra field on "player" table in the database (dbmodel.sql), you can initialize it there.
         $sql = "INSERT INTO player (player_id, player_color, player_canal, player_name, player_avatar) VALUES ";
         $values = array();
-        foreach( $players as $player_id => $player )
-        {
-            $color = array_shift( $default_colors );
-            $values[] = "('".$player_id."','$color','".$player['player_canal']."','".addslashes( $player['player_name'] )."','".addslashes( $player['player_avatar'] )."')";
+        foreach ($players as $player_id => $player) {
+            $color = array_shift($default_colors);
+            $values[] = "('" . $player_id . "', '$color', '" . $player['player_canal'] . "', '" . addslashes($player['player_name']) . "','" . addslashes($player['player_avatar']) . "')";
         }
-        $sql .= implode( $values, ',' );
-        self::DbQuery( $sql );
-        self::reattributeColorsBasedOnPreferences( $players, $gameinfos['player_colors'] );
+        $sql .= implode($values, ',');
+        self::DbQuery($sql);
+        self::reattributeColorsBasedOnPreferences($players, $gameinfos['player_colors']);
         self::reloadPlayersBasicInfos();
 
         /************ Start the game initialization *****/
@@ -90,8 +93,7 @@ class Vughex extends Table
         // TODO: setup the initial game situation here
 
 
-        // Activate first player (which is in general a good idea :) )
-        $this->activeNextPlayer();
+        $this->gamestate->nextState('roundSetup');
 
         /************ End of the game initialization *****/
     }
@@ -234,6 +236,11 @@ class Vughex extends Table
       }
     */
 
+    function stRoundSetup()
+    {
+    	$this->activeNextPlayer();
+    }
+
     //////////////////////////////////////////////////////////////////////////////
     //////////// Zombie
     ////////////
@@ -251,7 +258,7 @@ class Vughex extends Table
       you must _never_ use getCurrentPlayerId() or getCurrentPlayerName(), otherwise it will fail with a "Not logged" error message.
     */
 
-    function zombieTurn( $state, $active_player )
+    function zombieTurn($state, $active_player)
     {
         $statename = $state['name'];
 
@@ -267,12 +274,12 @@ class Vughex extends Table
 
         if ($state['type'] === "multipleactiveplayer") {
             // Make sure player is in a non blocking status for role turn
-            $this->gamestate->setPlayerNonMultiactive( $active_player, '' );
+            $this->gamestate->setPlayerNonMultiactive($active_player, '');
 
             return;
         }
 
-        throw new feException( "Zombie mode not supported at this game state: ".$statename );
+        throw new feException("Zombie mode not supported at this game state: " . $statename);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////:
@@ -290,7 +297,7 @@ class Vughex extends Table
 
     */
 
-    function upgradeTableDb( $from_version )
+    function upgradeTableDb($from_version)
     {
         // $from_version is the current version of this game database, in numerical form.
         // For example, if the game was running with a release of your game named "140430-1345",
@@ -314,7 +321,6 @@ class Vughex extends Table
         //        // Please add your future database scheme changes here
         //
         //
-
 
     }
 }
