@@ -91,7 +91,18 @@ class Vughex extends Table
         //self::initStat( 'player', 'player_teststat1', 0 );  // Init a player statistics (for all players)
 
         // TODO: setup the initial game situation here
+        $cards = [];
 
+        for ($cardNo = 1; $cardNo <= 15; $cardNo++) {
+            $cards[] = [
+                'type' => 0,
+                'type_arg' => $cardNo,
+                'nbr' => 1
+            ];
+        }
+
+        $this->cards->createCards($cards, 'deck');
+        $this->cards->shuffle('deck');
 
         $this->gamestate->nextState('roundSetup');
 
@@ -111,14 +122,25 @@ class Vughex extends Table
     {
         $result = array();
 
-        $current_player_id = self::getCurrentPlayerId();    // !! We must only return informations visible by this player !!
+        // !! We must only return informations visible by this player !!
+        $current_player_id = self::getCurrentPlayerId();
 
         // Get information about players
         // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
         $sql = "SELECT player_id id, player_score score FROM player ";
-        $result['players'] = self::getCollectionFromDb( $sql );
+        $result['players'] = self::getCollectionFromDb($sql);
 
         // TODO: Gather all information about current game situation (visible by player $current_player_id).
+        // return number of cards in the hand
+        foreach($result['players'] as $key => $value) {
+            $player_id = $key;
+            $count = count($this->cards->getCardsInLocation("hand", $player_id));
+            $result['players'][$key]['cards'] = $count;
+        }
+
+
+        $result['player_cards'] = array_values(
+            $this->cards->getCardsInLocation("hand", $current_player_id));
 
         return $result;
     }
@@ -238,6 +260,11 @@ class Vughex extends Table
 
     function stRoundSetup()
     {
+        $players = self::getCollectionFromDb("SELECT player_id id FROM player");
+        foreach($players as $playerID => $value) {
+            $this->cards->pickCards(5, 'deck', $playerID);
+        }
+
     	$this->activeNextPlayer();
     }
 

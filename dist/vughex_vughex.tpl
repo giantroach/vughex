@@ -25,9 +25,34 @@
     Please REMOVE this comment before publishing your game on BGA
 -->
 
+<div id="parents">
+  <div id="card-preview">
+    <h3 id="ontable_header">
+      <span>{ON_TABLE}:</span>
+    </h3>
+    <div class="ecliptic-table-cards">
+      <div id="table_cards"></div>
+    </div>
+  </div>
 
-This is your game interface. You can edit this HTML in your ".tpl" file.
+  <div id="card-playarea">
+    <div id="common_table" class="whiteblock">
+      <h3 id="ontable_header">
+        <span>{ON_TABLE}:</span>
+      </h3>
+      <div class="ecliptic-table-cards">
+        <div id="table_cards"></div>
+      </div>
+    </div>
 
+    <div id="player_hand" class="whiteblock">
+      <h3 id="inhand_header">
+        <span>{IN_HAND}:</span>
+      </h3>
+      <div id="player_cards" class="card_inhand"></div>
+    </div>
+  </div>
+</div>
 
 <script type="text/javascript">
 
@@ -38,6 +63,14 @@ This is your game interface. You can edit this HTML in your ".tpl" file.
 var jstpl_some_game_item='<div class="my_game_item" id="my_game_item_${MY_ITEM_ID}"></div>';
 
 */
+
+let jstpl_player_board = `
+<div class="vughex-hand-size">
+  <div>
+    <span id="hand-count_p\${id}">0</span>
+    <span id="hand-icon_p\${id}" class="fa fa-hand-paper-o"></span>
+  </div>
+</div>`;
 
 </script>
 

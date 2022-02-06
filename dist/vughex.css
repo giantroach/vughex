@@ -1,3 +1,4 @@
+@charset "UTF-8";
 /**
  *------
  * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
@@ -12,7 +13,6 @@
  * Vughex stylesheet
  *
  */
-
 /*
     This is the CSS stylesheet of your game User Interface.
 
@@ -41,17 +41,10 @@
      Note: on the production platform, this file will be compressed and comments will be removed.
            Consequently, don't hesitate to put as many comments as necessary.
 */
-
-
 /* Note: you must not use any @import directive */
-
-
 /********* You can start writing your CSS below this line: **********/
-
-
 /*
     Example of CSS sprites (a black token and a white token, 20x20px each, embedded in the same "tokens.png" 40x20px image):
-
     .white_token {
         background-image: url('img/tokens.png');
         background-position: 0px 0px;
@@ -66,3 +59,93 @@
         background-repeat: none;
     }
 */
+body {
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-color: #647b8a;
+}
+
+.player_board_content {
+  display: flex;
+}
+
+.player_board_content > div {
+  flex: 1 1 auto;
+}
+
+#parents {
+  display: flex;
+}
+
+#parents > #card-preview {
+  flex: 0 0 320px;
+}
+
+#parents > #card-playarea {
+  flex: 1 1 auto;
+}
+
+#card-preview {
+  margin: 10px 10px 10px 0;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 10px;
+}
+
+#common_table {
+  height: 220px;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 10px;
+  padding: 5px;
+  margin-bottom: 10px;
+}
+
+.vughex-table-cards {
+  display: flex;
+}
+
+#table_cards {
+  margin-left: -60px;
+  flex: 1 1 50%;
+}
+
+#player_hand {
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 10px;
+  padding: 5px;
+}
+
+#player_hand > h3 {
+  color: white;
+}
+
+.vughex-hand-size {
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+}
+
+.vughex-table-cards .stockitem {
+  box-shadow: 0px 0px 4px 4px rgba(0, 0, 0, 0.25);
+  border-radius: 10px;
+}
+
+.player_cards .stockitem {
+  border-radius: 10px;
+}
+
+.stockitem_selected {
+  border: 2px solid yellow !important;
+  box-shadow: 0px 0px 10px yellow !important;
+  border-radius: 10px;
+}
+
+.stockitem.vughex-playable {
+  border: 2px solid #80c080;
+  box-shadow: 0px 0px 10px #80ff80;
+  border-radius: 10px;
+}
+
+.stockitem.vughex-unplayable {
+  border: 2px solid #555;
+  border-radius: 10px;
+}

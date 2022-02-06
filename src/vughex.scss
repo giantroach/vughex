@@ -1,0 +1,149 @@
+/**
+ *------
+ * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
+ * Vughex implementation : © Tomoki Motohashi <tomoki.motohashi@takoashi.com>
+ *
+ * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
+ * See http://en.boardgamearena.com/#!doc/Studio for more information.
+ * -----
+ *
+ * vughex.css
+ *
+ * Vughex stylesheet
+ *
+ */
+
+/*
+    This is the CSS stylesheet of your game User Interface.
+
+    Styles defined on this file will be applied to the HTML elements you define in your
+    HTML template (vughex_vughex.tpl), and to HTML elements you create dynamically
+    (in vughex.js).
+
+    Usually, you are using CSS to:
+
+    1°) define the overall layout of your game
+        (ex: place the board on the top left, place player's hand beside, place the deck on the right, ...).
+
+    2°) create your CSS-sprites:
+        All images of your games should be gathered into a small number of image files. Then, using
+        background-image and background-position CSS properties, you create HTML blocks that can
+        display these images correctly (see example below).
+
+    3°) ... anything else:
+        It is really easy to add and remove CSS classes dynamically from your Javascript with
+        dojo.addClass and dojo.removeClass. It is also easy to check if an element has a class
+        (dojo.hasClass) or to get all elements with a specific class (dojo.query). This is why,
+        very often, using CSS classes for the logic of your user interface allow you to do complex
+        thing easily.
+
+
+     Note: on the production platform, this file will be compressed and comments will be removed.
+           Consequently, don't hesitate to put as many comments as necessary.
+*/
+
+
+/* Note: you must not use any @import directive */
+
+
+/********* You can start writing your CSS below this line: **********/
+
+
+/*
+    Example of CSS sprites (a black token and a white token, 20x20px each, embedded in the same "tokens.png" 40x20px image):
+    .white_token {
+        background-image: url('img/tokens.png');
+        background-position: 0px 0px;
+    }
+    .black_token {
+        background-image: url('img/tokens.png');
+        background-position: -20px 0px;
+    }
+    .token {
+        width: 20px;
+        height: 20px;
+        background-repeat: none;
+    }
+*/
+
+
+body {
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-color: #647b8a;
+}
+
+.player_board_content {
+    display: flex;
+}
+.player_board_content > div {
+    flex: 1 1 auto;
+}
+
+#parents {
+    display: flex;
+}
+
+#parents > #card-preview {
+    flex: 0 0 320px;
+}
+
+#parents > #card-playarea {
+    flex: 1 1 auto;
+}
+
+#card-preview {
+    margin: 10px 10px 10px 0;
+    background-color: rgba(255,255,255,0.5);
+    border-radius: 10px;
+}
+
+#common_table {
+    height: 220px;
+    background-color: rgba(255,255,255,0.5);
+    border-radius: 10px;
+    padding: 5px;
+    margin-bottom: 10px;
+}
+.vughex-table-cards {
+    display: flex;
+}
+#table_cards {
+    margin-left: -60px;
+    flex: 1 1 50%;
+}
+#player_hand {
+    background-color: rgba(0,0,0,0.5);
+    border-radius: 10px;
+    padding: 5px;
+}
+#player_hand > h3 {
+    color: white;
+}
+.vughex-hand-size {
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+}
+
+.vughex-table-cards .stockitem {
+    box-shadow: 0px 0px 4px 4px rgb(0 0 0 / 25%);
+    border-radius: 10px;
+}
+.player_cards .stockitem {
+    border-radius: 10px;
+}
+.stockitem_selected {
+    border: 2px solid yellow!important;
+    box-shadow: 0px 0px 10px yellow!important;
+    border-radius: 10px;
+}
+.stockitem.vughex-playable{
+    border: 2px solid #80c080;
+    box-shadow: 0px 0px 10px #80ff80;
+    border-radius: 10px;
+}
+.stockitem.vughex-unplayable{
+    border: 2px solid #555;
+    border-radius: 10px;
+}
