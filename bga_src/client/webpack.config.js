@@ -1,17 +1,19 @@
 const path = require('path');
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 module.exports = {
   mode: 'development',
   devtool: 'inline-source-map',
-  entry: {
-    main: './bga_src/client/vughex.ts',
-  },
+  plugins: [new MiniCssExtractPlugin({
+    filename: 'vughex.css',
+  })],
+  entry: [
+    './bga_src/client/vughex.ts',
+    './bga_src/client/vughex.scss',
+  ],
   output: {
     path: path.resolve(__dirname, '../../dist'),
     filename: 'vughex.js',
-  },
-  resolve: {
-    extensions: ['.ts', '.tsx', '.js'],
   },
   module: {
     rules: [
@@ -21,7 +23,7 @@ module.exports = {
       },
       {
         test: /\.scss$/,
-        loader: 'sass-loader',
+        use: [MiniCssExtractPlugin.loader, 'css-loader', "sass-loader"],
       },
     ],
   },

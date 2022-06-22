@@ -93,7 +93,22 @@ class Vughex extends Table
         // TODO: setup the initial game situation here
         $cards = [];
 
-        for ($cardNo = 1; $cardNo <= 15; $cardNo++) {
+        $players = self::getCollectionFromDb("SELECT player_id id FROM player");
+        $numOfCards = 15;
+
+        for ($cardNo = 1; $cardNo <= $numOfCards; $cardNo++) {
+            $cards[] = [
+                'type' => 0,
+                'type_arg' => $cardNo,
+                'nbr' => 1
+            ];
+        }
+
+        $this->cards->createCards($cards, 'deck');
+
+        $this->cards->shuffle('deck');
+
+        for ($cardNo = 1; $cardNo <= 13; $cardNo++) {
             $cards[] = [
                 'type' => 0,
                 'type_arg' => $cardNo,
@@ -219,23 +234,6 @@ class Vughex extends Table
       game state.
     */
 
-    /*
-
-      Example for game state "MyGameState":
-
-      function argMyGameState()
-      {
-      // Get some values from the current game situation in database...
-
-      // return values:
-      return array(
-      'variable1' => $value1,
-      'variable2' => $value2,
-      ...
-      );
-      }
-    */
-
     //////////////////////////////////////////////////////////////////////////////
     //////////// Game state actions
     ////////////
@@ -245,27 +243,56 @@ class Vughex extends Table
       The action method of state X is called everytime the current game state is set to X.
     */
 
-    /*
-
-      Example for game state "MyGameState":
-
-      function stMyGameState()
-      {
-      // Do some stuff ...
-
-      // (very often) go to another gamestate
-      $this->gamestate->nextState( 'some_gamestate_transition' );
-      }
-    */
-
     function stRoundSetup()
     {
-        $players = self::getCollectionFromDb("SELECT player_id id FROM player");
-        foreach($players as $playerID => $value) {
-            $this->cards->pickCards(5, 'deck', $playerID);
-        }
+        $this->activeNextPlayer();
 
-    	$this->activeNextPlayer();
+        // $this->cards->moveAllCardsInLocation(
+        //     'ondiscard',
+        //     'deck'
+        // );
+        // $this->cards->moveAllCardsInLocation(
+        //     'ontable',
+        //     'deck'
+        // );
+        // $this->cards->moveAllCardsInLocation(
+        //     'hand',
+        //     'deck'
+        // );
+
+        // $players = self::getCollectionFromDb("SELECT player_id id FROM player");
+        // foreach($players as $playerID => $value) {
+        //     // FIXME: deal the creeps
+        //     $this->cards->pickCards(5, 'deck', $playerID);
+        // }
+        // // self::DbQuery("UPDATE player SET player_passed=0");
+
+        // // FIXME: adjust who's turn is next (based on day and night)
+        // $apID = $this->getActivePlayerId();
+        // self::giveExtraTime($apID);
+        // $sql = "SELECT player_id id, player_score score FROM player ";
+        // $players = self::getCollectionFromDb($sql);
+
+        // // return number of cards in the hand
+        // foreach($players as $key => $value) {
+        //     $player_id = $key;
+        //     $count = count($this->cards->getCardsInLocation("hand", $player_id));
+        //     $players[$key]['cards'] = $count;
+        // }
+
+        // foreach($players as $key => $value) {
+        //     $player_id = $key;
+        //     $player_cards = array_values(
+        //         $this->cards->getCardsInLocation("hand", $player_id));
+
+        //     self::notifyPlayer($player_id, 'newRound', clienttranslate('FIXME: New turn'), [
+        //         'player_cards' => $player_cards,
+        //         'players' => $players,
+        //         'scoredPlayerID' => $apID
+        //     ]);
+        // }
+
+        // $this->gamestate->nextState('playerTurn');
     }
 
     //////////////////////////////////////////////////////////////////////////////
