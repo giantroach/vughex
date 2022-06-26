@@ -15,8 +15,8 @@
  *
  */
 
-import { Dojo, Game, Player } from './type/framework.d';
-import { Counter } from './type/counter.d';
+import { Dojo, Game, Player } from "./type/framework.d";
+import { Counter } from "./type/counter.d";
 import { Gamedata } from "./type/gamedata.d";
 import { BgaRequest } from "./type/bga-interface.d";
 
@@ -70,13 +70,19 @@ define([
       }
 
       // TODO: Set up your game interface here, according to "gamedatas"
-      vue.gamedata = gamedatas;
+      this.refreshGamedata(gamedatas);
 
       // Setup game notifications to handle (see "setupNotifications" method below)
       this.setupNotifications();
       this.setupActions();
 
       console.log("Ending game setup");
+    },
+
+    refreshGamedata: function (gamedatas: Gamedata) {
+      (Object.keys(gamedatas) as (keyof Gamedata)[]).forEach((prop) => {
+        vue.gamedata[prop] = gamedatas[prop];
+      });
     },
 
     ///////////////////////////////////////////////////
@@ -285,7 +291,7 @@ define([
               if (error) {
                 reject(error);
               }
-            }
+            },
           );
         });
       });

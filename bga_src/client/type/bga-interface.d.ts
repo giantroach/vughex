@@ -1,11 +1,11 @@
 interface BgaRequest {
-  name: string,
+  name: string;
   args: any;
 }
 
 interface BgaNotification {
-  name: string,
+  name: string;
   args: any;
 }
 
-export { BgaRequest, BgaNotification }
+export { BgaRequest, BgaNotification };

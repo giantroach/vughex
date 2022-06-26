@@ -75,14 +75,8 @@ export default class App extends Vue {
   public num = 0;
   public urlBase!: Ref<string>;
   public gridData: GridData = {
-    cardIDs: [
-      [],
-      ["mainCard1"],
-      ["centerCard0", "centerCard1", "centerCard2"],
-      [undefined, "mainCard3", undefined],
-      [],
-    ],
-    selectable: [[], [], [], [true, true, false], []],
+    cardIDs: [[], [], ["centerCard0", "centerCard1", "centerCard2"], [], []],
+    selectable: [[], [], [], [], []],
     selected: [],
     selectableCol: [],
     selectedCol: [],
@@ -106,16 +100,31 @@ export default class App extends Vue {
     neutralized_player_id: "",
     notifications: { last_packet_id: "", move_nbr: "" },
     playerorder: [],
+    player_cards: [],
     players: {},
     tablespeed: "",
   };
 
   mounted() {
     this.initBgaNotification();
-    const s = new State(this.gridData, this.handData);
-    s.current.value = "playerTurn:init";
-    s.refresh();
-    console.log("state", s);
+    const unwatch = watch(this.gamedata, () => {
+      // gamedata is set
+
+      // init: hand
+      this.handData.cardIDs = [];
+      this.handData.selectable = [];
+      this.gamedata.player_cards.forEach((c) => {
+        this.handData.cardIDs?.push(`mainCard${Number(c.type_arg) - 1}`);
+        this.handData.selectable?.push(true);
+      });
+      console.log("this.handData", this.handData);
+
+      const s = new State(this.gridData, this.handData);
+      s.current.value = "playerTurn:init";
+      s.refresh();
+      console.log("state", s);
+      unwatch();
+    });
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

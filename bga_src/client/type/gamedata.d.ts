@@ -4,13 +4,12 @@
 
 import { Player, Gamestate } from "./framework.d";
 
-// remove this if you don't use cards. If you do, make sure the types are correct . By default, some number are send as string, I suggest to cast to right type in PHP.
 interface Card {
-  id: number;
+  id: string; // num str
   location: string;
-  location_arg: number;
-  type: number;
-  number: number;
+  location_arg: string; // num str
+  type: number; // num str
+  type_arg: number; // num str
 }
 
 interface Gamedata {
@@ -26,6 +25,7 @@ interface Gamedata {
   tablespeed: string;
 
   // Add here variables you set up in getAllDatas
+  player_cards: Card[];
 }
 
 export { Card, Gamedata };

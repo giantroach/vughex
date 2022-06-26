@@ -94,27 +94,25 @@ class Vughex extends Table
         $cards = [];
 
         $players = self::getCollectionFromDb("SELECT player_id id FROM player");
-        $numOfCards = 15;
+        $numOfCards = 13;
 
         for ($cardNo = 1; $cardNo <= $numOfCards; $cardNo++) {
             $cards[] = [
-                'type' => 0,
+                'type' => 'standard',
                 'type_arg' => $cardNo,
                 'nbr' => 1
             ];
         }
-
-        $this->cards->createCards($cards, 'deck');
-
-        $this->cards->shuffle('deck');
-
-        for ($cardNo = 1; $cardNo <= 13; $cardNo++) {
-            $cards[] = [
-                'type' => 0,
-                'type_arg' => $cardNo,
-                'nbr' => 1
-            ];
-        }
+        $cards[] = [
+            'type' => 'creep',
+            'type_arg' => 14,
+            'nbr' => 1
+        ];
+        $cards[] = [
+            'type' => 'creep',
+            'type_arg' => 15,
+            'nbr' => 1
+        ];
 
         $this->cards->createCards($cards, 'deck');
         $this->cards->shuffle('deck');
@@ -260,11 +258,38 @@ class Vughex extends Table
         //     'deck'
         // );
 
+        $players = self::getCollectionFromDb("SELECT player_id id, player_no FROM player");
+        // deal appropriate creep
+        $allCards = array_values(
+            $this->cards->getCardsInLocation("deck")
+        );
+        // FIXME: should be shortcut like:
+        // $creeps = $this->cards->getCardsOfType('creep', 14);
+        $creepSun = null;
+        $creepNgt = null;
+        foreach ($allCards as $val) {
+            if ($val['type_arg'] == 14) {
+                $creepSun = $val;
+            }
+            if ($val['type_arg'] == 15) {
+                $creepNgt = $val;
+            }
+        }
+        foreach ($players as $playerID => $player) {
+            // FIXME:
+            if ($player['player_no'] == 1) {
+                $this->cards->moveCard($creepSun['id'], 'hand', $playerID);
+            }
+            if ($player['player_no'] == 2) {
+                $this->cards->moveCard($creepNgt['id'], 'hand', $playerID);
+            }
+        }
+
+        foreach ($players as $playerID => $value) {
+            $this->cards->pickCards(5, 'deck', $playerID);
+        }
+
         // $players = self::getCollectionFromDb("SELECT player_id id FROM player");
-        // foreach($players as $playerID => $value) {
-        //     // FIXME: deal the creeps
-        //     $this->cards->pickCards(5, 'deck', $playerID);
-        // }
         // // self::DbQuery("UPDATE player SET player_passed=0");
 
         // // FIXME: adjust who's turn is next (based on day and night)
@@ -273,24 +298,23 @@ class Vughex extends Table
         // $sql = "SELECT player_id id, player_score score FROM player ";
         // $players = self::getCollectionFromDb($sql);
 
-        // // return number of cards in the hand
-        // foreach($players as $key => $value) {
-        //     $player_id = $key;
-        //     $count = count($this->cards->getCardsInLocation("hand", $player_id));
-        //     $players[$key]['cards'] = $count;
-        // }
+        // return number of cards in the hand
+        foreach($players as $key => $value) {
+            $player_id = $key;
+            $count = count($this->cards->getCardsInLocation("hand", $player_id));
+            $players[$key]['cards'] = $count;
+        }
 
-        // foreach($players as $key => $value) {
-        //     $player_id = $key;
-        //     $player_cards = array_values(
-        //         $this->cards->getCardsInLocation("hand", $player_id));
+        foreach($players as $key => $value) {
+            $player_id = $key;
+            $player_cards = array_values(
+                $this->cards->getCardsInLocation("hand", $player_id));
 
-        //     self::notifyPlayer($player_id, 'newRound', clienttranslate('FIXME: New turn'), [
-        //         'player_cards' => $player_cards,
-        //         'players' => $players,
-        //         'scoredPlayerID' => $apID
-        //     ]);
-        // }
+            self::notifyPlayer($player_id, 'newRound', clienttranslate('FIXME: New turn'), [
+                'player_cards' => $player_cards,
+                'players' => $players
+            ]);
+        }
 
         // $this->gamestate->nextState('playerTurn');
     }

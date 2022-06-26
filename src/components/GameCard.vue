@@ -141,13 +141,16 @@ export default class GameCard extends Vue {
   public bgPosMini = "0 0";
 
   public created(): void {
-    const ids = /(.+)(\d+)/.exec(this.id);
+    const ids = /([^\d]+)(\d+)/.exec(this.id);
     if (!ids) {
       return;
     }
     const cat = ids[1];
     const idx = Number(ids[2]);
     const def = this.cardDef[cat];
+    if (!def) {
+      throw "no card definition found: " + this.id;
+    }
     this.text = def.details?.[idx]?.text || "";
     this.image = def.image;
     this.size = def.size;
@@ -200,7 +203,7 @@ export default class GameCard extends Vue {
     }
     const colNum = Number(sm[1]);
     const y = Math.floor(idx / colNum);
-    const x = idx % Number(colNum);
+    const x = idx % colNum;
     return `-${x * Number(wm[1])}${wm[2]} -${y * Number(hm[1])}${hm[2]}`;
   }
 

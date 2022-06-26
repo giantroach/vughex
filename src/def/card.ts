@@ -96,7 +96,7 @@ export const cardDefs: { [cardType: string]: CardDef } = {
           fixed: 3,
           center: 0,
         },
-        stealth: true,
+        stealth: false,
       },
       9: {
         name: "the Titan",
@@ -105,7 +105,7 @@ export const cardDefs: { [cardType: string]: CardDef } = {
           fixed: 7,
           center: 0,
         },
-        stealth: true,
+        stealth: false,
       },
       10: {
         name: "the Eclipse",
@@ -136,7 +136,7 @@ export const cardDefs: { [cardType: string]: CardDef } = {
       },
       13: {
         name: "the Creeps",
-        text: "None",
+        text: "",
         power: {
           fixed: 1,
           center: 0,
@@ -145,7 +145,7 @@ export const cardDefs: { [cardType: string]: CardDef } = {
       },
       14: {
         name: "the Creeps",
-        text: "None",
+        text: "",
         power: {
           fixed: 1,
           center: 0,
