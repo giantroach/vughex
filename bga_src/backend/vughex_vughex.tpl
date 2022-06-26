@@ -26,35 +26,6 @@
 -->
 
 
-<div id="parents">
-  <div id="card-preview">
-    <h3 id="ontable_header">
-      <span>{ON_TABLE}:</span>
-    </h3>
-    <div class="ecliptic-table-cards">
-      <div id="table_cards"></div>
-    </div>
-  </div>
-
-  <div id="card-playarea">
-    <div id="common_table" class="whiteblock">
-      <h3 id="ontable_header">
-        <span>{ON_TABLE}:</span>
-      </h3>
-      <div class="ecliptic-table-cards">
-        <div id="table_cards"></div>
-      </div>
-    </div>
-
-    <div id="player_hand" class="whiteblock">
-      <h3 id="inhand_header">
-        <span>{IN_HAND}:</span>
-      </h3>
-      <div id="player_cards" class="card_inhand"></div>
-    </div>
-  </div>
-</div>
-
 <div id="app"></div>
 <script type="text/javascript">
 

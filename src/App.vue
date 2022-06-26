@@ -5,26 +5,37 @@
   </div>
 
   <div>
-    <Grid
-      ref="grid"
-      type="table"
-      :cardIDs="gridData.cardIDs"
-      :selectable="gridData.selectable"
-      :selected="gridData.selected"
-      :selectableCol="gridData.selectableCol"
-      :selectedCol="gridData.selectedCol"
-      :active="gridData.active"
-    >
-    </Grid>
-    <Hand
-      ref="hand"
-      type="card"
-      :cardIDs="handData.cardIDs"
-      :selectable="handData.selectable"
-      :selected="handData.selected"
-      :active="handData.active"
-    >
-    </Hand>
+    <div id="common_table" class="whiteblock">
+      <h3 id="ontable_header">
+        <span>{ON_TABLE}:</span>
+      </h3>
+      <Grid
+        ref="grid"
+        type="table"
+        :cardIDs="gridData.cardIDs"
+        :selectable="gridData.selectable"
+        :selected="gridData.selected"
+        :selectableCol="gridData.selectableCol"
+        :selectedCol="gridData.selectedCol"
+        :active="gridData.active"
+      >
+      </Grid>
+    </div>
+    <div id="player_hand" class="whiteblock">
+      <h3 id="inhand_header">
+        <span>{IN_HAND}:</span>
+      </h3>
+
+      <Hand
+        ref="hand"
+        type="card"
+        :cardIDs="handData.cardIDs"
+        :selectable="handData.selectable"
+        :selected="handData.selected"
+        :active="handData.active"
+      >
+      </Hand>
+    </div>
   </div>
   <div id="modals"></div>
 </template>
@@ -177,5 +188,9 @@ export default class App extends Vue {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
+}
+#player_hand > h3,
+#common_table > h3 {
+  text-align: left;
 }
 </style>
