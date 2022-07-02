@@ -8,8 +8,8 @@ interface Card {
   id: string; // num str
   location: string;
   location_arg: string; // num str
-  type: number; // num str
-  type_arg: number; // num str
+  type: string; // num str
+  type_arg: string; // num str
 }
 
 interface Gamedata {

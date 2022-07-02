@@ -46,6 +46,8 @@ interface Dojo {
 type Gamestate = any; // TODO
 
 interface Player {
+  ack: string;
+  avatar: string;
   beginner: boolean;
   color: string;
   color_back: any | null;
@@ -55,6 +57,9 @@ interface Player {
   name: string;
   score: string;
   zombie: number;
+
+  // FIXME: add own prop here
+  cards: number;
 }
 
 export { Game, BGAClientFramework, Notif, Dojo, Gamestate, Player };

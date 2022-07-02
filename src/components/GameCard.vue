@@ -104,7 +104,7 @@ export interface Size {
     selected: Boolean, // for card detail modal
   },
   inject: ["urlBase", "cardDef"],
-  emits: ["selectCard"],
+  emits: ["selectCard", "showDetail", "hideDetail"],
 })
 export default class GameCard extends Vue {
   public name!: string;
@@ -191,6 +191,8 @@ export default class GameCard extends Vue {
       }
       this.modalTop = mcTop > 0 ? mcTop : 0;
       this.modalLeft = mcLeft > 0 ? mcLeft : 0;
+
+      this.$emit("showDetail", this.id);
     });
   }
 
@@ -222,6 +224,7 @@ export default class GameCard extends Vue {
 
   public hideDetails() {
     this.modal = false;
+    this.$emit("hideDetail", this.id);
   }
 }
 </script>

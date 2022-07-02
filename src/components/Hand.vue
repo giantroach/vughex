@@ -11,6 +11,7 @@
       :class="{
         selectable: isSelectable(idx),
         selected: isSelected(idx),
+        focued: focused[idx],
       }"
       @click="selectHand(idx)"
     >
@@ -20,6 +21,8 @@
         :selectable="isSelectable(idx)"
         :selected="isSelected(idx)"
         @selectCard="selectHand(idx)"
+        @showDetail="showDetail(idx)"
+        @hideDetail="hideDetail(idx)"
         ref="cardRef"
       >
       </GameCard>
@@ -51,10 +54,11 @@ import GameCard from "./GameCard.vue";
 export default class Hand extends Vue {
   public handDef!: { [handType: string]: HandDef };
   public type!: string; // card type
-  public cardIDs!: number[];
+  public cardIDs!: string[];
   public selectable!: boolean[];
   public selected!: boolean[];
   public exclusiveSelect = true;
+  public focused: boolean[] = [];
   public active!: boolean;
   public size!: SizeDef;
   public cardDef!: { [cardType: string]: CardDef };
@@ -79,19 +83,14 @@ export default class Hand extends Vue {
     return this.selected && this.selected[idx] ? true : false;
   }
 
-  // public selectCard(cid: string) {
-  //   if (!this.exclusiveSelect) {
-  //     return;
-  //   }
-  //   console.log("this.$refs", this.$refs);
-  //   // deselect all the other
-  //   (this.$refs.cardRef as GameCard[]).forEach((cr: GameCard) => {
-  //     if (cr.id === cid) {
-  //       return;
-  //     }
-  //     cr.unselectCard();
-  //   });
-  // }
+  public showDetail(idx: number): void {
+    this.focused = [];
+    this.focused[idx] = true; // focus is always only one.
+  }
+
+  public hideDetail(idx: number): void {
+    this.focused = [];
+  }
 
   public selectExcept(idx: number): void {
     this.selected.forEach((s, i) => {
@@ -130,6 +129,8 @@ li {
   list-style-type: none;
   margin-left: -10px;
   margin-right: -10px;
+  transition: margin-left 0.5s;
+  transition: margin-right 0.5s;
 }
 .selectable {
   border: 2px solid #05fdff;
@@ -138,5 +139,11 @@ li {
 .selected {
   border: 2px solid #fefb05;
   box-shadow: 0 0 5px 2px #fefb05;
+}
+.focued {
+  margin-left: 30px;
+  margin-right: 30px;
+  transition: margin-left 0.5s;
+  transition: margin-right 0.5s;
 }
 </style>
