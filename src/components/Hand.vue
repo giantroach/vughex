@@ -22,7 +22,7 @@
         :selected="isSelected(idx)"
         @selectCard="selectHand(idx)"
         @showDetail="showDetail(idx)"
-        @hideDetail="hideDetail(idx)"
+        @hideDetail="hideDetail()"
         ref="cardRef"
       >
       </GameCard>
@@ -88,7 +88,7 @@ export default class Hand extends Vue {
     this.focused[idx] = true; // focus is always only one.
   }
 
-  public hideDetail(idx: number): void {
+  public hideDetail(): void {
     this.focused = [];
   }
 

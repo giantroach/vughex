@@ -94,6 +94,7 @@ export class State {
   }
 
   // avoid unnecessary update
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private assign(obj: any, key: string, val: any): void {
     if (obj[key] !== val) {
       obj[key] = val;
