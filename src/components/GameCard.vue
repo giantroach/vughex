@@ -38,7 +38,8 @@
           backgroundPosition: bgPosMini,
         }"
         @click="[showDetails($event), selectCard($event)]"
-        v-on:mouseover="showDetails"
+        v-on:mouseenter="showDetails"
+        v-on:touchstart="showDetails"
       ></div>
     </template>
   </div>
@@ -210,7 +211,6 @@ export default class GameCard extends Vue {
   }
 
   public selectCard(): void {
-    // this.hideDetails();
     if (!this.selectable) {
       return;
     }
@@ -218,7 +218,6 @@ export default class GameCard extends Vue {
   }
 
   public unselectCard() {
-    // this.hideDetails();
     this.selected = false;
   }
 
