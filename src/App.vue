@@ -96,10 +96,10 @@ export default class App extends Vue {
   };
 
   public handData: HandData = {
-    cardIDs: ["mainCard0", "mainCard1", "mainCard2"],
-    selectable: [true, true, false],
+    cardIDs: [],
+    selectable: [],
     selected: [],
-    active: false,
+    active: true,
   };
 
   public gamedata: Gamedata = {
@@ -119,23 +119,174 @@ export default class App extends Vue {
   mounted() {
     this.initBgaNotification();
     const unwatch = watch(this.gamedata, () => {
-      // gamedata is set
-
-      // init: hand
-      this.handData.cardIDs = [];
-      this.handData.selectable = [];
-      this.gamedata.player_cards.forEach((c) => {
-        this.handData.cardIDs?.push(`mainCard${Number(c.type_arg) - 1}`);
-        this.handData.selectable?.push(true);
-      });
-      console.log("this.handData", this.handData);
-
-      const s = new State(this.gridData, this.handData);
-      s.current.value = "playerTurn:init";
-      s.refresh();
-      console.log("state", s);
+      this.init();
       unwatch();
     });
+  }
+
+  public init() {
+    // init: hand
+    this.handData.cardIDs = [];
+    this.handData.selectable = [];
+    this.gamedata.player_cards.forEach((c) => {
+      this.handData.cardIDs?.push(`mainCard${Number(c.type_arg) - 1}`);
+      this.handData.selectable?.push(true);
+    });
+
+    const s = new State(this.gridData, this.handData);
+    s.current.value = "playerTurn:init";
+    s.refresh();
+  }
+
+  public loadTestData() {
+    //FIXME: remove this
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    this.gamedata = {
+      current_player_id: "",
+      decision: { decision_type: "" },
+      game_result_neutralized: "0",
+      gamestate: {
+        id: "3",
+        active_player: "2348342",
+        args: null,
+        reflexion: {
+          total: { "2348342": 155, "2348343": "180" },
+          initial: { "2348342": 179 },
+          initial_ts: { "2348342": 1656683906819 },
+        },
+        updateGameProgression: 0,
+        name: "playerTurn",
+        description: "${actplayer} must play a card",
+        descriptionmyturn: "${you} must play a card",
+        type: "activeplayer",
+        possibleactions: ["playCard"],
+        transitions: { nextPlayer: 4, zombiePass: 4 },
+      },
+      gamestates: {
+        "1": {
+          name: "gameSetup",
+          description: "",
+          type: "manager",
+          action: "stGameSetup",
+          transitions: { roundSetup: 2 },
+        },
+        "2": {
+          name: "roundSetup",
+          type: "game",
+          action: "stRoundSetup",
+          updateGameProgression: true,
+          transitions: { playerTurn: 3 },
+        },
+        "3": {
+          name: "playerTurn",
+          description: "${actplayer} must play a card",
+          descriptionmyturn: "${you} must play a card",
+          type: "activeplayer",
+          possibleactions: ["playCard"],
+          transitions: { nextPlayer: 4, zombiePass: 4 },
+        },
+        "4": {
+          name: "nextPlayer",
+          type: "game",
+          action: "stNextPlayer",
+          updateGameProgression: true,
+          transitions: { playerTurn: 3, endRound: 10 },
+        },
+        "10": {
+          name: "endRound",
+          type: "game",
+          action: "stEndRound",
+          updateGameProgression: true,
+          transitions: { roundSetup: 2, endGame: 99 },
+        },
+        "99": {
+          name: "gameEnd",
+          description: "End of game",
+          type: "manager",
+          action: "stGameEnd",
+          args: "argGameEnd",
+        },
+      },
+      neutralized_player_id: "0",
+      notifications: { last_packet_id: "3", move_nbr: "1" },
+      playerorder: ["2348342", 2348343],
+      player_cards: [
+        {
+          id: "1",
+          type: "standard",
+          type_arg: "4",
+          location: "hand",
+          location_arg: "2348342",
+        },
+        {
+          id: "5",
+          type: "standard",
+          type_arg: "13",
+          location: "hand",
+          location_arg: "2348342",
+        },
+        {
+          id: "11",
+          type: "standard",
+          type_arg: "2",
+          location: "hand",
+          location_arg: "2348342",
+        },
+        {
+          id: "12",
+          type: "standard",
+          type_arg: "3",
+          location: "hand",
+          location_arg: "2348342",
+        },
+        {
+          id: "13",
+          type: "standard",
+          type_arg: "6",
+          location: "hand",
+          location_arg: "2348342",
+        },
+        {
+          id: "14",
+          type: "creep",
+          type_arg: "14",
+          location: "hand",
+          location_arg: "2348342",
+        },
+      ],
+      players: {
+        "2348342": {
+          id: "2348342",
+          score: "0",
+          cards: 6,
+          color: "ff0000",
+          color_back: null,
+          name: "giantroach0",
+          avatar: "000000",
+          zombie: 0,
+          eliminated: 0,
+          is_ai: "0",
+          beginner: true,
+          ack: "ack",
+        },
+        "2348343": {
+          id: "2348343",
+          score: "0",
+          cards: 6,
+          color: "008000",
+          color_back: null,
+          name: "giantroach1",
+          avatar: "000000",
+          zombie: 0,
+          eliminated: 0,
+          is_ai: "0",
+          beginner: true,
+          ack: "ack",
+        },
+      },
+      tablespeed: "1",
+    } as any;
+    this.init();
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -168,6 +319,7 @@ export default class App extends Vue {
           this.num = notif.args.num;
           break;
         default:
+          console.log("unhandled notif", notifs);
           break;
       }
     });

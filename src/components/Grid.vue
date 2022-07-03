@@ -228,23 +228,23 @@ ul.grid {
   margin: -120px 0;
 }
 li.grid-cell.selectable {
-  border: 2px solid #03b0b1;
+  border: 2px solid #00e9eb;
   box-shadow: 0 0 5px 5px #05fdff;
 }
 li.grid-cell.selected {
-  border: 2px solid #c3c104;
-  box-shadow: 0 0 5px 5px #fefb05;
+  border: 2px solid #fffc00;
+  box-shadow: 0 0 5px 5px #ffb644;
 }
 ul.grid > li.grid-row {
   border: 2px solid transparent;
   box-shadow: 0 0 5px 5px transparent;
 }
 ul.grid > li.grid-row.selectable {
-  border: 2px solid #03b0b1;
+  border: 2px solid #00e9eb;
   box-shadow: 0 0 5px 5px #05fdff;
 }
 ul.grid > li.grid-row.selected {
-  border: 2px solid #fefb05;
-  box-shadow: 0 0 5px 5px #fefb05;
+  border: 3px solid #fffc00;
+  box-shadow: 0 0 5px 5px #ffb644;
 }
 </style>

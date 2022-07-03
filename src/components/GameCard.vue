@@ -240,7 +240,7 @@ export default class GameCard extends Vue {
   opacity: 0;
   transition: opacity 0.4s;
   position: absolute;
-  z-index: 2;
+  z-index: 1000;
 }
 .card-modal:hover {
   opacity: 1;
@@ -260,11 +260,11 @@ export default class GameCard extends Vue {
   position: absolute;
 }
 .selectable {
-  border: 2px solid #05fdff;
+  border: 2px solid #00e9eb;
   box-shadow: 0 0 5px 2px #05fdff;
 }
 .selected {
-  border: 2px solid #fefb05;
-  box-shadow: 0 0 5px 2px #fefb05;
+  border: 2px solid #fffc00;
+  box-shadow: 0 0 5px 2px #ffb644;
 }
 </style>

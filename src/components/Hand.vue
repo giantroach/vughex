@@ -7,6 +7,7 @@
         width: size.width,
         borderRadius: size.radius,
         margin: margin,
+        zIndex: idx,
       }"
       :class="{
         selectable: isSelectable(idx),
@@ -133,12 +134,12 @@ li {
   transition: margin-right 0.5s;
 }
 .selectable {
-  border: 2px solid #05fdff;
+  border: 2px solid #00e9eb;
   box-shadow: 0 0 5px 2px #05fdff;
 }
 .selected {
-  border: 2px solid #fefb05;
-  box-shadow: 0 0 5px 2px #fefb05;
+  border: 2px solid #fffc00;
+  box-shadow: 0 0 5px 2px #ffb644;
 }
 .focued {
   margin-left: 30px;
