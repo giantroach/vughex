@@ -26,7 +26,7 @@ declare const $: any;
 declare const dojo: Dojo;
 declare const g_gamethemeurl: string;
 
-const appName = "vuetest";
+const appName = "vughex";
 
 define([
   "dojo",
