@@ -243,7 +243,7 @@ define([
       // this.notifqueue.setSynchronous( 'cardPlayed', 3000 );
       //
 
-      const notifications = ["getNum"];
+      const notifications = ["getNum", "playCard"];
       notifications.forEach((n) => {
         dojo.subscribe(n, this, (data: any) => {
           vue.bgaNotifications.push({

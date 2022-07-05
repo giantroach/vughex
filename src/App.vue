@@ -86,7 +86,7 @@ export default class App extends Vue {
   public num = 0;
   public urlBase!: Ref<string>;
   public gridData: GridData = {
-    cardIDs: [[], [], ["centerCard0", "centerCard1", "centerCard2"], [], []],
+    cardIDs: [],
     selectable: [[], [], [], [], []],
     selected: [],
     selectableCol: [],
@@ -110,9 +110,11 @@ export default class App extends Vue {
     gamestates: {},
     neutralized_player_id: "",
     notifications: { last_packet_id: "", move_nbr: "" },
-    playerorder: [],
     player_cards: [],
+    playerorder: [],
     players: {},
+    player_table: [],
+    oppo_table: [],
     tablespeed: "",
   };
 
@@ -129,18 +131,45 @@ export default class App extends Vue {
     this.handData.cardIDs = [];
     this.handData.selectable = [];
     this.gamedata.player_cards.forEach((c) => {
-      this.handData.cardIDs?.push(`mainCard${Number(c.type_arg) - 1}`);
+      this.handData.cardIDs?.push({
+        id: c.id,
+        cid: `mainCard${Number(c.type_arg) - 1}`,
+      });
       this.handData.selectable?.push(true);
     });
 
-    const s = new State(this.gridData, this.handData);
+    // init grid data
+    this.gridData.cardIDs = [
+      [undefined, undefined, "centerCard0"],
+      [undefined, undefined, "centerCard1"],
+      [undefined, undefined, "centerCard2"],
+    ];
+    this.gamedata.player_table.forEach((c) => {
+      const gridID = Number(c.location_arg);
+      const row = Math.floor(gridID / 3) + 3;
+      const col = gridID % 3;
+      if (!this.gridData.cardIDs) {
+        throw "invalid state";
+      }
+      this.gridData.cardIDs[col][row] = `mainCard${Number(c.type_arg) - 1}`;
+    });
+    this.gamedata.oppo_table.forEach((c) => {
+      const gridID = Number(c.location_arg);
+      const row = 1 - Math.floor(gridID / 3);
+      const col = gridID % 3;
+      if (!this.gridData.cardIDs) {
+        throw "invalid state";
+      }
+      this.gridData.cardIDs[col][row] = `mainCard${Number(c.type_arg) - 1}`;
+    });
+
+    const s = new State(this.request, this.gridData, this.handData);
     s.current.value = "playerTurn:init";
     s.refresh();
   }
 
   public loadTestData() {
     //FIXME: remove this
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.gamedata = {
       current_player_id: "",
       decision: { decision_type: "" },
@@ -284,8 +313,10 @@ export default class App extends Vue {
           ack: "ack",
         },
       },
+      player_table: [],
+      oppo_table: [],
       tablespeed: "1",
-    } as any;
+    };
     this.init();
   }
 
@@ -317,6 +348,9 @@ export default class App extends Vue {
       switch (notif.name) {
         case "getNum":
           this.num = notif.args.num;
+          break;
+        case "playCard":
+          console.log("notif.args.grid", notif.args.grid);
           break;
         default:
           console.log("unhandled notif", notifs);

@@ -1,9 +1,9 @@
 <template>
   <ul class="grid">
     <li
-      v-for="(gridRow, idx) in grid"
+      v-for="(gridCol, idx) in grid"
       :key="idx"
-      class="grid-row"
+      class="grid-col"
       :class="{
         selectable: isColSelectable(idx),
         selected: isColSelected(idx),
@@ -18,7 +18,7 @@
     >
       <ul>
         <li
-          v-for="(gridCell, idy) in gridRow"
+          v-for="(gridCell, idy) in gridCol"
           :key="gridCell"
           class="grid-cell"
           :class="{
@@ -30,14 +30,14 @@
             height: size.height,
             borderRadius: size.radius,
             marginTop: idy === 0 ? 0 : marginRow,
-            marginBottom: idy === gridRow.length - 1 ? 0 : marginRow,
+            marginBottom: idy === gridCol.length - 1 ? 0 : marginRow,
           }"
           @click="selectGrid(idx, idy)"
         >
           <template
-            v-if="cardIDs && cardIDs[idy] && cardIDs[idy][idx] !== undefined"
+            v-if="cardIDs && cardIDs[idx] && cardIDs[idx][idy] !== undefined"
           >
-            <GameCard :id="cardIDs[idy][idx]" :prioritizeMini="true"></GameCard>
+            <GameCard :id="cardIDs[idx][idy]" :prioritizeMini="true"></GameCard>
           </template>
         </li>
       </ul>
@@ -122,7 +122,7 @@ export default class Grid extends Vue {
     if (!this.active) {
       return false;
     }
-    return this.selectable && this.selectable[y] && this.selectable[y][x]
+    return this.selectable && this.selectable[x] && this.selectable[x][y]
       ? true
       : false;
   }
@@ -151,15 +151,15 @@ export default class Grid extends Vue {
   }
 
   public selectExcept(x: number, y: number): void {
-    this.selected.forEach((s, iy) => {
+    this.selected.forEach((s, ix) => {
       if (!s) {
         return;
       }
-      s.forEach((t, ix) => {
+      s.forEach((t, iy) => {
         if (y === iy && x === ix) {
           return;
         }
-        this.selected[iy][ix] = false;
+        this.selected[ix][iy] = false;
       });
     });
   }
@@ -181,12 +181,12 @@ export default class Grid extends Vue {
       return;
     }
 
-    if (this.selected[y] === void 0) {
-      this.selected[y] = [];
+    if (this.selected[x] === void 0) {
+      this.selected[x] = [];
     }
 
-    this.selected[y][x] = !this.selected[y][x];
-    if (this.selected[y][x]) {
+    this.selected[x][y] = !this.selected[x][y];
+    if (this.selected[x][y]) {
       if (this.exclusiveSelect) {
         this.selectExcept(x, y);
       }
@@ -235,15 +235,15 @@ li.grid-cell.selected {
   border: 2px solid #fffc00;
   box-shadow: 0 0 5px 5px #ffb644;
 }
-ul.grid > li.grid-row {
+ul.grid > li.grid-col {
   border: 2px solid transparent;
   box-shadow: 0 0 5px 5px transparent;
 }
-ul.grid > li.grid-row.selectable {
+ul.grid > li.grid-col.selectable {
   border: 2px solid #00e9eb;
   box-shadow: 0 0 5px 5px #05fdff;
 }
-ul.grid > li.grid-row.selected {
+ul.grid > li.grid-col.selected {
   border: 3px solid #fffc00;
   box-shadow: 0 0 5px 5px #ffb644;
 }

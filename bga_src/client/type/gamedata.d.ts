@@ -26,6 +26,8 @@ interface Gamedata {
 
   // Add here variables you set up in getAllDatas
   player_cards: Card[];
+  player_table: Card[];
+  oppo_table: Card[];
 }
 
 export { Card, Gamedata };

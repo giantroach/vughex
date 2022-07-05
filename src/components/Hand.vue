@@ -1,8 +1,8 @@
 <template>
   <ul class="hand">
     <li
-      v-for="(cid, idx) in cardIDs"
-      :key="cid"
+      v-for="(c, idx) in cardIDs"
+      :key="c.cid"
       v-bind:style="{
         width: size.width,
         borderRadius: size.radius,
@@ -17,7 +17,7 @@
       @click="selectHand(idx)"
     >
       <GameCard
-        :id="cid"
+        :id="c.cid"
         :prioritizeMini="true"
         :selectable="isSelectable(idx)"
         :selected="isSelected(idx)"
@@ -33,6 +33,7 @@
 
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
+import { CardID } from "../type/Hand.d";
 import { HandDef, SizeDef } from "../type/HandDef.d";
 import { CardDef } from "../type/CardDef.d";
 import GameCard from "./GameCard.vue";
@@ -55,7 +56,7 @@ import GameCard from "./GameCard.vue";
 export default class Hand extends Vue {
   public handDef!: { [handType: string]: HandDef };
   public type!: string; // card type
-  public cardIDs!: string[];
+  public cardIDs!: CardID[];
   public selectable!: boolean[];
   public selected!: boolean[];
   public exclusiveSelect = true;

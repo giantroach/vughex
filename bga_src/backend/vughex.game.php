@@ -151,9 +151,17 @@ class Vughex extends Table
             $result['players'][$key]['cards'] = $count;
         }
 
-
         $result['player_cards'] = array_values(
             $this->cards->getCardsInLocation("hand", $current_player_id));
+
+        // FIXME: Hide enemy stealth units
+        $result['player_table'] = array_values(
+            $this->cards->getCardsInLocation('table'. $current_player_id));
+
+        $sql = "SELECT player_id id FROM player WHERE player_id<>'" . $current_player_id . "'";
+        $oppo_id = self::getUniqueValueFromDB($sql);
+        $result['oppo_table'] = array_values(
+            $this->cards->getCardsInLocation('table' . $oppo_id));
 
         return $result;
     }
@@ -195,32 +203,78 @@ class Vughex extends Table
       (note: each method below must match an input method in vughex.action.php)
     */
 
-    /*
+    function playCard($cardID, $gridID)
+    {
+        self::dump('$cardID', $cardID);
+        $cardInfo = $this->cards->getCard($cardID);
+        $actorID = self::getActivePlayerId();
 
-      Example:
+        if (!$cardInfo) {
+            self::notifyPlayer($actorID, 'logError', '', [
+                'message' => clienttranslate('Invalid card selection! You cannot choose it.')
+            ]);
+            return;
+        }
 
-      function playCard( $card_id )
-      {
-      // Check that this is the player's turn and that it is a "possible action" at this game state (see states.inc.php)
-      self::checkAction( 'playCard' );
+        if ($cardInfo['location'] != 'hand' || $cardInfo['location_arg'] != $actorID) {
+            self::notifyPlayer($actorID, 'logError', '', [
+                'message' => clienttranslate('Invalid card selection! You cannot choose it.')
+            ]);
+            return;
+        }
 
-      $player_id = self::getActivePlayerId();
+        // FIXME: check if the card is playable
+        // $tCards = array_values(
+        //     $this->cards->getCardsInLocation("ontable"));
+        // usort($tCards, function ($a, $b) {
+        //     return -($a['location_arg'] <=> $b['location_arg']);
+        // });
+        // $pCard = null;
+        // if (count($tCards) > 1) {
+        //     $pCard = $tCards[1];
+        // }
+        // if (!count($tCards) == 0 && !self::isCardPlayable($tCards[0], $cardInfo, $pCard, self::isEclipsed())) {
+        //     self::notifyPlayer($actorID, 'logError', '', [
+        //         'message' => clienttranslate('Invalid card selection! Reload the page.')
+        //     ]);
+        //     return;
+        // }
 
-      // Add your game logic to play a card there
-      ...
+        $this->cards->moveCard(
+            $cardID,
+            'table' . $actorID,
+            $gridID,
+        );
 
-      // Notify all players about the card played
-      self::notifyAllPlayers( "cardPlayed", clienttranslate( '${player_name} plays ${card_name}' ), array(
-      'player_id' => $player_id,
-      'player_name' => self::getActivePlayerName(),
-      'card_name' => $card_name,
-      'card_id' => $card_id
-      ) );
+        $numberOfcards = $this->cards->countCardInLocation('hand', $actorID);
 
-      }
+        // FIXME: hide card info if it is stealth
+        self::notifyAllPlayers('playCard', clienttranslate('${player_name} played a card.'), [
+            'player_id' => $actorID,
+            'player_name' => self::getActivePlayerName(),
+            'card' => $cardInfo,
+            'cards' => $numberOfcards,
+            'grid' => $gridID,
+        ]);
 
-    */
+        $this->gamestate->nextState('nextPlayer');
+    }
 
+    function getNum($num)
+    {
+        $actorID = self::getActivePlayerId();
+        self::notifyAllPlayers(
+            "getNum",
+            clienttranslate('${player_name} got ${num}.'),
+            [
+                "player_id" => $actorID,
+                "player_name" => self::getActivePlayerName(),
+                "num" => $num + 1,
+            ]
+        );
+
+        $this->gamestate->nextState("nextPlayer");
+    }
 
     //////////////////////////////////////////////////////////////////////////////
     //////////// Game state arguments
@@ -318,6 +372,26 @@ class Vughex extends Table
 
         // $this->gamestate->nextState('playerTurn');
     }
+
+    function stNextPlayer()
+    {
+        // $lastPlayerID = self::getActivePlayerId();
+
+        // $allData = self::getAllDatas();
+
+        // foreach ($allData['players'] as $playerID => $player) {
+        //     if ($this->cards->countCardInLocation('hand', $lastPlayerID) <= 0) {
+        //         $this->gamestate->nextState('endRound');
+        //         return;
+        //     }
+        // }
+
+        $playerID = self::activeNextPlayer();
+
+        self::giveExtraTime($playerID);
+        $this->gamestate->nextState('playerTurn');
+    }
+
 
     //////////////////////////////////////////////////////////////////////////////
     //////////// Zombie

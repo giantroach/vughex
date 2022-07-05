@@ -135,6 +135,8 @@ $gameinfos = array(
 //    totranslate("This wonderful game is about geometric shapes!"),
 //    totranslate("It was awarded best triangle game of the year in 2005 and nominated for the Spiel des Jahres."),
 //    ...
+    totranslate("VUGHEX is a 2 players competitive card game. Players make use of 14 kind of the unit cards and its ability to take a control of 3 lanes."),
+    totranslate("The game is structed by a minimal 18 cards. However, there is a deep depth that makes you think carefully and strategy that experiences and skills are required than luck."),
 ),
 
 // Games categories

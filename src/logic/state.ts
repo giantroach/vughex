@@ -14,7 +14,12 @@ type CurrentState =
   | "otherPlayerTurn";
 
 export class State {
-  constructor(private gridData: GridData, private handData: HandData) {
+  constructor(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    private request: any,
+    private gridData: GridData,
+    private handData: HandData,
+  ) {
     watch([this.gridData, this.handData, this.current], () => {
       // FIXME: this may cause infinite loop
       this.refresh();
@@ -47,29 +52,46 @@ export class State {
           this.assign(this.gridData, "selected", []);
           break;
         }
-        this.assign(this.gridData, "active", true);
-        this.setPlayerGridSelectable();
-        break;
-
-      case "playerTurn:afterGridSelect":
-        if (!this.handData.selected?.includes(true)) {
-          this.current.value = "playerTurn:beforeCardSelect";
-          this.assign(this.gridData, "active", false);
-          this.assign(this.gridData, "selected", []);
-          break;
-        }
-
         if (
           this.gridData.selected?.find((row) => {
             return row?.includes(true);
           })
         ) {
-          this.assign(this.gridData, "active", false);
-          this.assign(this.gridData, "selected", []);
+          this.current.value = "playerTurn:afterGridSelect";
+          break;
+        }
+        this.assign(this.gridData, "active", true);
+        this.setPlayerGridSelectable();
+        break;
+
+      case "playerTurn:afterGridSelect": {
+        // FIXME: ability
+        const cardIdx = this.handData.selected?.indexOf(true);
+        if (cardIdx === undefined) {
+          throw "unexpected state";
+        }
+        const c = this.handData.cardIDs?.[cardIdx];
+        if (!c) {
+          throw "unexpected state";
         }
 
-        this.assign(this.gridData, "active", true);
+        let gridID = 0;
+        this.gridData.selected?.find((row, colIdx) => {
+          const rowIdx = row?.indexOf(true);
+          if (rowIdx === undefined || rowIdx === -1) {
+            return false;
+          }
+          // 0 - 1 - 2
+          // 3 - 4 - 5
+          gridID = colIdx + (rowIdx - 3) * 3;
+        });
+
+        this.request("playCard", {
+          card: c.id,
+          gridID: gridID,
+        });
         break;
+      }
 
       case "playerTurn:beforeTargetSelect":
         break;
@@ -82,12 +104,12 @@ export class State {
   }
 
   private setPlayerGridSelectable(): void {
-    const selectable: boolean[][] = [[], [], [], [], []];
+    const selectable: boolean[][] = [[], [], []];
     for (let i = 0; i < 3; i += 1) {
-      if (!this.gridData?.cardIDs?.[3][i]) {
-        selectable[3][i] = true;
-      } else if (!this.gridData?.cardIDs[4][i]) {
-        selectable[4][i] = true;
+      if (!this.gridData?.cardIDs?.[i][3]) {
+        selectable[i][3] = true;
+      } else if (!this.gridData?.cardIDs[i][4]) {
+        selectable[i][4] = true;
       }
     }
     this.gridData.selectable = selectable;
