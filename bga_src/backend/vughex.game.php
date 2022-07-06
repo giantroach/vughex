@@ -254,7 +254,7 @@ class Vughex extends Table
             'player_name' => self::getActivePlayerName(),
             'card' => $cardInfo,
             'cards' => $numberOfcards,
-            'grid' => $gridID,
+            'gridID' => $gridID,
         ]);
 
         $this->gamestate->nextState('nextPlayer');

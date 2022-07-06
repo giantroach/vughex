@@ -71,6 +71,7 @@ define([
 
       // TODO: Set up your game interface here, according to "gamedatas"
       this.refreshGamedata(gamedatas);
+      vue.playerID = this.player_id;
 
       // Setup game notifications to handle (see "setupNotifications" method below)
       this.setupNotifications();

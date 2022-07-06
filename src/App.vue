@@ -117,6 +117,7 @@ export default class App extends Vue {
     oppo_table: [],
     tablespeed: "",
   };
+  public playerID = "";
 
   mounted() {
     this.initBgaNotification();
