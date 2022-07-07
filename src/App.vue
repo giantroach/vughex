@@ -87,7 +87,7 @@ export default class App extends Vue {
   public urlBase!: Ref<string>;
   public gridData: GridData = {
     cardIDs: [],
-    selectable: [[], [], [], [], []],
+    selectable: [[], [], []],
     selected: [],
     selectableCol: [],
     selectedCol: [],
@@ -118,6 +118,7 @@ export default class App extends Vue {
     tablespeed: "",
   };
   public playerID = "";
+  public state: null | State = null;
 
   mounted() {
     this.initBgaNotification();
@@ -164,9 +165,8 @@ export default class App extends Vue {
       this.gridData.cardIDs[col][row] = `mainCard${Number(c.type_arg) - 1}`;
     });
 
-    const s = new State(this.request, this.gridData, this.handData);
-    s.current.value = "playerTurn:init";
-    s.refresh();
+    this.state = new State(this.request, this.gridData, this.handData);
+    this.state.refresh();
   }
 
   public loadTestData() {

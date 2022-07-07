@@ -4,6 +4,7 @@ import { watch, ref, Ref } from "vue";
 
 type CurrentState =
   | "init"
+  | "waitingForOtherPlayer"
   | "playerTurn:init"
   | "playerTurn:beforeCardSelect"
   | "playerTurn:afterCardSelect"
@@ -26,10 +27,17 @@ export class State {
     });
   }
 
-  public current: Ref<CurrentState> = ref("init");
+  public current: Ref<CurrentState> = ref("waitingForOtherPlayer");
 
   public refresh() {
     switch (this.current.value) {
+      case "waitingForOtherPlayer":
+        this.assign(this.handData, "active", false);
+        this.assign(this.handData, "selected", []);
+        this.assign(this.gridData, "active", false);
+        this.assign(this.gridData, "selected", []);
+        break;
+
       case "playerTurn:init":
         this.assign(this.handData, "active", true);
         this.current.value = "playerTurn:beforeCardSelect";
@@ -90,6 +98,7 @@ export class State {
           card: c.id,
           gridID: gridID,
         });
+        // FIXME: remove card from the hand
         break;
       }
 

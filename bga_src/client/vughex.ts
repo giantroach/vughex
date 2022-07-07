@@ -96,15 +96,15 @@ define([
       console.log("Entering state: " + stateName);
 
       switch (stateName) {
-        /* Example:
-
-             case 'myGameState':
-
-             // Show some HTML block at this game state
-             dojo.style( 'my_html_block_id', 'display', 'block' );
-
-             break;
-          */
+        case 'playerTurn':
+          if (this.isCurrentPlayerActive()) {
+            // FIXME: do we need this delay yet?
+            setTimeout(() => {
+              vue.state.current = "playerTurn:init";
+              vue.state.refresh();
+            }, 1000); // wait for other following events
+          }
+          break;
 
         case "dummmy":
           break;
@@ -118,15 +118,10 @@ define([
       console.log("Leaving state: " + stateName);
 
       switch (stateName) {
-        /* Example:
-
-             case 'myGameState':
-
-             // Hide the HTML block we are displaying only during this game state
-             dojo.style( 'my_html_block_id', 'display', 'none' );
-
-             break;
-          */
+        case 'playerTurn':
+          vue.state.current = "waitingForOtherPlayer";
+          vue.state.refresh();
+          break;
 
         case "dummmy":
           break;
