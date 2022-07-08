@@ -239,7 +239,7 @@ export default class GameCard extends Vue {
 .card-modal {
   opacity: 0;
   transition: opacity 0.4s;
-  position: absolute;
+  position: fixed;
   z-index: 1000;
 }
 .card-modal:hover {

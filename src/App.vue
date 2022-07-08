@@ -99,7 +99,7 @@ export default class App extends Vue {
     cardIDs: [],
     selectable: [],
     selected: [],
-    active: true,
+    active: false,
   };
 
   public gamedata: Gamedata = {
