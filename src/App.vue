@@ -50,6 +50,7 @@ import { Gamedata } from "bga_src/client/type/gamedata.d";
 import {
   BgaRequest,
   BgaNotification,
+  BgaPlayCardNotif,
 } from "bga_src/client/type/bga-interface.d";
 import { GridData } from "./type/Grid.d";
 import { HandData } from "./type/Hand.d";
@@ -350,9 +351,31 @@ export default class App extends Vue {
         case "getNum":
           this.num = notif.args.num;
           break;
-        case "playCard":
-          console.log("notif.args.grid", notif.args.grid);
+        case "playCard": {
+          const arg = notif.args as BgaPlayCardNotif;
+          const gridID = Number(arg.gridID);
+          if (Number(arg.player_id) === Number(this.playerID)) {
+            this.handData.cardIDs = this.handData.cardIDs?.filter((ids) => {
+              return ids.id !== arg.card.id;
+            });
+            const row = (gridID % 3) + 3;
+            const col = Math.floor(gridID / 3);
+            if (this.gridData.cardIDs) {
+              this.gridData.cardIDs[col][row] = `mainCard${
+                Number(arg.card.type_arg) - 1
+              }`;
+            }
+          } else {
+            const row = 1 - (gridID % 3);
+            const col = Math.floor(gridID / 3);
+            if (this.gridData.cardIDs) {
+              this.gridData.cardIDs[col][row] = `mainCard${
+                Number(arg.card.type_arg) - 1
+              }`;
+            }
+          }
           break;
+        }
         default:
           console.log("unhandled notif", notifs);
           break;

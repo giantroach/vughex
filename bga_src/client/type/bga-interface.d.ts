@@ -1,3 +1,5 @@
+import { Card } from "./gamedata";
+
 interface BgaRequest {
   name: string;
   args: any;
@@ -8,4 +10,12 @@ interface BgaNotification {
   args: any;
 }
 
-export { BgaRequest, BgaNotification };
+interface BgaPlayCardNotif {
+  player_id: string; // num string
+  player_name: string;
+  card: Card;
+  cards: string; // number of cards
+  gridID: string;
+}
+
+export { BgaRequest, BgaNotification, BgaPlayCardNotif };
