@@ -1,13 +1,15 @@
 import { Card } from "./gamedata";
 
+type BgaNotifyName = "playCard";
+
 interface BgaRequest {
   name: string;
   args: any;
 }
 
 interface BgaNotification {
-  name: string;
-  args: any;
+  name: BgaNotifyName;
+  args: BgaPlayCardNotif;
 }
 
 interface BgaPlayCardNotif {

@@ -50,7 +50,6 @@ import { Gamedata } from "bga_src/client/type/gamedata.d";
 import {
   BgaRequest,
   BgaNotification,
-  BgaPlayCardNotif,
 } from "bga_src/client/type/bga-interface.d";
 import { GridData } from "./type/Grid.d";
 import { HandData } from "./type/Hand.d";
@@ -58,6 +57,7 @@ import { cardDefs } from "./def/card";
 import { gridDefs } from "./def/grid";
 import { handDefs } from "./def/hand";
 import { State } from "./logic/state";
+import { Sub } from "./logic/sub";
 import GameCard from "./components/GameCard.vue";
 import Hand from "./components/Hand.vue";
 import Grid from "./components/Grid.vue";
@@ -120,6 +120,7 @@ export default class App extends Vue {
   };
   public playerID = "";
   public state: null | State = null;
+  public sub: null | Sub = null;
 
   mounted() {
     this.initBgaNotification();
@@ -168,6 +169,7 @@ export default class App extends Vue {
 
     this.state = new State(this.request, this.gridData, this.handData);
     this.state.refresh();
+    this.sub = new Sub(this.playerID, this.gridData, this.handData);
   }
 
   public loadTestData() {
@@ -347,39 +349,8 @@ export default class App extends Vue {
       if (!notif) {
         return;
       }
-      switch (notif.name) {
-        case "getNum":
-          this.num = notif.args.num;
-          break;
-        case "playCard": {
-          const arg = notif.args as BgaPlayCardNotif;
-          const gridID = Number(arg.gridID);
-          if (Number(arg.player_id) === Number(this.playerID)) {
-            this.handData.cardIDs = this.handData.cardIDs?.filter((ids) => {
-              return ids.id !== arg.card.id;
-            });
-            const row = (gridID % 3) + 3;
-            const col = Math.floor(gridID / 3);
-            if (this.gridData.cardIDs) {
-              this.gridData.cardIDs[col][row] = `mainCard${
-                Number(arg.card.type_arg) - 1
-              }`;
-            }
-          } else {
-            const row = 1 - (gridID % 3);
-            const col = Math.floor(gridID / 3);
-            if (this.gridData.cardIDs) {
-              this.gridData.cardIDs[col][row] = `mainCard${
-                Number(arg.card.type_arg) - 1
-              }`;
-            }
-          }
-          break;
-        }
-        default:
-          console.log("unhandled notif", notifs);
-          break;
-      }
+      console.log("notif", notif);
+      this.sub?.handle(notif);
     });
   }
 
