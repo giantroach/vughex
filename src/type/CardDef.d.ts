@@ -35,6 +35,7 @@ interface CardDetail {
   onPlay?: OnPlay;
   onResolution?: OnResolution;
   stealth: boolean;
+  onlyMini?: boolean;
 }
 
 interface CardDef {

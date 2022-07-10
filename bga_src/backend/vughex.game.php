@@ -160,8 +160,22 @@ class Vughex extends Table
 
         $sql = "SELECT player_id id FROM player WHERE player_id<>'" . $current_player_id . "'";
         $oppo_id = self::getUniqueValueFromDB($sql);
-        $result['oppo_table'] = array_values(
-            $this->cards->getCardsInLocation('table' . $oppo_id));
+        $result['oppo_table'] = [];
+        foreach (array_values($this->cards->getCardsInLocation('table' . $oppo_id)) as $card) {
+            $c = $this->card_types[intval($card['type_arg']) - 1];
+            self::dump('$c', $c);
+            if ($c->stealth) {
+                $result['oppo_table'][] = [
+                    'id' => "0",
+                    'type' => "stealth",
+                    'type_arg' => "18",
+                    'location' => $card['location'],
+                    'location_arg' => $card['location_arg'],
+                ];
+            } else {
+                $result['oppo_table'][] = $card;
+            }
+        }
 
         return $result;
     }

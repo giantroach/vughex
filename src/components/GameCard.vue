@@ -140,6 +140,7 @@ export default class GameCard extends Vue {
   public urlBase!: Ref<string>;
   public bgPos = "0 0";
   public bgPosMini = "0 0";
+  public onlyMini = false;
 
   public created(): void {
     const ids = /([^\d]+)(\d+)/.exec(this.id);
@@ -162,9 +163,13 @@ export default class GameCard extends Vue {
       return;
     }
     this.bgPosMini = this.getBgPos(def.miniDef.sprite, def.miniDef.size, idx);
+    this.onlyMini = def.details?.[idx]?.onlyMini || false;
   }
 
   public showDetails(evt: MouseEvent) {
+    if (this.onlyMini) {
+      return;
+    }
     const elm = evt.srcElement as HTMLElement;
     const rect = elm.getBoundingClientRect();
 
