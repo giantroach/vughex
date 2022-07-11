@@ -152,6 +152,16 @@ export const cardDefs: { [cardType: string]: CardDef } = {
         },
         stealth: true,
       },
+      17: {
+        name: "Stealth",
+        text: "(Reviealed at the battle phase!)",
+        power: {
+          fixed: 1,
+          center: 0,
+        },
+        stealth: true,
+        onlyMini: true,
+      },
     },
     miniDef: {
       image: require("@/assets/cardset-mini.png"),

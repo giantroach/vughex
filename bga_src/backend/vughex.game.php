@@ -163,7 +163,6 @@ class Vughex extends Table
         $result['oppo_table'] = [];
         foreach (array_values($this->cards->getCardsInLocation('table' . $oppo_id)) as $card) {
             $c = $this->card_types[intval($card['type_arg']) - 1];
-            self::dump('$c', $c);
             if ($c->stealth) {
                 $result['oppo_table'][] = [
                     'id' => "0",
@@ -263,13 +262,41 @@ class Vughex extends Table
         $numberOfcards = $this->cards->countCardInLocation('hand', $actorID);
 
         // FIXME: hide card info if it is stealth
-        self::notifyAllPlayers('playCard', clienttranslate('${player_name} played a card.'), [
+        self::notifyPlayer($actorID, 'playCard', clienttranslate('${player_name} played a card.'), [
             'player_id' => $actorID,
             'player_name' => self::getActivePlayerName(),
             'card' => $cardInfo,
             'cards' => $numberOfcards,
             'gridID' => $gridID,
         ]);
+
+        $sql = "SELECT player_id id FROM player WHERE player_id<>'" . $actorID . "'";
+        $oppo_id = self::getUniqueValueFromDB($sql);
+        $c = $this->card_types[intval($cardInfo['type_arg']) - 1];
+        if ($c->stealth) {
+            self::notifyPlayer($oppo_id, 'playCard', clienttranslate('${player_name} played a stealth card.'), [
+                'player_id' => $actorID,
+                'player_name' => self::getActivePlayerName(),
+                'card' => [
+                    'id' => "0",
+                    'type' => "stealth",
+                    'type_arg' => "18",
+                    'location' => $cardInfo['location'],
+                    'location_arg' => $cardInfo['location_arg'],
+                ],
+                'cards' => $numberOfcards,
+                'gridID' => $gridID,
+            ]);
+
+        } else {
+            self::notifyPlayer($oppo_id, 'playCard', clienttranslate('${player_name} played a card.'), [
+                'player_id' => $actorID,
+                'player_name' => self::getActivePlayerName(),
+                'card' => $cardInfo,
+                'cards' => $numberOfcards,
+                'gridID' => $gridID,
+            ]);
+        }
 
         $this->gamestate->nextState('nextPlayer');
     }
