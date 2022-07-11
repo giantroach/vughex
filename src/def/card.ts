@@ -166,12 +166,12 @@ export const cardDefs: { [cardType: string]: CardDef } = {
     miniDef: {
       image: require("@/assets/cardset-mini.png"),
       sprite: "8x3",
-      size: { width: "138px", height: "120px", radius: "10px" },
+      size: { width: "138px", height: "121.6px", radius: "10px" },
     },
   },
   centerCard: {
     image: require("@/assets/centerset.png"),
     sprite: "6x3",
-    size: { width: "138px", height: "120px", radius: "10px" },
+    size: { width: "138px", height: "121.6px", radius: "10px" },
   },
 };
