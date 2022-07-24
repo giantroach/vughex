@@ -204,8 +204,8 @@ export default class GameCard extends Vue {
 
   private getBgPos(sprite: string, size: SizeDef, idx: number): string {
     const sm = /^(\d+)x(\d+)/g.exec(sprite);
-    const wm = /^([\d\.]+)(.*)/g.exec(size.width);
-    const hm = /^([\d\.]+)(.*)/g.exec(size.height);
+    const wm = /^([\d.]+)(.*)/g.exec(size.width);
+    const hm = /^([\d.]+)(.*)/g.exec(size.height);
     if (!sm || !wm || !hm) {
       return "0 0";
     }

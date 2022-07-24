@@ -1,6 +1,7 @@
 import { GridData } from "../type/Grid.d";
 import { HandData } from "../type/Hand.d";
 import { watch, ref, Ref } from "vue";
+import { cardDefs } from "../def/card";
 
 type CurrentState =
   | "init"
@@ -61,7 +62,7 @@ export class State {
           break;
         }
         if (
-          this.gridData.selected?.find((row) => {
+          this.gridData.selected?.[0]?.find((row) => {
             return row?.includes(true);
           })
         ) {
@@ -73,7 +74,49 @@ export class State {
         break;
 
       case "playerTurn:afterGridSelect": {
-        // FIXME: ability
+        this.current.value = "playerTurn:beforeTargetSelect";
+        break;
+      }
+
+      case "playerTurn:beforeTargetSelect": {
+        // cardDefs;
+        const cardIdx = this.handData.selected?.indexOf(true);
+        if (cardIdx === undefined) {
+          throw "unexpected state";
+        }
+        const c = this.handData.cardIDs?.[cardIdx];
+        if (!c) {
+          throw "unexpected state";
+        }
+
+        // FIXME: make a parser
+        const ids = /([^\d]+)(\d+)/.exec(c.cid);
+        if (!ids) {
+          return;
+        }
+        const cat = ids[1];
+        const idx = Number(ids[2]);
+
+        const def = cardDefs[cat]?.details?.[idx];
+        if (!def || !def.onPlay) {
+          this.current.value = "playerTurn:beforeGridSelect";
+          break;
+        }
+
+        const [x, y] = this.getSelectedCoordinate(0);
+
+        switch (def.onPlay) {
+          case "TargetSameLane:Silence": {
+            this.setTargetSelectable(x, y, {
+              sameLane: true,
+            });
+            break;
+          }
+        }
+        break;
+      }
+
+      case "playerTurn:afterTargetSelect": {
         const cardIdx = this.handData.selected?.indexOf(true);
         if (cardIdx === undefined) {
           throw "unexpected state";
@@ -84,7 +127,7 @@ export class State {
         }
 
         let gridID = 0;
-        this.gridData.selected?.find((row, colIdx) => {
+        this.gridData.selected?.[1]?.find((row, colIdx) => {
           const rowIdx = row?.indexOf(true);
           if (rowIdx === undefined || rowIdx === -1) {
             return false;
@@ -98,30 +141,55 @@ export class State {
           card: c.id,
           gridID: gridID,
         });
-        // FIXME: remove card from the hand
         break;
       }
-
-      case "playerTurn:beforeTargetSelect":
-        break;
-
-      case "playerTurn:afterTargetSelect":
-        break;
     }
 
     console.log("debug", this.current.value, this.gridData, this.handData);
   }
 
   private setPlayerGridSelectable(): void {
-    const selectable: boolean[][] = [[], [], []];
+    const selectable: boolean[][][] = [[[], [], []]];
     for (let i = 0; i < 3; i += 1) {
       if (!this.gridData?.cardIDs?.[i][3]) {
-        selectable[i][3] = true;
+        selectable[0][i][3] = true;
       } else if (!this.gridData?.cardIDs[i][4]) {
-        selectable[i][4] = true;
+        selectable[0][i][4] = true;
       }
     }
     this.gridData.selectable = selectable;
+  }
+
+  private setTargetSelectable(
+    x: number,
+    y: number,
+    param: {
+      sameLane?: boolean;
+    },
+  ): void {
+    const selectable: boolean[][] = [[], [], []];
+    if (param.sameLane) {
+      for (let iy = 0; iy < 5; iy += 1) {
+        if (iy !== 2 && this.gridData?.cardIDs?.[x][iy]) {
+          selectable[x][iy] = true;
+        }
+      }
+      if (!this.gridData.selectable) {
+        this.gridData.selectable = [[], []];
+      }
+      this.gridData.selectable[1] = selectable;
+    }
+  }
+
+  private getSelectedCoordinate(idx: number): [number, number] {
+    let y = -1;
+    const x = this.gridData.selected?.[idx].findIndex((col) => {
+      y = col.findIndex((row) => {
+        return row;
+      });
+      return y !== -1;
+    });
+    return [x !== undefined ? x : -1, y !== undefined ? y : -1];
   }
 
   // avoid unnecessary update

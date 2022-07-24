@@ -5,8 +5,8 @@
       :key="idx"
       class="grid-col"
       :class="{
-        selectable: isColSelectable(idx),
-        selected: isColSelected(idx),
+        selectable0: isColSelectable(idx),
+        selected0: isColSelected(idx),
       }"
       v-bind:style="{
         width: size.width,
@@ -22,8 +22,10 @@
           :key="gridCell"
           class="grid-cell"
           :class="{
-            selectable: isSelectable(idx, idy),
-            selected: isSelected(idx, idy),
+            selectable0: isSelectable(0, idx, idy),
+            selected0: isSelected(0, idx, idy),
+            selectable1: isSelectable(1, idx, idy),
+            selected1: isSelected(1, idx, idy),
           }"
           v-bind:style="{
             width: size.width,
@@ -32,7 +34,7 @@
             marginTop: idy === 0 ? 0 : marginRow,
             marginBottom: idy === gridCol.length - 1 ? 0 : marginRow,
           }"
-          @click="selectGrid(idx, idy)"
+          @click="selectGrid(getSelectableIdx(idx, idy), idx, idy)"
         >
           <template
             v-if="cardIDs && cardIDs[idx] && cardIDs[idx][idy] !== undefined"
@@ -76,8 +78,8 @@ export default class Grid extends Vue {
   public marginRow!: string;
   public marginCol!: string;
   public cardIDs!: string[][];
-  public selectable!: boolean[][];
-  public selected!: boolean[][];
+  public selectable!: boolean[][][];
+  public selected!: boolean[][][];
   public selectableCol!: boolean[];
   public selectedCol!: boolean[];
   public exclusiveSelect = true;
@@ -118,22 +120,39 @@ export default class Grid extends Vue {
     return `${Number(cm[1]) / 2}${cm[2]}`;
   }
 
-  public isSelectable(x: number, y: number): boolean {
+  public isSelectable(idx: number, x: number, y: number): boolean {
     if (!this.active) {
       return false;
     }
-    return this.selectable && this.selectable[x] && this.selectable[x][y]
+    return this.selectable &&
+      this.selectable[idx] &&
+      this.selectable[idx][x] &&
+      this.selectable[idx][x][y]
       ? true
       : false;
   }
 
-  public isSelected(x: number, y: number): boolean {
+  public getSelectableIdx(x: number, y: number): number {
+    for (let i = this.selectable.length; i >= 0; i -= 1) {
+      if (this.isSelectable(i, x, y)) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  public isSelected(idx: number, x: number, y: number): boolean {
     if (!this.active) {
       return false;
     }
-    return this.selected && this.selected[y] && this.selected[y][x]
-      ? true
-      : false;
+    const selected =
+      this.selected &&
+      this.selected[idx] &&
+      this.selected[idx][x] &&
+      this.selected[idx][x][y]
+        ? true
+        : false;
+    return selected;
   }
 
   public isColSelectable(x: number): boolean {
@@ -150,8 +169,8 @@ export default class Grid extends Vue {
     return this.selectedCol && this.selectedCol[x] ? true : false;
   }
 
-  public selectExcept(x: number, y: number): void {
-    this.selected.forEach((s, ix) => {
+  public selectExcept(idx: number, x: number, y: number): void {
+    this.selected[idx].forEach((s, ix) => {
       if (!s) {
         return;
       }
@@ -159,7 +178,7 @@ export default class Grid extends Vue {
         if (y === iy && x === ix) {
           return;
         }
-        this.selected[ix][iy] = false;
+        this.selected[idx][ix][iy] = false;
       });
     });
   }
@@ -176,21 +195,25 @@ export default class Grid extends Vue {
     });
   }
 
-  public selectGrid(x: number, y: number): void {
-    if (!this.isSelectable(x, y)) {
+  public selectGrid(idx: number, x: number, y: number): void {
+    if (!this.isSelectable(idx, x, y)) {
       return;
     }
 
-    if (this.selected[x] === void 0) {
-      this.selected[x] = [];
+    if (!this.selected[idx]) {
+      this.selected[idx] = [];
     }
 
-    this.selected[x][y] = !this.selected[x][y];
-    if (this.selected[x][y]) {
+    if (this.selected[idx][x] === void 0) {
+      this.selected[idx][x] = [];
+    }
+
+    this.selected[idx][x][y] = !this.selected[idx][x][y];
+    if (this.selected[idx][x][y]) {
       if (this.exclusiveSelect) {
-        this.selectExcept(x, y);
+        this.selectExcept(idx, x, y);
       }
-      this.$emit("selectGrid", { x, y });
+      this.$emit("selectGrid", { idx, x, y });
     }
   }
 
@@ -227,11 +250,19 @@ ul.grid {
   transform: scale(0.6);
   margin: -120px 0;
 }
-li.grid-cell.selectable {
+li.grid-cell.selectable0 {
   border: 2px solid #00e9eb;
   box-shadow: 0 0 5px 5px #05fdff;
 }
-li.grid-cell.selected {
+li.grid-cell.selected0 {
+  border: 2px solid #fffc00;
+  box-shadow: 0 0 5px 5px #ffb644;
+}
+li.grid-cell.selectable1 {
+  border: 2px solid #00eb7a;
+  box-shadow: 0 0 5px 5px #05ff92;
+}
+li.grid-cell.selected1 {
   border: 2px solid #fffc00;
   box-shadow: 0 0 5px 5px #ffb644;
 }
