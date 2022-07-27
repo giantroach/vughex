@@ -41,6 +41,15 @@
           >
             <GameCard :id="cardIDs[idx][idy]" :prioritizeMini="true"></GameCard>
           </template>
+          <template
+            v-if="ghosts && ghosts[idx] && ghosts[idx][idy] !== undefined"
+          >
+            <GameCard
+              :id="ghosts[idx][idy]"
+              :prioritizeMini="true"
+              :ghost="true"
+            ></GameCard>
+          </template>
         </li>
       </ul>
     </li>
@@ -60,6 +69,7 @@ import GameCard from "./GameCard.vue";
   props: {
     type: String,
     cardIDs: Array,
+    ghosts: Array,
     selectable: Array,
     selected: Array,
     selectableCol: Array,
@@ -78,6 +88,7 @@ export default class Grid extends Vue {
   public marginRow!: string;
   public marginCol!: string;
   public cardIDs!: string[][];
+  public ghosts!: string[][];
   public selectable!: boolean[][][];
   public selected!: boolean[][][];
   public selectableCol!: boolean[];

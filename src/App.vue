@@ -13,6 +13,7 @@
         ref="grid"
         type="table"
         :cardIDs="gridData.cardIDs"
+        :ghosts="gridData.ghosts"
         :selectable="gridData.selectable"
         :selected="gridData.selected"
         :selectableCol="gridData.selectableCol"
@@ -88,7 +89,8 @@ export default class App extends Vue {
   public urlBase!: Ref<string>;
   public gridData: GridData = {
     cardIDs: [],
-    selectable: [[], [], []],
+    ghosts: [],
+    selectable: [],
     selected: [],
     selectableCol: [],
     selectedCol: [],
@@ -170,158 +172,6 @@ export default class App extends Vue {
     this.state = new State(this.request, this.gridData, this.handData);
     this.state.refresh();
     this.sub = new Sub(this.playerID, this.gridData, this.handData);
-  }
-
-  public loadTestData() {
-    //FIXME: remove this
-    this.gamedata = {
-      current_player_id: "",
-      decision: { decision_type: "" },
-      game_result_neutralized: "0",
-      gamestate: {
-        id: "3",
-        active_player: "2348342",
-        args: null,
-        reflexion: {
-          total: { "2348342": 155, "2348343": "180" },
-          initial: { "2348342": 179 },
-          initial_ts: { "2348342": 1656683906819 },
-        },
-        updateGameProgression: 0,
-        name: "playerTurn",
-        description: "${actplayer} must play a card",
-        descriptionmyturn: "${you} must play a card",
-        type: "activeplayer",
-        possibleactions: ["playCard"],
-        transitions: { nextPlayer: 4, zombiePass: 4 },
-      },
-      gamestates: {
-        "1": {
-          name: "gameSetup",
-          description: "",
-          type: "manager",
-          action: "stGameSetup",
-          transitions: { roundSetup: 2 },
-        },
-        "2": {
-          name: "roundSetup",
-          type: "game",
-          action: "stRoundSetup",
-          updateGameProgression: true,
-          transitions: { playerTurn: 3 },
-        },
-        "3": {
-          name: "playerTurn",
-          description: "${actplayer} must play a card",
-          descriptionmyturn: "${you} must play a card",
-          type: "activeplayer",
-          possibleactions: ["playCard"],
-          transitions: { nextPlayer: 4, zombiePass: 4 },
-        },
-        "4": {
-          name: "nextPlayer",
-          type: "game",
-          action: "stNextPlayer",
-          updateGameProgression: true,
-          transitions: { playerTurn: 3, endRound: 10 },
-        },
-        "10": {
-          name: "endRound",
-          type: "game",
-          action: "stEndRound",
-          updateGameProgression: true,
-          transitions: { roundSetup: 2, endGame: 99 },
-        },
-        "99": {
-          name: "gameEnd",
-          description: "End of game",
-          type: "manager",
-          action: "stGameEnd",
-          args: "argGameEnd",
-        },
-      },
-      neutralized_player_id: "0",
-      notifications: { last_packet_id: "3", move_nbr: "1" },
-      playerorder: ["2348342", 2348343],
-      player_cards: [
-        {
-          id: "1",
-          type: "standard",
-          type_arg: "4",
-          location: "hand",
-          location_arg: "2348342",
-        },
-        {
-          id: "5",
-          type: "standard",
-          type_arg: "13",
-          location: "hand",
-          location_arg: "2348342",
-        },
-        {
-          id: "11",
-          type: "standard",
-          type_arg: "2",
-          location: "hand",
-          location_arg: "2348342",
-        },
-        {
-          id: "12",
-          type: "standard",
-          type_arg: "3",
-          location: "hand",
-          location_arg: "2348342",
-        },
-        {
-          id: "13",
-          type: "standard",
-          type_arg: "6",
-          location: "hand",
-          location_arg: "2348342",
-        },
-        {
-          id: "14",
-          type: "creep",
-          type_arg: "14",
-          location: "hand",
-          location_arg: "2348342",
-        },
-      ],
-      players: {
-        "2348342": {
-          id: "2348342",
-          score: "0",
-          cards: 6,
-          color: "ff0000",
-          color_back: null,
-          name: "giantroach0",
-          avatar: "000000",
-          zombie: 0,
-          eliminated: 0,
-          is_ai: "0",
-          beginner: true,
-          ack: "ack",
-        },
-        "2348343": {
-          id: "2348343",
-          score: "0",
-          cards: 6,
-          color: "008000",
-          color_back: null,
-          name: "giantroach1",
-          avatar: "000000",
-          zombie: 0,
-          eliminated: 0,
-          is_ai: "0",
-          beginner: true,
-          ack: "ack",
-        },
-      },
-      player_table: [],
-      oppo_table: [],
-      tablespeed: "1",
-    };
-    this.init();
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

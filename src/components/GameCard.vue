@@ -30,6 +30,9 @@
     <template v-if="miniDef && prioritizeMini">
       <div
         class="card card-mini"
+        :class="{
+          ghost: ghost,
+        }"
         v-bind:style="{
           width: miniDef.size.width,
           height: miniDef.size.height,
@@ -103,6 +106,7 @@ export interface Size {
     prioritizeMini: Boolean,
     selectable: Boolean, // for card detail modal
     selected: Boolean, // for card detail modal
+    ghost: Boolean,
   },
   inject: ["urlBase", "cardDef"],
   emits: ["selectCard", "showDetail", "hideDetail"],
@@ -129,6 +133,7 @@ export default class GameCard extends Vue {
   };
   public selected!: boolean;
   public selectable!: boolean;
+  public ghost!: boolean;
 
   public modal = false;
   public modalTop = 0;
@@ -271,5 +276,8 @@ export default class GameCard extends Vue {
 .selected {
   border: 2px solid #fffc00;
   box-shadow: 0 0 5px 2px #ffb644;
+}
+.ghost {
+  opacity: 0.67;
 }
 </style>

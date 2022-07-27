@@ -1,7 +1,7 @@
 import { GridData } from "../type/Grid.d";
 import { HandData } from "../type/Hand.d";
 import { watch, ref, Ref } from "vue";
-import { cardDefs } from "../def/card";
+import { cardDefs, getCard } from "../def/card";
 
 type CurrentState =
   | "init"
@@ -74,6 +74,17 @@ export class State {
         break;
 
       case "playerTurn:afterGridSelect": {
+        const c = handUtil.findFirstSelectedID(this.handData);
+        if (!c) {
+          this.current.value = "playerTurn:afterCardSelect";
+          throw "invalid state";
+        }
+        const idx = gridUtil.getFirstSelectedIdx(this.gridData, 0);
+        const ghost: Array<Array<string>> = [[]];
+        ghost[idx.x] = [];
+        ghost[idx.x][idx.y] = c.cid;
+        this.assign(this.gridData, "ghosts", ghost);
+        this.assign(this.gridData, "selectable", []);
         this.current.value = "playerTurn:beforeTargetSelect";
         break;
       }
@@ -89,15 +100,7 @@ export class State {
           throw "unexpected state";
         }
 
-        // FIXME: make a parser
-        const ids = /([^\d]+)(\d+)/.exec(c.cid);
-        if (!ids) {
-          return;
-        }
-        const cat = ids[1];
-        const idx = Number(ids[2]);
-
-        const def = cardDefs[cat]?.details?.[idx];
+        const def = cardUtil.getCard(c.cid);
         if (!def || !def.onPlay) {
           this.current.value = "playerTurn:beforeGridSelect";
           break;

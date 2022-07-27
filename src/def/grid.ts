@@ -1,4 +1,5 @@
 import { GridDef } from "../type/GridDef.d";
+import { GridData } from "../type/Grid.d";
 
 // const isGridSelectable = (
 //   x: number,
@@ -26,4 +27,24 @@ const gridDefs: { [cardType: string]: GridDef } = {
   },
 };
 
-export { gridDefs };
+const gridUtil = {
+  // generally works only exclusiveSelect mode
+  getFirstSelectedIdx: (
+    gridData: GridData,
+    idx: number,
+  ): { x: number; y: number } => {
+    let x = -1;
+    let y = -1;
+    if (gridData.selected) {
+      x = gridData.selected?.[idx].findIndex((col) => {
+        y = col.findIndex((row) => {
+          return row;
+        });
+        return y !== -1;
+      });
+    }
+    return { x, y };
+  },
+};
+
+export { gridDefs, gridUtil };

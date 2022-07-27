@@ -1,4 +1,5 @@
 import { HandDef } from "../type/HandDef.d";
+import { HandData, CardID } from "../type/Hand.d";
 
 const handDefs: { [cardType: string]: HandDef } = {
   card: {
@@ -6,4 +7,18 @@ const handDefs: { [cardType: string]: HandDef } = {
   },
 };
 
-export { handDefs };
+const handUtil = {
+  findFirstSelectedID: (data: HandData): CardID | null => {
+    const cardIdx = data.selected?.indexOf(true);
+    if (!cardIdx) {
+      return null;
+    }
+    const c = data.cardIDs?.[cardIdx];
+    if (!c) {
+      return null;
+    }
+    return c;
+  },
+};
+
+export { handDefs, handUtil };

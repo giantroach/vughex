@@ -1,6 +1,6 @@
-import { CardDef } from "../type/CardDef.d";
+import { CardDef, CardDetail } from "../type/CardDef.d";
 
-export const cardDefs: { [cardType: string]: CardDef } = {
+const cardDefs: { [cardType: string]: CardDef } = {
   mainCard: {
     image: require("@/assets/cardset.png"),
     sprite: "8x2",
@@ -175,3 +175,30 @@ export const cardDefs: { [cardType: string]: CardDef } = {
     size: { width: "138px", height: "121.6px", radius: "10px" },
   },
 };
+
+const cardUtil = {
+  getCard: (cid: string): CardDetail => {
+    const ids = /([^\d]+)(\d+)/.exec(cid);
+    if (!ids) {
+      throw "invalid cid format";
+    }
+    const cat = ids[1];
+    const idx = Number(ids[2]);
+    const detail = cardDefs[cat].details?.[idx];
+    if (!detail) {
+      throw "invalid cid";
+    }
+
+    return detail;
+  },
+
+  getIdx: (cid: string): number => {
+    const ids = /([^\d]+)(\d+)/.exec(cid);
+    if (!ids) {
+      throw "invalid cid format";
+    }
+    return Number(ids[2]);
+  },
+};
+
+export { cardDefs, cardUtil };

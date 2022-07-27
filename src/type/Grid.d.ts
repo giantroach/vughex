@@ -1,5 +1,6 @@
 interface GridData {
   cardIDs?: Array<Array<string | undefined>>;
+  ghosts?: Array<Array<string | undefined>>;
   selectable?: boolean[][][];
   selected?: boolean[][][];
   selectableCol?: boolean[];
