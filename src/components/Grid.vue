@@ -39,15 +39,10 @@
           <template
             v-if="cardIDs && cardIDs[idx] && cardIDs[idx][idy] !== undefined"
           >
-            <GameCard :id="cardIDs[idx][idy]" :prioritizeMini="true"></GameCard>
-          </template>
-          <template
-            v-if="ghosts && ghosts[idx] && ghosts[idx][idy] !== undefined"
-          >
             <GameCard
-              :id="ghosts[idx][idy]"
+              :id="cardIDs[idx][idy]"
               :prioritizeMini="true"
-              :ghost="true"
+              :ghost="ghosts && ghosts[idx] && ghosts[idx][idy]"
             ></GameCard>
           </template>
         </li>

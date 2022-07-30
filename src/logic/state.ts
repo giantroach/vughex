@@ -1,7 +1,9 @@
 import { GridData } from "../type/Grid.d";
 import { HandData } from "../type/Hand.d";
 import { watch, ref, Ref } from "vue";
-import { cardDefs, getCard } from "../def/card";
+import { cardUtil } from "../def/card";
+import { gridUtil } from "../def/grid";
+import { handUtil } from "../def/hand";
 
 type CurrentState =
   | "init"
@@ -80,10 +82,20 @@ export class State {
           throw "invalid state";
         }
         const idx = gridUtil.getFirstSelectedIdx(this.gridData, 0);
-        const ghost: Array<Array<string>> = [[]];
-        ghost[idx.x] = [];
-        ghost[idx.x][idx.y] = c.cid;
-        this.assign(this.gridData, "ghosts", ghost);
+        const ghosts: Array<Array<boolean>> = [[]];
+        ghosts[idx.x] = [];
+        ghosts[idx.x][idx.y] = true;
+        let cardIDs = this.gridData.cardIDs;
+        if (cardIDs === undefined) {
+          cardIDs = [[], [], []];
+        }
+        if (!cardIDs[idx.x] === undefined) {
+          cardIDs[idx.x] = [];
+        }
+        cardIDs[idx.x][idx.y] = c.cid;
+
+        this.assign(this.gridData, "cardIDs", cardIDs);
+        this.assign(this.gridData, "ghosts", ghosts);
         this.assign(this.gridData, "selectable", []);
         this.current.value = "playerTurn:beforeTargetSelect";
         break;
@@ -110,9 +122,20 @@ export class State {
 
         switch (def.onPlay) {
           case "TargetSameLane:Silence": {
-            this.setTargetSelectable(x, y, {
-              sameLane: true,
-            });
+            this.setTargetSameLane(x);
+            break;
+          }
+          case "TargetNonStealthSameLane:Reincanate": {
+            // this.setTargetSelectable(x, y, {
+            //   sameLane: true,
+            //   nonStealth: true,
+            // });
+            break;
+          }
+          case "TargeAnytStealth:Reveal": {
+            break;
+          }
+          case "TargetSameLaneToAnother:Maze": {
             break;
           }
         }
@@ -148,7 +171,7 @@ export class State {
       }
     }
 
-    console.log("debug", this.current.value, this.gridData, this.handData);
+    // console.log("debug", this.current.value, this.gridData, this.handData);
   }
 
   private setPlayerGridSelectable(): void {
@@ -163,26 +186,69 @@ export class State {
     this.gridData.selectable = selectable;
   }
 
-  private setTargetSelectable(
-    x: number,
-    y: number,
-    param: {
-      sameLane?: boolean;
-    },
-  ): void {
+  private setTargetSameLane(x: number): void {
     const selectable: boolean[][] = [[], [], []];
-    if (param.sameLane) {
-      for (let iy = 0; iy < 5; iy += 1) {
-        if (iy !== 2 && this.gridData?.cardIDs?.[x][iy]) {
+    // same lane
+    for (let iy = 0; iy < 5; iy += 1) {
+      if (iy !== 2) {
+        if (this.gridData?.cardIDs?.[x][iy]) {
+          selectable[x][iy] = true;
+        }
+        if (this.gridData?.ghosts?.[x][iy]) {
           selectable[x][iy] = true;
         }
       }
-      if (!this.gridData.selectable) {
-        this.gridData.selectable = [[], []];
-      }
-      this.gridData.selectable[1] = selectable;
     }
+    if (!this.gridData.selectable) {
+      this.gridData.selectable = [[], []];
+    }
+    this.gridData.selectable[1] = selectable;
   }
+
+  // private setTargetSelectable(
+  //   x: number,
+  //   y: number,
+  //   param: {
+  //     self?: boolean;
+  //     sameLane?: boolean;
+  //     nonStealth?: boolean;
+  //     stealth?: boolean;
+  //   },
+  // ): void {
+  //   const selectable: boolean[][] = [[], [], []];
+  //   if (param.sameLane) {
+  //     // same lane
+  //     for (let iy = 0; iy < 5; iy += 1) {
+  //       if (iy !== 2) {
+  //         if (this.gridData?.cardIDs?.[x][iy]) {
+  //           selectable[x][iy] = true;
+  //         }
+  //         if (param.self && this.gridData?.ghosts?.[x][iy]) {
+  //           selectable[x][iy] = true;
+  //         }
+  //       }
+  //     }
+  //     if (!this.gridData.selectable) {
+  //       this.gridData.selectable = [[], []];
+  //     }
+  //     this.gridData.selectable[1] = selectable;
+
+  //   } else {
+  //     // not same lane
+  //     for (let ix = 0; ix < 3; ix += 1) {
+  //       for (let iy = 0; iy < 5; iy += 1) {
+  //         if (iy !== 2) {
+  //           if (this.gridData?.cardIDs?.[ix][iy]) {
+  //             selectable[ix][iy] = true;
+  //           }
+  //           if (param.self && this.gridData?.ghosts?.[x][iy]) {
+  //             selectable[ix][iy] = true;
+  //           }
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
 
   private getSelectedCoordinate(idx: number): [number, number] {
     let y = -1;
