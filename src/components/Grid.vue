@@ -5,8 +5,8 @@
       :key="idx"
       class="grid-col"
       :class="{
-        selectable0: isColSelectable(idx),
-        selected0: isColSelected(idx),
+        selectable: isColSelectable(idx),
+        selected: isColSelected(idx),
       }"
       v-bind:style="{
         width: size.width,
@@ -43,6 +43,10 @@
               :id="cardIDs[idx][idy]"
               :prioritizeMini="true"
               :ghost="ghosts && ghosts[idx] && ghosts[idx][idy]"
+              :selectable="
+                isSelectable(0, idx, idy) || isSelectable(1, idx, idy)
+              "
+              @selectCard="selectGrid(getSelectableIdx(idx, idy), idx, idy)"
             ></GameCard>
           </template>
         </li>

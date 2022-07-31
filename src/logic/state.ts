@@ -14,6 +14,7 @@ type CurrentState =
   | "playerTurn:beforeGridSelect"
   | "playerTurn:afterGridSelect"
   | "playerTurn:beforeTargetSelect"
+  | "playerTurn:beforeTargetSelect2"
   | "playerTurn:afterTargetSelect"
   | "otherPlayerTurn";
 
@@ -103,7 +104,6 @@ export class State {
       }
 
       case "playerTurn:beforeTargetSelect": {
-        // cardDefs;
         const cardIdx = this.handData.selected?.indexOf(true);
         if (cardIdx === undefined) {
           throw "unexpected state";
@@ -119,26 +119,56 @@ export class State {
           break;
         }
 
+        const selected: boolean[][] = this.gridData.selected?.[0] || [];
+        const targetSelected = selected.some((s: boolean[]) => {
+          return (s || []).includes(true);
+        });
+        if (targetSelected) {
+          if (def.onPlay === "TargetSameLaneToAnother:Maze") {
+            this.current.value = "playerTurn:beforeTargetSelect2";
+          } else {
+            this.current.value = "playerTurn:afterTargetSelect";
+          }
+        }
+
         const [x, y] = this.getSelectedCoordinate(0);
 
         switch (def.onPlay) {
           case "TargetSameLane:Silence": {
-            this.setTargetSameLane(x);
+            if (!this.setTargetSameLane(x)) {
+              this.current.value = "playerTurn:afterTargetSelect";
+            }
             break;
           }
           case "TargetNonStealthSameLane:Reincanate": {
-            this.setTargetSameLaneNonStealth(x, y);
+            if (!this.setTargetSameLaneNonStealth(x, y)) {
+              this.current.value = "playerTurn:afterTargetSelect";
+            }
             break;
           }
           case "TargeAnytStealth:Reveal": {
-            this.setTargetAnyStealth();
+            if (!this.setTargetAnyStealth()) {
+              this.current.value = "playerTurn:afterTargetSelect";
+            }
             break;
           }
           case "TargetSameLaneToAnother:Maze": {
-            this.setTargetSameLaneStealth(x);
+            if (!this.setTargetSameLaneStealth(x)) {
+              this.current.value = "playerTurn:afterTargetSelect";
+            }
+            break;
+          }
+          default: {
+            this.current.value = "playerTurn:afterTargetSelect";
             break;
           }
         }
+        break;
+      }
+
+      case "playerTurn:beforeTargetSelect2": {
+        const coordinate = this.getSelectedCoordinate(1);
+        this.setTargetAnotherLane(coordinate[0]);
         break;
       }
 
@@ -186,15 +216,18 @@ export class State {
     this.gridData.selectable = selectable;
   }
 
-  private setTargetSameLane(x: number): void {
+  private setTargetSameLane(x: number): boolean {
     const selectable: boolean[][] = [[], [], []];
+    let result = false;
     for (let iy = 0; iy < 5; iy += 1) {
       if (iy !== 2) {
         if (this.gridData?.cardIDs?.[x][iy]) {
           selectable[x][iy] = true;
+          result = true;
         }
         if (this.gridData?.ghosts?.[x][iy]) {
           selectable[x][iy] = true;
+          result = true;
         }
       }
     }
@@ -202,10 +235,12 @@ export class State {
       this.gridData.selectable = [[], []];
     }
     this.gridData.selectable[1] = selectable;
+    return result;
   }
 
-  private setTargetSameLaneNonStealth(x: number, y: number): void {
+  private setTargetSameLaneNonStealth(x: number, y: number): boolean {
     const selectable: boolean[][] = [[], [], []];
+    let result = false;
     for (let iy = 0; iy < 5; iy += 1) {
       if (iy !== 2) {
         const cid = this.gridData?.cardIDs?.[x][iy];
@@ -213,10 +248,12 @@ export class State {
           const cDetail = cardUtil.getCard(cid);
           if (!cDetail.stealth) {
             selectable[x][iy] = true;
+            result = true;
           }
         }
         if (this.gridData?.ghosts?.[x][y]) {
           selectable[x][y] = true;
+          result = true;
         }
       }
     }
@@ -224,10 +261,12 @@ export class State {
       this.gridData.selectable = [[], []];
     }
     this.gridData.selectable[1] = selectable;
+    return result;
   }
 
-  private setTargetAnyStealth(): void {
+  private setTargetAnyStealth(): boolean {
     const selectable: boolean[][] = [[], [], []];
+    let result = false;
     for (let ix = 0; ix < 3; ix += 1) {
       for (let iy = 0; iy < 5; iy += 1) {
         if (iy !== 2) {
@@ -236,6 +275,7 @@ export class State {
             const cDetail = cardUtil.getCard(cid);
             if (cDetail.stealth) {
               selectable[ix][iy] = true;
+              result = true;
             }
           }
         }
@@ -245,10 +285,12 @@ export class State {
       this.gridData.selectable = [[], []];
     }
     this.gridData.selectable[1] = selectable;
+    return result;
   }
 
-  private setTargetSameLaneStealth(x: number): void {
+  private setTargetSameLaneStealth(x: number): boolean {
     const selectable: boolean[][] = [[], [], []];
+    let result = false;
     for (let iy = 0; iy < 5; iy += 1) {
       if (iy !== 2) {
         const cid = this.gridData?.cardIDs?.[x][iy];
@@ -256,6 +298,7 @@ export class State {
           const cDetail = cardUtil.getCard(cid);
           if (cDetail.stealth) {
             selectable[x][iy] = true;
+            result = true;
           }
         }
       }
@@ -264,11 +307,23 @@ export class State {
       this.gridData.selectable = [[], []];
     }
     this.gridData.selectable[1] = selectable;
+    return result;
+  }
+
+  private setTargetAnotherLane(x: number): void {
+    if (x === -1) {
+      this.gridData.selectableCol = [false, false, false];
+      return;
+    }
+    const selectableCol = [true, true, true];
+    selectableCol[x] = false;
+    this.gridData.selectableCol = selectableCol;
+    // FIXME: remove if there is no space
   }
 
   private getSelectedCoordinate(idx: number): [number, number] {
     let y = -1;
-    const x = this.gridData.selected?.[idx].findIndex((col) => {
+    const x = this.gridData.selected?.[idx]?.findIndex((col) => {
       y = (col || []).findIndex((row) => {
         return row;
       });
