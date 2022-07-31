@@ -10,7 +10,7 @@ const handDefs: { [cardType: string]: HandDef } = {
 const handUtil = {
   findFirstSelectedID: (data: HandData): CardID | null => {
     const cardIdx = data.selected?.indexOf(true);
-    if (!cardIdx) {
+    if (cardIdx === undefined || cardIdx === -1) {
       return null;
     }
     const c = data.cardIDs?.[cardIdx];

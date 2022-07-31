@@ -126,10 +126,7 @@ export class State {
             break;
           }
           case "TargetNonStealthSameLane:Reincanate": {
-            // this.setTargetSelectable(x, y, {
-            //   sameLane: true,
-            //   nonStealth: true,
-            // });
+            this.setTargetSameLaneNonStealth(x, y);
             break;
           }
           case "TargeAnytStealth:Reveal": {
@@ -188,7 +185,6 @@ export class State {
 
   private setTargetSameLane(x: number): void {
     const selectable: boolean[][] = [[], [], []];
-    // same lane
     for (let iy = 0; iy < 5; iy += 1) {
       if (iy !== 2) {
         if (this.gridData?.cardIDs?.[x][iy]) {
@@ -196,6 +192,28 @@ export class State {
         }
         if (this.gridData?.ghosts?.[x][iy]) {
           selectable[x][iy] = true;
+        }
+      }
+    }
+    if (!this.gridData.selectable) {
+      this.gridData.selectable = [[], []];
+    }
+    this.gridData.selectable[1] = selectable;
+  }
+
+  private setTargetSameLaneNonStealth(x: number, y: number): void {
+    const selectable: boolean[][] = [[], [], []];
+    for (let iy = 0; iy < 5; iy += 1) {
+      if (iy !== 2) {
+        const cid = this.gridData?.cardIDs?.[x][iy];
+        if (cid) {
+          const cDetail = cardUtil.getCard(cid);
+          if (!cDetail.stealth) {
+            selectable[x][iy] = true;
+          }
+        }
+        if (this.gridData?.ghosts?.[x][y]) {
+          selectable[x][y] = true;
         }
       }
     }
