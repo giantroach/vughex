@@ -37,7 +37,7 @@ const gridUtil = {
     let y = -1;
     if (gridData.selected) {
       x = gridData.selected?.[idx].findIndex((col) => {
-        y = col.findIndex((row) => {
+        y = (col || []).findIndex((row) => {
           return row;
         });
         return y !== -1;

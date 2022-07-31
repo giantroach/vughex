@@ -97,6 +97,7 @@ export class State {
         this.assign(this.gridData, "cardIDs", cardIDs);
         this.assign(this.gridData, "ghosts", ghosts);
         this.assign(this.gridData, "selectable", []);
+        this.assign(this.handData, "selectable", []);
         this.current.value = "playerTurn:beforeTargetSelect";
         break;
       }
@@ -130,6 +131,7 @@ export class State {
             break;
           }
           case "TargeAnytStealth:Reveal": {
+            this.setTargetAnyStealth();
             break;
           }
           case "TargetSameLaneToAnother:Maze": {
@@ -223,6 +225,27 @@ export class State {
     this.gridData.selectable[1] = selectable;
   }
 
+  private setTargetAnyStealth(): void {
+    const selectable: boolean[][] = [[], [], []];
+    for (let ix = 0; ix < 3; ix += 1) {
+      for (let iy = 0; iy < 5; iy += 1) {
+        if (iy !== 2) {
+          const cid = this.gridData?.cardIDs?.[ix][iy];
+          if (cid) {
+            const cDetail = cardUtil.getCard(cid);
+            if (cDetail.stealth) {
+              selectable[ix][iy] = true;
+            }
+          }
+        }
+      }
+    }
+    if (!this.gridData.selectable) {
+      this.gridData.selectable = [[], []];
+    }
+    this.gridData.selectable[1] = selectable;
+  }
+
   // private setTargetSelectable(
   //   x: number,
   //   y: number,
@@ -271,7 +294,7 @@ export class State {
   private getSelectedCoordinate(idx: number): [number, number] {
     let y = -1;
     const x = this.gridData.selected?.[idx].findIndex((col) => {
-      y = col.findIndex((row) => {
+      y = (col || []).findIndex((row) => {
         return row;
       });
       return y !== -1;
