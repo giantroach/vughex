@@ -80,6 +80,15 @@ const cardDefs: { [cardType: string]: CardDef } = {
         stealth: false,
       },
       7: {
+        name: "the Eclipse",
+        text: "[Combat] Ties the Combat in this lane if the power gap is 4+. (Prior to the Titan).",
+        power: {
+          fixed: 0,
+          center: 1,
+        },
+        stealth: true,
+      },
+      8: {
         name: "the Maze",
         text: "[Placement] Choose a stealth unit in this lane. Move it to another lane.",
         power: {
@@ -89,7 +98,7 @@ const cardDefs: { [cardType: string]: CardDef } = {
         onPlay: "TargetSameLaneToAnother:Maze",
         stealth: false,
       },
-      8: {
+      9: {
         name: "the Plague",
         text: "[Combat] Change ◆ in this lane to 0. (Apply this before any other abilities)",
         power: {
@@ -98,7 +107,7 @@ const cardDefs: { [cardType: string]: CardDef } = {
         },
         stealth: false,
       },
-      9: {
+      10: {
         name: "the Titan",
         text: "[Combat] The lower power wins in this lane. (Unless the combat is tied by the Eclipseʼs ability).",
         power: {
@@ -106,15 +115,6 @@ const cardDefs: { [cardType: string]: CardDef } = {
           center: 0,
         },
         stealth: false,
-      },
-      10: {
-        name: "the Eclipse",
-        text: "[Combat] Ties the Combat in this lane if the power gap is 4+. (Prior to the Titan).",
-        power: {
-          fixed: 0,
-          center: 1,
-        },
-        stealth: true,
       },
       11: {
         name: "the Agent",

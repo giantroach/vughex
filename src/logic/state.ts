@@ -135,6 +135,7 @@ export class State {
             break;
           }
           case "TargetSameLaneToAnother:Maze": {
+            this.setTargetSameLaneStealth(x);
             break;
           }
         }
@@ -246,50 +247,24 @@ export class State {
     this.gridData.selectable[1] = selectable;
   }
 
-  // private setTargetSelectable(
-  //   x: number,
-  //   y: number,
-  //   param: {
-  //     self?: boolean;
-  //     sameLane?: boolean;
-  //     nonStealth?: boolean;
-  //     stealth?: boolean;
-  //   },
-  // ): void {
-  //   const selectable: boolean[][] = [[], [], []];
-  //   if (param.sameLane) {
-  //     // same lane
-  //     for (let iy = 0; iy < 5; iy += 1) {
-  //       if (iy !== 2) {
-  //         if (this.gridData?.cardIDs?.[x][iy]) {
-  //           selectable[x][iy] = true;
-  //         }
-  //         if (param.self && this.gridData?.ghosts?.[x][iy]) {
-  //           selectable[x][iy] = true;
-  //         }
-  //       }
-  //     }
-  //     if (!this.gridData.selectable) {
-  //       this.gridData.selectable = [[], []];
-  //     }
-  //     this.gridData.selectable[1] = selectable;
-
-  //   } else {
-  //     // not same lane
-  //     for (let ix = 0; ix < 3; ix += 1) {
-  //       for (let iy = 0; iy < 5; iy += 1) {
-  //         if (iy !== 2) {
-  //           if (this.gridData?.cardIDs?.[ix][iy]) {
-  //             selectable[ix][iy] = true;
-  //           }
-  //           if (param.self && this.gridData?.ghosts?.[x][iy]) {
-  //             selectable[ix][iy] = true;
-  //           }
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
+  private setTargetSameLaneStealth(x: number): void {
+    const selectable: boolean[][] = [[], [], []];
+    for (let iy = 0; iy < 5; iy += 1) {
+      if (iy !== 2) {
+        const cid = this.gridData?.cardIDs?.[x][iy];
+        if (cid) {
+          const cDetail = cardUtil.getCard(cid);
+          if (cDetail.stealth) {
+            selectable[x][iy] = true;
+          }
+        }
+      }
+    }
+    if (!this.gridData.selectable) {
+      this.gridData.selectable = [[], []];
+    }
+    this.gridData.selectable[1] = selectable;
+  }
 
   private getSelectedCoordinate(idx: number): [number, number] {
     let y = -1;
