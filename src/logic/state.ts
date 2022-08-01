@@ -169,8 +169,14 @@ export class State {
       case "playerTurn:beforeTargetSelect2": {
         const [x, y] = this.getSelectedCoordinate(1);
         const laneSelectable = this.setTargetAnotherLane(x, y);
+        this.gridData.selectable = [];
         if (!laneSelectable) {
           this.current.value = "playerTurn:afterTargetSelect";
+          break;
+        }
+        if (this.gridData.selectedCol?.includes(true)) {
+          this.current.value = "playerTurn:afterTargetSelect";
+          break;
         }
         break;
       }
