@@ -285,7 +285,7 @@ ul.grid > li.grid-col.selectable {
   box-shadow: 0 0 5px 5px #05fdff;
 }
 ul.grid > li.grid-col.selected {
-  border: 3px solid #fffc00;
+  border: 2px solid #fffc00;
   box-shadow: 0 0 5px 5px #ffb644;
 }
 </style>

@@ -119,7 +119,7 @@ export class State {
           break;
         }
 
-        const selected: boolean[][] = this.gridData.selected?.[0] || [];
+        const selected: boolean[][] = this.gridData.selected?.[1] || [];
         const targetSelected = selected.some((s: boolean[]) => {
           return (s || []).includes(true);
         });
@@ -167,8 +167,11 @@ export class State {
       }
 
       case "playerTurn:beforeTargetSelect2": {
-        const coordinate = this.getSelectedCoordinate(1);
-        this.setTargetAnotherLane(coordinate[0]);
+        const [x, y] = this.getSelectedCoordinate(1);
+        const laneSelectable = this.setTargetAnotherLane(x, y);
+        if (!laneSelectable) {
+          this.current.value = "playerTurn:afterTargetSelect";
+        }
         break;
       }
 
@@ -310,15 +313,29 @@ export class State {
     return result;
   }
 
-  private setTargetAnotherLane(x: number): void {
+  private setTargetAnotherLane(x: number, y: number): boolean {
     if (x === -1) {
-      this.gridData.selectableCol = [false, false, false];
-      return;
+      // this.gridData.selectableCol = [false, false, false];
+      return false;
     }
     const selectableCol = [true, true, true];
     selectableCol[x] = false;
+
+    for (let ix = 0; ix < 3; ix += 1) {
+      if (ix === x) {
+        continue;
+      }
+      let ymax = 5;
+      if (y < 2) {
+        ymax = 1;
+      }
+      if (this.gridData.cardIDs?.[ix]?.[ymax]) {
+        selectableCol[ix] = false;
+      }
+    }
+
     this.gridData.selectableCol = selectableCol;
-    // FIXME: remove if there is no space
+    return selectableCol.includes(true);
   }
 
   private getSelectedCoordinate(idx: number): [number, number] {
