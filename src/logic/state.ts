@@ -4,6 +4,7 @@ import { watch, ref, Ref } from "vue";
 import { cardUtil } from "../def/card";
 import { gridUtil } from "../def/grid";
 import { handUtil } from "../def/hand";
+import { throttle } from "../util/util";
 
 type CurrentState =
   | "init"
@@ -25,10 +26,17 @@ export class State {
     private gridData: GridData,
     private handData: HandData,
   ) {
-    watch([this.gridData, this.handData, this.current], () => {
-      // FIXME: this may cause infinite loop
-      this.refresh();
-    });
+    watch(
+      [this.gridData, this.handData, this.current],
+      throttle(
+        () => {
+          // FIXME: this may cause infinite loop
+          this.refresh();
+        },
+        100,
+        this,
+      ),
+    );
   }
 
   public current: Ref<CurrentState> = ref("waitingForOtherPlayer");

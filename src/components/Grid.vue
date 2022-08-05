@@ -58,6 +58,7 @@
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
 import { SizeDef, MarginDef, GridDef } from "../type/GridDef.d";
+import { throttle } from "../util/util";
 import { CardDef } from "../type/CardDef.d";
 import GameCard from "./GameCard.vue";
 
@@ -106,6 +107,7 @@ export default class Grid extends Vue {
     this.size = def.size;
     this.marginCol = this.formatMarginCol(def.margin);
     this.marginRow = this.formatMarginRow(def.margin);
+    this.setSelectGrid();
   }
 
   private parseLayoutStr(layoutStr: string): number[][] {
@@ -206,25 +208,37 @@ export default class Grid extends Vue {
   }
 
   public selectGrid(idx: number, x: number, y: number): void {
-    if (!this.isSelectable(idx, x, y)) {
-      return;
-    }
+    this.throttledSelectGrid(idx, x, y);
+  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public throttledSelectGrid: any;
+  public setSelectGrid(): void {
+    // FIXME: this is triggered twice when you click
+    this.throttledSelectGrid = throttle(
+      (idx: number, x: number, y: number) => {
+        if (!this.isSelectable(idx, x, y)) {
+          return;
+        }
 
-    if (!this.selected[idx]) {
-      this.selected[idx] = [];
-    }
+        if (!this.selected[idx]) {
+          this.selected[idx] = [];
+        }
 
-    if (this.selected[idx][x] === void 0) {
-      this.selected[idx][x] = [];
-    }
+        if (this.selected[idx][x] === void 0) {
+          this.selected[idx][x] = [];
+        }
 
-    this.selected[idx][x][y] = !this.selected[idx][x][y];
-    if (this.selected[idx][x][y]) {
-      if (this.exclusiveSelect) {
-        this.selectExcept(idx, x, y);
-      }
-      this.$emit("selectGrid", { idx, x, y });
-    }
+        this.selected[idx][x][y] = !this.selected[idx][x][y];
+        if (this.selected[idx][x][y]) {
+          if (this.exclusiveSelect) {
+            this.selectExcept(idx, x, y);
+          }
+          this.$emit("selectGrid", { idx, x, y });
+        }
+      },
+      100,
+      this,
+    );
   }
 
   public selectCol(x: number): void {
