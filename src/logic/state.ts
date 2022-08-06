@@ -1,6 +1,7 @@
 import { GridData } from "../type/Grid.d";
 import { HandData } from "../type/Hand.d";
-import { watch, ref, Ref } from "vue";
+import { CtrlButtonData } from "../type/CtrlButton.d";
+import { watch } from "vue";
 import { cardUtil } from "../def/card";
 import { gridUtil } from "../def/grid";
 import { handUtil } from "../def/hand";
@@ -25,9 +26,10 @@ export class State {
     private request: any,
     private gridData: GridData,
     private handData: HandData,
+    private ctrlButtonData: CtrlButtonData,
   ) {
     watch(
-      [this.gridData, this.handData, this.current],
+      [this.gridData, this.handData, this.current, this.ctrlButtonData],
       throttle(
         () => {
           // FIXME: this may cause infinite loop
@@ -39,35 +41,53 @@ export class State {
     );
   }
 
-  public current: Ref<CurrentState> = ref("waitingForOtherPlayer");
+  public current: CurrentState = "waitingForOtherPlayer";
 
   public refresh() {
-    switch (this.current.value) {
+    console.log("this.current", this.current);
+    switch (this.current) {
       case "waitingForOtherPlayer":
         this.assign(this.handData, "active", false);
         this.assign(this.handData, "selected", []);
         this.assign(this.gridData, "active", false);
         this.assign(this.gridData, "selected", []);
+        this.assign(this.gridData, "ghosts", []);
         break;
 
       case "playerTurn:init":
         this.assign(this.handData, "active", true);
-        this.current.value = "playerTurn:beforeCardSelect";
+        this.assign(this.handData, "selected", []);
+        this.assign(
+          this.handData,
+          "selectable",
+          new Array(this.handData.cardIDs?.length || 0).fill(true),
+        );
+        this.assign(this.gridData, "selected", []);
+        this.assign(this.gridData, "selectable", []);
+        this.assign(this.gridData, "selectedCol", []);
+        this.assign(this.gridData, "selectableCol", []);
+        this.assign(this.gridData, "ghosts", []);
+        this.current = "playerTurn:beforeCardSelect";
+        this.refresh();
         break;
 
       case "playerTurn:beforeCardSelect":
         if (this.handData.selected?.includes(true)) {
-          this.current.value = "playerTurn:afterCardSelect";
+          this.current = "playerTurn:afterCardSelect";
+          this.refresh();
+          break;
         }
         break;
 
       case "playerTurn:afterCardSelect":
-        this.current.value = "playerTurn:beforeGridSelect";
+        this.current = "playerTurn:beforeGridSelect";
+        this.ctrlButtonData.cancel.display = true;
+        this.refresh();
         break;
 
       case "playerTurn:beforeGridSelect":
         if (!this.handData.selected?.includes(true)) {
-          this.current.value = "playerTurn:beforeCardSelect";
+          this.current = "playerTurn:beforeCardSelect";
           this.assign(this.gridData, "active", false);
           this.assign(this.gridData, "selected", []);
           break;
@@ -77,7 +97,8 @@ export class State {
             return row?.includes(true);
           })
         ) {
-          this.current.value = "playerTurn:afterGridSelect";
+          this.current = "playerTurn:afterGridSelect";
+          this.refresh();
           break;
         }
         this.assign(this.gridData, "active", true);
@@ -87,7 +108,7 @@ export class State {
       case "playerTurn:afterGridSelect": {
         const c = handUtil.findFirstSelectedID(this.handData);
         if (!c) {
-          this.current.value = "playerTurn:afterCardSelect";
+          this.current = "playerTurn:afterCardSelect";
           throw "invalid state";
         }
         const idx = gridUtil.getFirstSelectedIdx(this.gridData, 0);
@@ -105,9 +126,10 @@ export class State {
 
         this.assign(this.gridData, "cardIDs", cardIDs);
         this.assign(this.gridData, "ghosts", ghosts);
-        this.assign(this.gridData, "selectable", []);
+        // this.assign(this.gridData, "selectable", []);
         this.assign(this.handData, "selectable", []);
-        this.current.value = "playerTurn:beforeTargetSelect";
+        this.current = "playerTurn:beforeTargetSelect";
+        this.refresh();
         break;
       }
 
@@ -123,7 +145,8 @@ export class State {
 
         const def = cardUtil.getCard(c.cid);
         if (!def || !def.onPlay) {
-          this.current.value = "playerTurn:beforeGridSelect";
+          this.current = "playerTurn:beforeGridSelect";
+          this.refresh();
           break;
         }
 
@@ -133,9 +156,13 @@ export class State {
         });
         if (targetSelected) {
           if (def.onPlay === "TargetSameLaneToAnother:Maze") {
-            this.current.value = "playerTurn:beforeTargetSelect2";
+            this.current = "playerTurn:beforeTargetSelect2";
+            this.refresh();
+            break;
           } else {
-            this.current.value = "playerTurn:afterTargetSelect";
+            this.current = "playerTurn:afterTargetSelect";
+            this.refresh();
+            break;
           }
         }
 
@@ -144,30 +171,38 @@ export class State {
         switch (def.onPlay) {
           case "TargetSameLane:Silence": {
             if (!this.setTargetSameLane(x)) {
-              this.current.value = "playerTurn:afterTargetSelect";
+              this.current = "playerTurn:afterTargetSelect";
+              this.refresh();
+              break;
             }
             break;
           }
           case "TargetNonStealthSameLane:Reincanate": {
             if (!this.setTargetSameLaneNonStealth(x, y)) {
-              this.current.value = "playerTurn:afterTargetSelect";
+              this.current = "playerTurn:afterTargetSelect";
+              this.refresh();
+              break;
             }
             break;
           }
           case "TargeAnytStealth:Reveal": {
             if (!this.setTargetAnyStealth()) {
-              this.current.value = "playerTurn:afterTargetSelect";
+              this.current = "playerTurn:afterTargetSelect";
+              this.refresh();
+              break;
             }
             break;
           }
           case "TargetSameLaneToAnother:Maze": {
             if (!this.setTargetSameLaneStealth(x)) {
-              this.current.value = "playerTurn:afterTargetSelect";
+              this.current = "playerTurn:afterTargetSelect";
+              this.refresh();
+              break;
             }
             break;
           }
           default: {
-            this.current.value = "playerTurn:afterTargetSelect";
+            this.current = "playerTurn:afterTargetSelect";
             break;
           }
         }
@@ -179,11 +214,11 @@ export class State {
         const laneSelectable = this.setTargetAnotherLane(x, y);
         this.gridData.selectable = [];
         if (!laneSelectable) {
-          this.current.value = "playerTurn:afterTargetSelect";
+          this.current = "playerTurn:afterTargetSelect";
           break;
         }
         if (this.gridData.selectedCol?.includes(true)) {
-          this.current.value = "playerTurn:afterTargetSelect";
+          this.current = "playerTurn:afterTargetSelect";
           break;
         }
         break;
@@ -218,7 +253,16 @@ export class State {
       }
     }
 
-    // console.log("debug", this.current.value, this.gridData, this.handData);
+    // console.log("debug", this.current, this.gridData, this.handData);
+  }
+
+  public cancelState(): void {
+    if (/^playerTurn/.test(this.current)) {
+      this.current = "playerTurn:init";
+      this.ctrlButtonData.cancel.display = false;
+      this.undoPlayedCard();
+      this.refresh();
+    }
   }
 
   private setPlayerGridSelectable(): void {
@@ -350,6 +394,24 @@ export class State {
 
     this.gridData.selectableCol = selectableCol;
     return selectableCol.includes(true);
+  }
+
+  private undoPlayedCard(): void {
+    const id = handUtil.findFirstSelectedID(this.handData);
+    if (!id) {
+      return;
+    }
+    const idx = gridUtil.getIdxFromCid(this.gridData, id.cid);
+    if (idx.x === -1 || idx.y === -1) {
+      return;
+    }
+    const ghosts: Array<Array<boolean>> = [[]];
+    ghosts[idx.x] = [];
+    ghosts[idx.x][idx.y] = true;
+    this.assign(this.gridData, "ghosts", ghosts);
+    if (this.gridData.cardIDs) {
+      this.gridData.cardIDs[idx.x][idx.y] = undefined;
+    }
   }
 
   private getSelectedCoordinate(idx: number): [number, number] {

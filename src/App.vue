@@ -22,6 +22,16 @@
       >
       </Grid>
     </div>
+
+    <div id="ctrl_buttons">
+      <CtrlButton
+        type="cancel"
+        :active="ctrlButtonData.cancel.active"
+        :display="ctrlButtonData.cancel.display"
+        @btnClick="cancelState()"
+      ></CtrlButton>
+    </div>
+
     <div id="player_hand" class="whiteblock">
       <h3 id="inhand_header">
         <span>{IN_HAND}:</span>
@@ -54,20 +64,24 @@ import {
 } from "bga_src/client/type/bga-interface.d";
 import { GridData } from "./type/Grid.d";
 import { HandData } from "./type/Hand.d";
+import { CtrlButtonData } from "./type/CtrlButton.d";
 import { cardDefs } from "./def/card";
 import { gridDefs } from "./def/grid";
 import { handDefs } from "./def/hand";
+import { ctrlButtonDefs } from "./def/ctrlButton";
 import { State } from "./logic/state";
 import { Sub } from "./logic/sub";
 import GameCard from "./components/GameCard.vue";
 import Hand from "./components/Hand.vue";
 import Grid from "./components/Grid.vue";
+import CtrlButton from "./components/CtrlButton.vue";
 
 @Options({
   components: {
     GameCard,
     Hand,
     Grid,
+    CtrlButton,
   },
   provide: () => {
     return {
@@ -76,6 +90,7 @@ import Grid from "./components/Grid.vue";
       cardDef: cardDefs,
       gridDef: gridDefs,
       handDef: handDefs,
+      ctrlButtonDef: ctrlButtonDefs,
     };
   },
   inject: ["urlBase"],
@@ -105,6 +120,13 @@ export default class App extends Vue {
     active: false,
   };
 
+  public ctrlButtonData: CtrlButtonData = {
+    cancel: {
+      active: true,
+      display: false,
+    },
+  };
+
   public gamedata: Gamedata = {
     current_player_id: "",
     decision: { decision_type: "" },
@@ -120,6 +142,7 @@ export default class App extends Vue {
     oppo_table: [],
     tablespeed: "",
   };
+
   public playerID = "";
   public state: null | State = null;
   public sub: null | Sub = null;
@@ -169,9 +192,18 @@ export default class App extends Vue {
       this.gridData.cardIDs[col][row] = `mainCard${Number(c.type_arg) - 1}`;
     });
 
-    this.state = new State(this.request, this.gridData, this.handData);
+    this.state = new State(
+      this.request,
+      this.gridData,
+      this.handData,
+      this.ctrlButtonData,
+    );
     this.state.refresh();
     this.sub = new Sub(this.playerID, this.gridData, this.handData);
+  }
+
+  public cancelState(): void {
+    this.state?.cancelState();
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -45,6 +45,23 @@ const gridUtil = {
     }
     return { x, y };
   },
+
+  getIdxFromCid: (
+    gridData: GridData,
+    cid: string,
+  ): { x: number; y: number } => {
+    let x = -1;
+    let y = -1;
+    if (gridData.cardIDs) {
+      x = gridData.cardIDs.findIndex((col) => {
+        y = (col || []).findIndex((row) => {
+          return row === cid;
+        });
+        return y !== -1;
+      });
+    }
+    return { x, y };
+  },
 };
 
 export { gridDefs, gridUtil };
