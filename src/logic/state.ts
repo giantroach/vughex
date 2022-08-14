@@ -18,6 +18,7 @@ type CurrentState =
   | "playerTurn:beforeTargetSelect"
   | "playerTurn:beforeTargetSelect2"
   | "playerTurn:afterTargetSelect"
+  | "playerTurn:submit"
   | "otherPlayerTurn";
 
 export class State {
@@ -65,6 +66,8 @@ export class State {
         this.assign(this.gridData, "selectableCol", []);
         this.assign(this.gridData, "ghosts", []);
         this.setState("playerTurn:beforeCardSelect");
+        this.ctrlButtonData.submit.display = false;
+        this.ctrlButtonData.cancel.display = false;
         break;
 
       case "playerTurn:beforeCardSelect":
@@ -222,6 +225,20 @@ export class State {
         if (!c) {
           throw "unexpected state";
         }
+
+        this.ctrlButtonData.submit.display = true;
+        break;
+      }
+
+      case "playerTurn:submit": {
+        const cardIdx = this.handData.selected?.indexOf(true);
+        if (cardIdx === undefined) {
+          throw "unexpected state";
+        }
+        const c = this.handData.cardIDs?.[cardIdx];
+        if (!c) {
+          throw "unexpected state";
+        }
         this.assign(this.handData, "active", false);
         this.assign(this.gridData, "active", false);
 
@@ -248,7 +265,17 @@ export class State {
     if (/^playerTurn/.test(this.current)) {
       this.current = "playerTurn:init";
       this.ctrlButtonData.cancel.display = false;
+      this.ctrlButtonData.submit.display = false;
       this.undoPlayedCard();
+      this.throttledRefresh();
+    }
+  }
+
+  public submitState(): void {
+    if (/^playerTurn/.test(this.current)) {
+      this.current = "playerTurn:submit";
+      this.ctrlButtonData.cancel.display = false;
+      this.ctrlButtonData.submit.display = false;
       this.throttledRefresh();
     }
   }

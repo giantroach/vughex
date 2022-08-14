@@ -25,6 +25,12 @@
 
     <div id="ctrl_buttons">
       <CtrlButton
+        type="submit"
+        :active="ctrlButtonData.submit.active"
+        :display="ctrlButtonData.submit.display"
+        @btnClick="submitState()"
+      ></CtrlButton>
+      <CtrlButton
         type="cancel"
         :active="ctrlButtonData.cancel.active"
         :display="ctrlButtonData.cancel.display"
@@ -121,6 +127,10 @@ export default class App extends Vue {
   };
 
   public ctrlButtonData: CtrlButtonData = {
+    submit: {
+      active: true,
+      display: false,
+    },
     cancel: {
       active: true,
       display: false,
@@ -206,6 +216,10 @@ export default class App extends Vue {
     this.state?.cancelState();
   }
 
+  public submitState(): void {
+    this.state?.submitState();
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public request(name: string, args: any): Promise<any> {
     return new Promise((resolve, reject) => {
@@ -255,5 +269,8 @@ export default class App extends Vue {
 #player_hand > h3,
 #common_table > h3 {
   text-align: left;
+}
+#ctrl_buttons :not(:last-child) {
+  margin-right: 5px;
 }
 </style>

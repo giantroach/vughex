@@ -5,8 +5,15 @@ const ctrlButtonDefs: { [cardType in ButtonType]: CtrlButtonDef } = {
     label: "Cancel",
     size: { width: "138px", height: "30px", radius: "15px" },
     textColor: "white",
-    background: "darkorange",
-    border: "2px solid orange",
+    background: "#3d50ff",
+    border: "2px solid #adc1ff",
+  },
+  submit: {
+    label: "Submit",
+    size: { width: "138px", height: "30px", radius: "15px" },
+    textColor: "white",
+    background: "#ff621f",
+    border: "2px solid #ffb571",
   },
 };
 
