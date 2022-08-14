@@ -28,20 +28,17 @@ export class State {
     private handData: HandData,
     private ctrlButtonData: CtrlButtonData,
   ) {
-    watch(
-      [this.gridData, this.handData, this.current, this.ctrlButtonData],
-      throttle(
-        () => {
-          // FIXME: this may cause infinite loop
-          this.refresh();
-        },
-        100,
-        this,
-      ),
-    );
+    this.throttledRefresh = throttle(this.refresh, 100, this);
+    watch([this.gridData, this.handData, this.ctrlButtonData], () => {
+      // FIXME: there are too many of refresh calls
+      this.throttledRefresh();
+    });
   }
 
   public current: CurrentState = "waitingForOtherPlayer";
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public throttledRefresh: any;
 
   public refresh() {
     console.log("this.current", this.current);
@@ -67,29 +64,26 @@ export class State {
         this.assign(this.gridData, "selectedCol", []);
         this.assign(this.gridData, "selectableCol", []);
         this.assign(this.gridData, "ghosts", []);
-        this.current = "playerTurn:beforeCardSelect";
-        this.refresh();
+        this.setState("playerTurn:beforeCardSelect");
         break;
 
       case "playerTurn:beforeCardSelect":
         if (this.handData.selected?.includes(true)) {
-          this.current = "playerTurn:afterCardSelect";
-          this.refresh();
+          this.setState("playerTurn:afterCardSelect");
           break;
         }
         break;
 
       case "playerTurn:afterCardSelect":
-        this.current = "playerTurn:beforeGridSelect";
         this.ctrlButtonData.cancel.display = true;
-        this.refresh();
+        this.setState("playerTurn:beforeGridSelect");
         break;
 
       case "playerTurn:beforeGridSelect":
         if (!this.handData.selected?.includes(true)) {
-          this.current = "playerTurn:beforeCardSelect";
           this.assign(this.gridData, "active", false);
           this.assign(this.gridData, "selected", []);
+          this.setState("playerTurn:beforeCardSelect");
           break;
         }
         if (
@@ -97,8 +91,7 @@ export class State {
             return row?.includes(true);
           })
         ) {
-          this.current = "playerTurn:afterGridSelect";
-          this.refresh();
+          this.setState("playerTurn:afterGridSelect");
           break;
         }
         this.assign(this.gridData, "active", true);
@@ -126,10 +119,9 @@ export class State {
 
         this.assign(this.gridData, "cardIDs", cardIDs);
         this.assign(this.gridData, "ghosts", ghosts);
-        // this.assign(this.gridData, "selectable", []);
+        this.assign(this.gridData, "selectable", []);
         this.assign(this.handData, "selectable", []);
-        this.current = "playerTurn:beforeTargetSelect";
-        this.refresh();
+        this.setState("playerTurn:beforeTargetSelect");
         break;
       }
 
@@ -144,9 +136,12 @@ export class State {
         }
 
         const def = cardUtil.getCard(c.cid);
-        if (!def || !def.onPlay) {
-          this.current = "playerTurn:beforeGridSelect";
-          this.refresh();
+        if (!def) {
+          this.setState("playerTurn:beforeGridSelect");
+          break;
+        }
+        if (!def.onPlay) {
+          this.setState("playerTurn:afterTargetSelect");
           break;
         }
 
@@ -156,12 +151,10 @@ export class State {
         });
         if (targetSelected) {
           if (def.onPlay === "TargetSameLaneToAnother:Maze") {
-            this.current = "playerTurn:beforeTargetSelect2";
-            this.refresh();
+            this.setState("playerTurn:beforeTargetSelect2");
             break;
           } else {
-            this.current = "playerTurn:afterTargetSelect";
-            this.refresh();
+            this.setState("playerTurn:afterTargetSelect");
             break;
           }
         }
@@ -171,38 +164,34 @@ export class State {
         switch (def.onPlay) {
           case "TargetSameLane:Silence": {
             if (!this.setTargetSameLane(x)) {
-              this.current = "playerTurn:afterTargetSelect";
-              this.refresh();
+              this.setState("playerTurn:afterTargetSelect");
               break;
             }
             break;
           }
           case "TargetNonStealthSameLane:Reincanate": {
             if (!this.setTargetSameLaneNonStealth(x, y)) {
-              this.current = "playerTurn:afterTargetSelect";
-              this.refresh();
+              this.setState("playerTurn:afterTargetSelect");
               break;
             }
             break;
           }
           case "TargeAnytStealth:Reveal": {
             if (!this.setTargetAnyStealth()) {
-              this.current = "playerTurn:afterTargetSelect";
-              this.refresh();
+              this.setState("playerTurn:afterTargetSelect");
               break;
             }
             break;
           }
           case "TargetSameLaneToAnother:Maze": {
             if (!this.setTargetSameLaneStealth(x)) {
-              this.current = "playerTurn:afterTargetSelect";
-              this.refresh();
+              this.setState("playerTurn:afterTargetSelect");
               break;
             }
             break;
           }
           default: {
-            this.current = "playerTurn:afterTargetSelect";
+            this.setState("playerTurn:afterTargetSelect");
             break;
           }
         }
@@ -214,11 +203,11 @@ export class State {
         const laneSelectable = this.setTargetAnotherLane(x, y);
         this.gridData.selectable = [];
         if (!laneSelectable) {
-          this.current = "playerTurn:afterTargetSelect";
+          this.setState("playerTurn:afterTargetSelect");
           break;
         }
         if (this.gridData.selectedCol?.includes(true)) {
-          this.current = "playerTurn:afterTargetSelect";
+          this.setState("playerTurn:afterTargetSelect");
           break;
         }
         break;
@@ -233,18 +222,12 @@ export class State {
         if (!c) {
           throw "unexpected state";
         }
+        this.assign(this.handData, "active", false);
+        this.assign(this.gridData, "active", false);
 
-        let gridID = 0;
-        this.gridData.selected?.[1]?.find((row, colIdx) => {
-          const rowIdx = row?.indexOf(true);
-          if (rowIdx === undefined || rowIdx === -1) {
-            return false;
-          }
-          // 0 - 1 - 2
-          // 3 - 4 - 5
-          gridID = colIdx + (rowIdx - 3) * 3;
-        });
+        const gridID = this.getSelectedGridID(0);
 
+        // FIXME: this better to use submit button
         this.request("playCard", {
           card: c.id,
           gridID: gridID,
@@ -256,12 +239,17 @@ export class State {
     // console.log("debug", this.current, this.gridData, this.handData);
   }
 
+  public setState(state: CurrentState): void {
+    this.current = state;
+    this.throttledRefresh();
+  }
+
   public cancelState(): void {
     if (/^playerTurn/.test(this.current)) {
       this.current = "playerTurn:init";
       this.ctrlButtonData.cancel.display = false;
       this.undoPlayedCard();
-      this.refresh();
+      this.throttledRefresh();
     }
   }
 
@@ -423,6 +411,20 @@ export class State {
       return y !== -1;
     });
     return [x !== undefined ? x : -1, y !== undefined ? y : -1];
+  }
+
+  private getSelectedGridID(gridIdx: number): number {
+    let gridID = 0;
+    this.gridData.selected?.[gridIdx]?.find((row, colIdx) => {
+      const rowIdx = row?.indexOf(true);
+      if (rowIdx === undefined || rowIdx === -1) {
+        return false;
+      }
+      // 0 - 1 - 2
+      // 3 - 4 - 5
+      gridID = colIdx + (rowIdx - 3) * 3;
+    });
+    return gridID;
   }
 
   // avoid unnecessary update
