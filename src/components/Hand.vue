@@ -21,6 +21,7 @@
         :prioritizeMini="true"
         :selectable="isSelectable(idx)"
         :selected="isSelected(idx)"
+        :detailPos="'center'"
         @selectCard="selectHand(idx)"
         @showDetail="showDetail(idx)"
         @hideDetail="hideDetail()"

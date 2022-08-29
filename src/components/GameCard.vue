@@ -42,6 +42,7 @@
         }"
         @click="[showDetails($event), selectCard($event)]"
         v-on:mouseenter="showDetails"
+        v-on:mouseout="mouseOutFromMini"
         v-on:touchstart="showDetails"
       ></div>
     </template>
@@ -65,6 +66,7 @@
         backgroundPosition: bgPos,
       }"
       @click="selectCard"
+      v-on:mouseout="mouseOutFromDetail"
     >
       <div v-if="text" class="container-text">
         <div
@@ -80,7 +82,11 @@
       </div>
     </div>
 
-    <Modal @hide-modal="hideDetails" :backdrop="false"></Modal>
+    <Modal
+      v-if="detailPos === 'center'"
+      @hide-modal="mouseOutFromDetail"
+      :backdrop="false"
+    ></Modal>
   </teleport>
 </template>
 
@@ -107,6 +113,7 @@ export interface Size {
     selectable: Boolean, // for card detail modal
     selected: Boolean, // for card detail modal
     ghost: Boolean,
+    detailPos: String,
   },
   inject: ["urlBase", "cardDef"],
   emits: ["selectCard", "showDetail", "hideDetail"],
@@ -134,6 +141,7 @@ export default class GameCard extends Vue {
   public selected!: boolean;
   public selectable!: boolean;
   public ghost!: boolean;
+  public detailPos!: "center" | "right";
 
   public modal = false;
   public modalTop = 0;
@@ -146,6 +154,10 @@ export default class GameCard extends Vue {
   public bgPos = "0 0";
   public bgPosMini = "0 0";
   public onlyMini = false;
+
+  // tweaks related to show details
+  public disableShowDetailsUntilMouseOut = false;
+  public lastTimeHideDetails = 0;
 
   public created(): void {
     const ids = /([^\d]+)(\d+)/.exec(this.id);
@@ -175,12 +187,29 @@ export default class GameCard extends Vue {
     if (this.onlyMini) {
       return;
     }
+    if (this.disableShowDetailsUntilMouseOut) {
+      return;
+    }
+    if (
+      this.lastTimeHideDetails &&
+      Number(new Date()) - this.lastTimeHideDetails < 10
+    ) {
+      this.disableShowDetailsUntilMouseOut = true;
+      return;
+    }
+
     const elm = evt.srcElement as HTMLElement;
     const rect = elm.getBoundingClientRect();
 
     // find center coordinate
     const centerY = rect.top + window.scrollY + rect.height / 2;
-    const centerX = rect.left + window.scrollX + rect.width / 2;
+    let centerX = 0;
+    if (this.detailPos === "right") {
+      // *2 because it is center
+      centerX = rect.right + window.scrollX + rect.width * 2 + 20;
+    } else {
+      centerX = rect.left + window.scrollX + rect.width / 2;
+    }
     this.modal = true;
 
     setTimeout(() => {
@@ -221,6 +250,8 @@ export default class GameCard extends Vue {
   }
 
   public selectCard(): void {
+    this.hideDetails();
+    this.lastTimeHideDetails = Number(new Date());
     if (!this.selectable) {
       return;
     }
@@ -229,6 +260,20 @@ export default class GameCard extends Vue {
 
   public unselectCard() {
     this.selected = false;
+  }
+
+  public mouseOutFromMini() {
+    if (this.detailPos === "right") {
+      this.hideDetails();
+    }
+    this.disableShowDetailsUntilMouseOut = false;
+  }
+
+  public mouseOutFromDetail() {
+    if (this.detailPos === "right") {
+      return; // ignore
+    }
+    this.hideDetails();
   }
 
   public hideDetails() {
@@ -246,15 +291,16 @@ export default class GameCard extends Vue {
   position: relative;
   box-shadow: 0 5px 5px 5px rgb(0 0 0 / 30%);
 }
+/* those opacity stuff does not work with detailPos: right */
 .card-modal {
   opacity: 0;
   transition: opacity 0.4s;
-  position: fixed;
+  position: absolute;
   z-index: 1000;
 }
-.card-modal:hover {
-  opacity: 1;
-}
+/* .card-modal:hover { */
+/*   opacity: 1; */
+/* } */
 .container-text,
 .text {
   position: absolute;

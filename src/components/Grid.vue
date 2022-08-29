@@ -37,12 +37,23 @@
           @click="selectGrid(getSelectableIdx(idx, idy), idx, idy)"
         >
           <template
+            v-if="
+              overlay &&
+              overlay[idx] &&
+              overlay[idx][idy] &&
+              overlay[idx][idy].type === 'text'
+            "
+          >
+            <div class="">{{ overlay[idx][idy].data }}</div>
+          </template>
+          <template
             v-if="cardIDs && cardIDs[idx] && cardIDs[idx][idy] !== undefined"
           >
             <GameCard
               :id="cardIDs[idx][idy]"
               :prioritizeMini="true"
               :ghost="ghosts && ghosts[idx] && ghosts[idx][idy]"
+              :detailPos="'right'"
               :selectable="
                 isSelectable(0, idx, idy) || isSelectable(1, idx, idy)
               "
@@ -57,6 +68,7 @@
 
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
+import { Overlay } from "../type/Grid.d";
 import { SizeDef, MarginDef, GridDef } from "../type/GridDef.d";
 import { throttle } from "../util/util";
 import { CardDef } from "../type/CardDef.d";
@@ -75,6 +87,7 @@ import GameCard from "./GameCard.vue";
     selectableCol: Array,
     selectedCol: Array,
     exclusiveSelect: Boolean,
+    overlay: Array,
     active: Boolean,
   },
   inject: ["gridDef", "cardDef"],
@@ -94,6 +107,7 @@ export default class Grid extends Vue {
   public selectableCol!: boolean[];
   public selectedCol!: boolean[];
   public exclusiveSelect = true;
+  public overlay!: Overlay[][];
   public active!: boolean;
   public cardDef!: { [cardType: string]: CardDef };
 
