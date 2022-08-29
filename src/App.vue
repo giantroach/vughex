@@ -19,6 +19,7 @@
         :selectableCol="gridData.selectableCol"
         :selectedCol="gridData.selectedCol"
         :active="gridData.active"
+        :overlay="gridData.overlay"
       >
       </Grid>
     </div>
