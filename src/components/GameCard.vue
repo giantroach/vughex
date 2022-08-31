@@ -206,7 +206,7 @@ export default class GameCard extends Vue {
     let centerX = 0;
     if (this.detailPos === "right") {
       // *2 because it is center
-      centerX = rect.right + window.scrollX + rect.width * 2 + 20;
+      centerX = rect.right + window.scrollX + rect.width * 2;
     } else {
       centerX = rect.left + window.scrollX + rect.width / 2;
     }
@@ -293,7 +293,7 @@ export default class GameCard extends Vue {
 }
 /* those opacity stuff does not work with detailPos: right */
 .card-modal {
-  opacity: 0;
+  /* opacity: 0; */
   transition: opacity 0.4s;
   position: absolute;
   z-index: 1000;
