@@ -1,8 +1,10 @@
 type OverlayType = "text";
+type OverlayClass = "largeCenter"
 
 interface Overlay {
   type: OverlayType;
   data: string;
+  cssClass?: OverlayClass;
 }
 
 interface GridData {

@@ -44,7 +44,9 @@
               overlay[idx][idy].type === 'text'
             "
           >
-            <div class="">{{ overlay[idx][idy].data }}</div>
+            <div :class="'overlay ' + overlay[idx][idy].cssClass || ''">
+              {{ overlay[idx][idy].data }}
+            </div>
           </template>
           <template
             v-if="cardIDs && cardIDs[idx] && cardIDs[idx][idy] !== undefined"
@@ -315,5 +317,21 @@ ul.grid > li.grid-col.selectable {
 ul.grid > li.grid-col.selected {
   border: 2px solid #fffc00;
   box-shadow: 0 0 5px 5px #ffb644;
+}
+.overlay {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  height: 100%;
+  text-align: center;
+  flex: 1 1 auto;
+  justify-content: center;
+}
+.overlay.largeCenter {
+  color: white;
+  font-size: 4em;
+  font-weight: bolder;
+  text-stroke: 2px #000;
+  -webkit-text-stroke: 2px #000;
 }
 </style>
