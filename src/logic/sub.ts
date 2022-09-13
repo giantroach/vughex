@@ -1,16 +1,19 @@
 import {
   BgaNotification,
   BgaPlayCardNotif,
+  BgaEndRoundNotif,
 } from "bga_src/client/type/bga-interface.d";
 
 import { GridData } from "../type/Grid.d";
 import { HandData } from "../type/Hand.d";
+import { ScoreData } from "../type/Score.d";
 
 export class Sub {
   constructor(
     private playerID: string,
     private gridData: GridData,
     private handData: HandData,
+    private scoreData: ScoreData,
   ) {}
 
   public handle(notif: BgaNotification) {
@@ -36,6 +39,21 @@ export class Sub {
             this.gridData.cardIDs[col][row] = `mainCard${
               Number(arg.card.type_arg) - 1
             }`;
+          }
+        }
+        break;
+      }
+
+      case "endRound": {
+        const arg = notif.args as BgaEndRoundNotif;
+        const score = arg.score;
+        for (const pID in score) {
+          if (pID === "center") {
+            this.scoreData.centerScore = score[pID];
+          } else if (pID === this.playerID) {
+            this.scoreData.myScore = score[pID];
+          } else {
+            this.scoreData.oppoScore = score[pID];
           }
         }
         break;

@@ -1,5 +1,5 @@
 type OverlayType = "text";
-type OverlayClass = "largeCenter"
+type OverlayClass = "largeCenter";
 
 interface Overlay {
   type: OverlayType;

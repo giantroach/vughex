@@ -285,6 +285,7 @@ li {
 }
 li.grid-cell {
   border: 2px solid rgba(0, 0, 0, 0.5);
+  position: relative;
 }
 ul.grid {
   transform: scale(0.6);
@@ -326,6 +327,9 @@ ul.grid > li.grid-col.selected {
   text-align: center;
   flex: 1 1 auto;
   justify-content: center;
+  position: absolute;
+  width: 100%;
+  z-index: 1;
 }
 .overlay.largeCenter {
   color: white;

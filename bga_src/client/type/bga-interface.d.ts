@@ -1,6 +1,6 @@
-import { Card } from "./gamedata";
+import { Card, Score } from "./gamedata";
 
-type BgaNotifyName = "playCard";
+type BgaNotifyName = "playCard" | "endRound";
 
 interface BgaRequest {
   name: string;
@@ -9,7 +9,7 @@ interface BgaRequest {
 
 interface BgaNotification {
   name: BgaNotifyName;
-  args: BgaPlayCardNotif;
+  args: BgaPlayCardNotif | BgaEndRoundNotif;
 }
 
 interface BgaPlayCardNotif {
@@ -20,4 +20,8 @@ interface BgaPlayCardNotif {
   gridID: string;
 }
 
-export { BgaRequest, BgaNotification, BgaPlayCardNotif };
+interface BgaEndRoundNotif {
+  score: Score;
+}
+
+export { BgaRequest, BgaNotification, BgaPlayCardNotif, BgaEndRoundNotif };

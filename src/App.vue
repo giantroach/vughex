@@ -72,6 +72,7 @@ import {
 import { GridData } from "./type/Grid.d";
 import { HandData } from "./type/Hand.d";
 import { CtrlButtonData } from "./type/CtrlButton.d";
+import { ScoreData } from "./type/Score.d";
 import { cardDefs } from "./def/card";
 import { gridDefs } from "./def/grid";
 import { handDefs } from "./def/hand";
@@ -117,6 +118,7 @@ export default class App extends Vue {
     selectableCol: [],
     selectedCol: [],
     exclusiveSelect: true,
+    overlay: [[{ type: "text", data: "a", cssClass: "largeCenter" }]],
     active: false,
   };
 
@@ -136,6 +138,12 @@ export default class App extends Vue {
       active: true,
       display: false,
     },
+  };
+
+  public scoreData: ScoreData = {
+    centerScore: [],
+    oppoScore: [],
+    myScore: [],
   };
 
   public gamedata: Gamedata = {
@@ -207,10 +215,16 @@ export default class App extends Vue {
       this.request,
       this.gridData,
       this.handData,
+      this.scoreData,
       this.ctrlButtonData,
     );
     this.state.refresh();
-    this.sub = new Sub(this.playerID, this.gridData, this.handData);
+    this.sub = new Sub(
+      this.playerID,
+      this.gridData,
+      this.handData,
+      this.scoreData,
+    );
   }
 
   public cancelState(): void {
@@ -242,6 +256,7 @@ export default class App extends Vue {
 
   private initBgaNotification(): void {
     watch(this.bgaNotifications, (notifs: BgaNotification[]) => {
+      // TODO: make this suspendable
       const notif = notifs.shift();
       if (!notif) {
         return;

@@ -12,6 +12,10 @@ interface Card {
   type_arg: string; // num str
 }
 
+interface Score {
+  [playerId: string]: string[];
+}
+
 interface Gamedata {
   current_player_id: string;
   decision: { decision_type: string };
@@ -30,4 +34,4 @@ interface Gamedata {
   oppo_table: Card[];
 }
 
-export { Card, Gamedata };
+export { Card, Score, Gamedata };

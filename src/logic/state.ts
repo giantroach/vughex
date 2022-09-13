@@ -1,5 +1,6 @@
-import { GridData } from "../type/Grid.d";
+import { GridData, Overlay } from "../type/Grid.d";
 import { HandData } from "../type/Hand.d";
+import { ScoreData } from "../type/Score.d";
 import { CtrlButtonData } from "../type/CtrlButton.d";
 import { watch } from "vue";
 import { cardUtil } from "../def/card";
@@ -19,6 +20,8 @@ type CurrentState =
   | "playerTurn:beforeTargetSelect2"
   | "playerTurn:afterTargetSelect"
   | "playerTurn:submit"
+  | "endRound"
+  | "endRound:afterAnim"
   | "otherPlayerTurn";
 
 export class State {
@@ -27,13 +30,17 @@ export class State {
     private request: any,
     private gridData: GridData,
     private handData: HandData,
+    private scoreData: ScoreData,
     private ctrlButtonData: CtrlButtonData,
   ) {
     this.throttledRefresh = throttle(this.refresh, 100, this);
-    watch([this.gridData, this.handData, this.ctrlButtonData], () => {
-      // FIXME: there are too many of refresh calls
-      this.throttledRefresh();
-    });
+    watch(
+      [this.gridData, this.handData, this.ctrlButtonData, this.scoreData],
+      () => {
+        // FIXME: there are too many of refresh calls
+        this.throttledRefresh();
+      },
+    );
   }
 
   public current: CurrentState = "waitingForOtherPlayer";
@@ -251,6 +258,25 @@ export class State {
         });
         break;
       }
+
+      case "endRound": {
+        // FIXME:
+        if (
+          !this.scoreData.myScore.length ||
+          !this.scoreData.oppoScore.length
+        ) {
+          return;
+        }
+        this.setScore();
+        this.setState("endRound:afterAnim");
+        break;
+      }
+
+      case "endRound:afterAnim": {
+        // FIXME: here we wait for confirm button;
+        console.log("FIXME:");
+        break;
+      }
     }
 
     // console.log("debug", this.current, this.gridData, this.handData);
@@ -438,6 +464,56 @@ export class State {
       return y !== -1;
     });
     return [x !== undefined ? x : -1, y !== undefined ? y : -1];
+  }
+
+  private setScore() {
+    const overlay: Overlay[][] = [];
+    this.scoreData.oppoScore.forEach((score, idx) => {
+      const cs = this.getCoodinateFromIdx(idx, "oppo");
+      if (!overlay[cs[0]]) {
+        overlay[cs[0]] = [];
+      }
+      overlay[cs[0]][cs[1]] = {
+        type: "text",
+        data: score,
+        cssClass: "largeCenter",
+      };
+    });
+    this.scoreData.myScore.forEach((score, idx) => {
+      const cs = this.getCoodinateFromIdx(idx, "me");
+      if (!overlay[cs[0]]) {
+        overlay[cs[0]] = [];
+      }
+      overlay[cs[0]][cs[1]] = {
+        type: "text",
+        data: score,
+        cssClass: "largeCenter",
+      };
+    });
+    this.assign(this.gridData, "overlay", overlay);
+  }
+
+  // NOTE: this idx is 0 - 5
+  private getCoodinateFromIdx(
+    idx: number,
+    player: "me" | "oppo" | "center",
+  ): [number, number] {
+    const x = idx % 3;
+    const y = Math.floor(idx / 3);
+
+    if (player === "oppo") {
+      // 3 - 4 - 5
+      // 0 - 1 - 2
+      return [x, 1 - y];
+    }
+
+    if (player === "center") {
+      return [x, 2];
+    }
+
+    // 0 - 1 - 2
+    // 3 - 4 - 5
+    return [x, y + 3];
   }
 
   private getSelectedGridID(gridIdx: number): number {

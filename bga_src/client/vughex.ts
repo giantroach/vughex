@@ -96,14 +96,18 @@ define([
       console.log("Entering state: " + stateName);
 
       switch (stateName) {
-        case 'playerTurn':
+        case "playerTurn":
           if (this.isCurrentPlayerActive()) {
             // FIXME: do we need this delay yet?
             setTimeout(() => {
-              vue.state.current = "playerTurn:init";
-              vue.state.refresh();
+              vue.state.setState("playerTurn:init");
             }, 1000); // wait for other following events
           }
+          break;
+
+        case "endRound":
+          // NOTE: this needs some time to let user to check
+          vue.state.setState("endRound");
           break;
 
         case "dummmy":
@@ -118,7 +122,7 @@ define([
       console.log("Leaving state: " + stateName);
 
       switch (stateName) {
-        case 'playerTurn':
+        case "playerTurn":
           vue.state.current = "waitingForOtherPlayer";
           vue.state.refresh();
           break;
@@ -239,7 +243,7 @@ define([
       // this.notifqueue.setSynchronous( 'cardPlayed', 3000 );
       //
 
-      const notifications = ["getNum", "playCard"];
+      const notifications = ["getNum", "playCard", "endRound"];
       notifications.forEach((n) => {
         dojo.subscribe(n, this, (data: any) => {
           vue.bgaNotifications.push({
