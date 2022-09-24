@@ -244,8 +244,8 @@ export default class GameCard extends Vue {
       return "0 0";
     }
     const colNum = Number(sm[1]);
-    const y = Math.floor((idx - 1) / colNum);
-    const x = (idx - 1) % colNum;
+    const y = Math.floor(idx / colNum);
+    const x = idx % colNum;
     return `-${x * Number(wm[1])}${wm[2]} -${y * Number(hm[1])}${hm[2]}`;
   }
 

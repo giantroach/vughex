@@ -28,17 +28,13 @@ export class Sub {
           const row = Math.floor(gridID / 3) + 3;
           const col = gridID % 3;
           if (this.gridData.cardIDs) {
-            this.gridData.cardIDs[col][row] = `mainCard${
-              arg.card.type_arg
-            }`;
+            this.gridData.cardIDs[col][row] = `mainCard${arg.card.type_arg}`;
           }
         } else {
           const row = 1 - Math.floor(gridID / 3);
           const col = gridID % 3;
           if (this.gridData.cardIDs) {
-            this.gridData.cardIDs[col][row] = `mainCard${
-              arg.card.type_arg
-            }`;
+            this.gridData.cardIDs[col][row] = `mainCard${arg.card.type_arg}`;
           }
         }
         break;

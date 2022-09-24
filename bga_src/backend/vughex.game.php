@@ -94,9 +94,9 @@ class Vughex extends Table
         $cards = [];
 
         $players = self::getCollectionFromDb("SELECT player_id id FROM player");
-        $numOfCards = 13;
+        $numOfCards = 12;
 
-        for ($cardNo = 1; $cardNo <= $numOfCards; $cardNo++) {
+        for ($cardNo = 0; $cardNo <= $numOfCards; $cardNo++) {
             $cards[] = [
                 'type' => 'standard',
                 'type_arg' => $cardNo,
@@ -105,12 +105,12 @@ class Vughex extends Table
         }
         $cards[] = [
             'type' => 'creep',
-            'type_arg' => 14,
+            'type_arg' => 13,
             'nbr' => 1
         ];
         $cards[] = [
             'type' => 'creep',
-            'type_arg' => 15,
+            'type_arg' => 14,
             'nbr' => 1
         ];
 
@@ -162,12 +162,12 @@ class Vughex extends Table
         $oppo_id = self::getUniqueValueFromDB($sql);
         $result['oppo_table'] = [];
         foreach (array_values($this->cards->getCardsInLocation('table' . $oppo_id)) as $card) {
-            $c = $this->card_types[intval($card['type_arg']) - 1];
+            $c = $this->card_types[intval($card['type_arg'])];
             if ($c->stealth) {
                 $result['oppo_table'][] = [
                     'id' => "0",
                     'type' => "stealth",
-                    'type_arg' => "18",
+                    'type_arg' => "17",
                     'location' => $card['location'],
                     'location_arg' => $card['location_arg'],
                 ];
@@ -218,7 +218,6 @@ class Vughex extends Table
 
     function playCard($cardID, $gridID)
     {
-        self::dump('$cardID', $cardID);
         $cardInfo = $this->cards->getCard($cardID);
         $actorID = self::getActivePlayerId();
 
@@ -272,7 +271,7 @@ class Vughex extends Table
 
         $sql = "SELECT player_id id FROM player WHERE player_id<>'" . $actorID . "'";
         $oppo_id = self::getUniqueValueFromDB($sql);
-        $c = $this->card_types[intval($cardInfo['type_arg']) - 1];
+        $c = $this->card_types[intval($cardInfo['type_arg'])];
         if ($c->stealth) {
             self::notifyPlayer($oppo_id, 'playCard', clienttranslate('${player_name} played a stealth card.'), [
                 'player_id' => $actorID,
@@ -280,7 +279,7 @@ class Vughex extends Table
                 'card' => [
                     'id' => "0",
                     'type' => "stealth",
-                    'type_arg' => "18",
+                    'type_arg' => "17",
                     'location' => $cardInfo['location'],
                     'location_arg' => $cardInfo['location_arg'],
                 ],
@@ -363,10 +362,10 @@ class Vughex extends Table
         $creepSun = null;
         $creepNgt = null;
         foreach ($allCards as $val) {
-            if ($val['type_arg'] == 14) {
+            if ($val['type_arg'] == 13) {
                 $creepSun = $val;
             }
-            if ($val['type_arg'] == 15) {
+            if ($val['type_arg'] == 14) {
                 $creepNgt = $val;
             }
         }
