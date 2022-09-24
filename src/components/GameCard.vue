@@ -202,7 +202,7 @@ export default class GameCard extends Vue {
     const rect = elm.getBoundingClientRect();
 
     // find center coordinate
-    const centerY = rect.top + window.scrollY + rect.height / 2;
+    const centerY = rect.top + rect.height / 2;
     let centerX = 0;
     if (this.detailPos === "right") {
       // *2 because it is center
@@ -244,8 +244,8 @@ export default class GameCard extends Vue {
       return "0 0";
     }
     const colNum = Number(sm[1]);
-    const y = Math.floor(idx / colNum);
-    const x = idx % colNum;
+    const y = Math.floor((idx - 1) / colNum);
+    const x = (idx - 1) % colNum;
     return `-${x * Number(wm[1])}${wm[2]} -${y * Number(hm[1])}${hm[2]}`;
   }
 
@@ -295,7 +295,7 @@ export default class GameCard extends Vue {
 .card-modal {
   /* opacity: 0; */
   transition: opacity 0.4s;
-  position: absolute;
+  position: fixed;
   z-index: 1000;
 }
 /* .card-modal:hover { */

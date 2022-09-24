@@ -29,7 +29,7 @@ export class Sub {
           const col = gridID % 3;
           if (this.gridData.cardIDs) {
             this.gridData.cardIDs[col][row] = `mainCard${
-              Number(arg.card.type_arg) - 1
+              arg.card.type_arg
             }`;
           }
         } else {
@@ -37,7 +37,7 @@ export class Sub {
           const col = gridID % 3;
           if (this.gridData.cardIDs) {
             this.gridData.cardIDs[col][row] = `mainCard${
-              Number(arg.card.type_arg) - 1
+              arg.card.type_arg
             }`;
           }
         }

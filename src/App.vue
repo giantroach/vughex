@@ -181,7 +181,7 @@ export default class App extends Vue {
     this.gamedata.player_cards.forEach((c) => {
       this.handData.cardIDs?.push({
         id: c.id,
-        cid: `mainCard${Number(c.type_arg) - 1}`,
+        cid: `mainCard${c.type_arg}`,
       });
       this.handData.selectable?.push(true);
     });
@@ -199,7 +199,7 @@ export default class App extends Vue {
       if (!this.gridData.cardIDs) {
         throw "invalid state";
       }
-      this.gridData.cardIDs[col][row] = `mainCard${Number(c.type_arg) - 1}`;
+      this.gridData.cardIDs[col][row] = `mainCard${c.type_arg}`;
     });
     this.gamedata.oppo_table.forEach((c) => {
       const gridID = Number(c.location_arg);
@@ -208,7 +208,7 @@ export default class App extends Vue {
       if (!this.gridData.cardIDs) {
         throw "invalid state";
       }
-      this.gridData.cardIDs[col][row] = `mainCard${Number(c.type_arg) - 1}`;
+      this.gridData.cardIDs[col][row] = `mainCard${c.type_arg}`;
     });
 
     this.state = new State(
