@@ -23,6 +23,7 @@ import { BgaRequest } from "./type/bga-interface.d";
 declare const define: any;
 declare const ebg: any;
 declare const $: any;
+declare const _: any;
 declare const dojo: Dojo;
 declare const g_gamethemeurl: string;
 
@@ -96,18 +97,20 @@ define([
       console.log("Entering state: " + stateName);
 
       switch (stateName) {
+        case "roundSetup":
+          if (this.isCurrentPlayerActive()) {
+            vue.bgaStates.push("roundSetup");
+          }
+          break;
+
         case "playerTurn":
           if (this.isCurrentPlayerActive()) {
-            // FIXME: do we need this delay yet?
-            setTimeout(() => {
-              vue.state.setState("playerTurn:init");
-            }, 1000); // wait for other following events
+            vue.bgaStates.push("playerTurn:init");
           }
           break;
 
         case "endRound":
-          // NOTE: this needs some time to let user to check
-          vue.state.setState("endRound");
+          vue.bgaStates.push("endRound");
           break;
 
         case "dummmy":
@@ -123,8 +126,7 @@ define([
 
       switch (stateName) {
         case "playerTurn":
-          vue.state.current = "waitingForOtherPlayer";
-          vue.state.refresh();
+          vue.bgaStates.push("waitingForOtherPlayer");
           break;
 
         case "dummmy":

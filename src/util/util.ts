@@ -11,4 +11,17 @@ const throttle = (func: any, msec: number, context: any): any => {
   };
 };
 
-export { throttle };
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const objToArray = (obj: any): Array<any> => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const result: Array<any> = [];
+  Object.keys(obj).forEach((k) => {
+    const idx = Number(k);
+    if (!isNaN(idx)) {
+      result[idx] = obj[k];
+    }
+  });
+  return result;
+};
+
+export { throttle, objToArray };

@@ -337,20 +337,8 @@ class Vughex extends Table
 
     function stRoundSetup()
     {
-        $this->activeNextPlayer();
-
-        // $this->cards->moveAllCardsInLocation(
-        //     'ondiscard',
-        //     'deck'
-        // );
-        // $this->cards->moveAllCardsInLocation(
-        //     'ontable',
-        //     'deck'
-        // );
-        // $this->cards->moveAllCardsInLocation(
-        //     'hand',
-        //     'deck'
-        // );
+        // FIXME: this is needed for new round (not the initial)
+        $this->cards->moveAllCardsInLocation(null, 'deck');
 
         $players = self::getCollectionFromDb("SELECT player_id id, player_no FROM player");
         // deal appropriate creep
@@ -410,26 +398,105 @@ class Vughex extends Table
             ]);
         }
 
-        // $this->gamestate->nextState('playerTurn');
+        $actorID = self::getActivePlayerId();
+        if (!$actorID) {
+            $this->activeNextPlayer();
+        } else {
+            $this->gamestate->nextState('playerTurn');
+        }
     }
 
     function stNextPlayer()
     {
-        // $lastPlayerID = self::getActivePlayerId();
+        $allData = self::getAllDatas();
 
-        // $allData = self::getAllDatas();
+        foreach ($allData['players'] as $playerID => $player) {
+            // if any player has a card, go next player
+            if ($this->cards->countCardInLocation('hand', $playerID) > 0) {
+                $playerID = self::activeNextPlayer();
 
-        // foreach ($allData['players'] as $playerID => $player) {
-        //     if ($this->cards->countCardInLocation('hand', $lastPlayerID) <= 0) {
-        //         $this->gamestate->nextState('endRound');
-        //         return;
-        //     }
-        // }
+                self::giveExtraTime($playerID);
+                $this->gamestate->nextState('playerTurn');
 
-        $playerID = self::activeNextPlayer();
+                return;
+            }
+        }
 
-        self::giveExtraTime($playerID);
-        $this->gamestate->nextState('playerTurn');
+        $this->gamestate->nextState('endRound');
+    }
+
+    function stEndRound()
+    {
+        // FIXME:
+        $actorID = self::getActivePlayerId();
+        self::dump('$actorID', $actorID);
+
+        $allData = self::getAllDatas();
+
+        $result = array();
+        // FIXME:
+        $result['center'] = [2, 3, 6];
+
+        foreach ($allData['players'] as $playerID => $player) {
+            self::dump('$playerID', $playerID);
+
+            // TODO: check if this $playerID really correct
+            $playerCards = array_values(
+                $this->cards->getCardsInLocation('table' . $playerID)
+            );
+
+            $tmpResult = array();
+
+            self::dump('$playerCards', $playerCards);
+            foreach ($playerCards as $c) {
+                $cardInfo = $this->card_types[intval($c['type_arg'])];
+                $posID = $c['location_arg'];
+
+                $powerFixed = $cardInfo->powerFixed;
+                $powerCenter = $cardInfo->powerCenter;
+                self::dump('$cardInfo->name', $cardInfo->name);
+                self::dump('$powerFixed', $powerFixed);
+                self::dump('$powerCenter', $powerCenter);
+
+                // 0 - 1 - 2
+                // 3 - 4 - 5
+                switch ($posID) {
+                    case 0:
+                        $center = $result['center'][0];
+                        $tmpResult[$posID] = $powerFixed + $powerCenter * $center;
+                        break;
+                    case 1:
+                        $center = $result['center'][1];
+                        $tmpResult[$posID] = $powerFixed + $powerCenter * $center;
+                        break;
+                    case 2:
+                        $center = $result['center'][2];
+                        $tmpResult[$posID] = $powerFixed + $powerCenter * $center;
+                        break;
+                    case 3:
+                        $center = $result['center'][0];
+                        $tmpResult[$posID] = $powerFixed + $powerCenter * $center;
+                        break;
+                    case 4:
+                        $center = $result['center'][1];
+                        $tmpResult[$posID] = $powerFixed + $powerCenter * $center;
+                        break;
+                    case 5:
+                        $center = $result['center'][2];
+                        $tmpResult[$posID] = $powerFixed + $powerCenter * $center;
+                        break;
+                }
+
+            }
+            $result[$playerID] = $tmpResult;
+            self::dump('$tmpResult', $tmpResult);
+        }
+
+        self::notifyAllPlayers('endRound', clienttranslate('Round Ended.'), [
+            'score' => $result,
+        ]);
+
+        $this->gamestate->nextState('roundSetup');
     }
 
 

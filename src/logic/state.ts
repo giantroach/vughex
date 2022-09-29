@@ -10,7 +10,9 @@ import { throttle } from "../util/util";
 
 type CurrentState =
   | "init"
+  | "roundSetup"
   | "waitingForOtherPlayer"
+  | "playerTurn"
   | "playerTurn:init"
   | "playerTurn:beforeCardSelect"
   | "playerTurn:afterCardSelect"
@@ -24,7 +26,7 @@ type CurrentState =
   | "endRound:afterAnim"
   | "otherPlayerTurn";
 
-export class State {
+class State {
   constructor(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private request: any,
@@ -59,6 +61,7 @@ export class State {
         this.assign(this.gridData, "ghosts", []);
         break;
 
+      case "playerTurn":
       case "playerTurn:init":
         this.assign(this.handData, "active", true);
         this.assign(this.handData, "selected", []);
@@ -261,6 +264,7 @@ export class State {
 
       case "endRound": {
         // FIXME:
+        console.log("this.scoreData", this.scoreData);
         if (
           !this.scoreData.myScore.length ||
           !this.scoreData.oppoScore.length
@@ -273,8 +277,7 @@ export class State {
       }
 
       case "endRound:afterAnim": {
-        // FIXME: here we wait for confirm button;
-        console.log("FIXME:");
+        console.log("FIXME: wait for timeout (let player to check)");
         break;
       }
     }
@@ -490,6 +493,17 @@ export class State {
         cssClass: "largeCenter",
       };
     });
+    this.scoreData.centerScore.forEach((score, idx) => {
+      const cs = this.getCoodinateFromIdx(idx, "center");
+      if (!overlay[cs[0]]) {
+        overlay[cs[0]] = [];
+      }
+      overlay[cs[0]][cs[1]] = {
+        type: "text",
+        data: score,
+        cssClass: "largeCenter",
+      };
+    });
     this.assign(this.gridData, "overlay", overlay);
   }
 
@@ -538,3 +552,5 @@ export class State {
     }
   }
 }
+
+export { CurrentState, State };

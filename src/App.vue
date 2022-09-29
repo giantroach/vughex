@@ -77,7 +77,7 @@ import { cardDefs } from "./def/card";
 import { gridDefs } from "./def/grid";
 import { handDefs } from "./def/hand";
 import { ctrlButtonDefs } from "./def/ctrlButton";
-import { State } from "./logic/state";
+import { State, CurrentState } from "./logic/state";
 import { Sub } from "./logic/sub";
 import GameCard from "./components/GameCard.vue";
 import Hand from "./components/Hand.vue";
@@ -108,6 +108,9 @@ export default class App extends Vue {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public bgaRequestPromise: Promise<any> = Promise.resolve();
   public bgaNotifications: BgaNotification[] = [];
+  public bgaStates: CurrentState[] = [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public bgaStateQueue: Promise<any> = Promise.resolve();
   public num = 0;
   public urlBase!: Ref<string>;
   public gridData: GridData = {
@@ -162,12 +165,13 @@ export default class App extends Vue {
     tablespeed: "",
   };
 
-  public playerID = "";
+  public playerID = -1;
   public state: null | State = null;
   public sub: null | Sub = null;
 
   mounted() {
     this.initBgaNotification();
+    this.initBgaState();
     const unwatch = watch(this.gamedata, () => {
       this.init();
       unwatch();
@@ -263,6 +267,41 @@ export default class App extends Vue {
       }
       console.log("notif", notif);
       this.sub?.handle(notif);
+    });
+  }
+
+  private initBgaState(): void {
+    watch(this.bgaStates, (states: CurrentState[]) => {
+      const state = states.shift();
+      if (!state) {
+        return;
+      }
+      this.bgaStateQueue = this.bgaStateQueue.then(() => {
+        return new Promise<void>((resolve) => {
+          switch (state) {
+            case "roundSetup":
+              this.state?.setState("roundSetup");
+              resolve();
+              break;
+            case "playerTurn:init":
+              this.state?.setState("playerTurn");
+              resolve();
+              break;
+            case "endRound":
+              this.state?.setState("endRound");
+              // FIXME: this should be configurable
+              setTimeout(() => {
+                resolve();
+              }, 10000);
+              break;
+            case "waitingForOtherPlayer": {
+              this.state?.setState("waitingForOtherPlayer");
+              resolve();
+              break;
+            }
+          }
+        });
+      });
     });
   }
 
