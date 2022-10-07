@@ -325,6 +325,9 @@ export default class App extends Vue {
 #common_table > h3 {
   text-align: left;
 }
+#ctrl_buttons {
+  height: 30px;
+}
 #ctrl_buttons :not(:last-child) {
   margin-right: 5px;
 }
