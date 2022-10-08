@@ -22,6 +22,7 @@ type CurrentState =
   | "playerTurn:beforeTargetSelect2"
   | "playerTurn:afterTargetSelect"
   | "playerTurn:submit"
+  | "playerTurn:afterSubmit"
   | "endRound"
   | "endRound:afterAnim"
   | "otherPlayerTurn";
@@ -259,6 +260,11 @@ class State {
           card: c.id,
           gridID: gridID,
         });
+        this.setState("playerTurn:afterSubmit");
+        break;
+      }
+
+      case "playerTurn:afterSubmit": {
         break;
       }
 
