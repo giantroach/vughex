@@ -121,7 +121,7 @@ export default class App extends Vue {
     selectableCol: [],
     selectedCol: [],
     exclusiveSelect: true,
-    overlay: [[{ type: "text", data: "a", cssClass: "largeCenter" }]],
+    overlay: [],
     active: false,
   };
 

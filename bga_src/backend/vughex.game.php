@@ -70,7 +70,7 @@ class Vughex extends Table
         // Create players
         // Note: if you added some extra field on "player" table in the database (dbmodel.sql), you can initialize it there.
         $sql = "INSERT INTO player (player_id, player_color, player_canal, player_name, player_avatar) VALUES ";
-        $values = array();
+        $values = [];
         foreach ($players as $player_id => $player) {
             $color = array_shift($default_colors);
             $values[] = "('" . $player_id . "', '$color', '" . $player['player_canal'] . "', '" . addslashes($player['player_name']) . "','" . addslashes($player['player_avatar']) . "')";
@@ -133,7 +133,7 @@ class Vughex extends Table
     */
     protected function getAllDatas()
     {
-        $result = array();
+        $result = [];
 
         // !! We must only return informations visible by this player !!
         $current_player_id = self::getCurrentPlayerId();
@@ -345,6 +345,8 @@ class Vughex extends Table
         $allCards = array_values(
             $this->cards->getCardsInLocation("deck")
         );
+        self::dump('stRoundSetup:$allCards', $allCards);
+
         // FIXME: should be shortcut like:
         // $creeps = $this->cards->getCardsOfType('creep', 14);
         $creepSun = null;
@@ -427,25 +429,24 @@ class Vughex extends Table
 
     function stEndRound()
     {
-        // FIXME:
-        $actorID = self::getActivePlayerId();
-        self::dump('$actorID', $actorID);
-
         $allData = self::getAllDatas();
 
-        $result = array();
-        // FIXME:
-        $result['center'] = [2, 3, 6];
+        $result = [
+            'score' => [],
+            'table' => [],
+        ];
+
+        // FIXME: swap this based on day and night
+        $result['score']['center'] = [2, 3, 6];
 
         foreach ($allData['players'] as $playerID => $player) {
             self::dump('$playerID', $playerID);
 
-            // TODO: check if this $playerID really correct
             $playerCards = array_values(
                 $this->cards->getCardsInLocation('table' . $playerID)
             );
 
-            $tmpResult = array();
+            $tmpResult = [];
 
             self::dump('$playerCards', $playerCards);
             foreach ($playerCards as $c) {
@@ -462,40 +463,40 @@ class Vughex extends Table
                 // 3 - 4 - 5
                 switch ($posID) {
                     case 0:
-                        $center = $result['center'][0];
+                        $center = $result['score']['center'][0];
                         $tmpResult[$posID] = $powerFixed + $powerCenter * $center;
                         break;
                     case 1:
-                        $center = $result['center'][1];
+                        $center = $result['score']['center'][1];
                         $tmpResult[$posID] = $powerFixed + $powerCenter * $center;
                         break;
                     case 2:
-                        $center = $result['center'][2];
+                        $center = $result['score']['center'][2];
                         $tmpResult[$posID] = $powerFixed + $powerCenter * $center;
                         break;
                     case 3:
-                        $center = $result['center'][0];
+                        $center = $result['score']['center'][0];
                         $tmpResult[$posID] = $powerFixed + $powerCenter * $center;
                         break;
                     case 4:
-                        $center = $result['center'][1];
+                        $center = $result['score']['center'][1];
                         $tmpResult[$posID] = $powerFixed + $powerCenter * $center;
                         break;
                     case 5:
-                        $center = $result['center'][2];
+                        $center = $result['score']['center'][2];
                         $tmpResult[$posID] = $powerFixed + $powerCenter * $center;
                         break;
                 }
 
             }
-            $result[$playerID] = $tmpResult;
+            $result['score'][$playerID] = $tmpResult;
+            $result['table'][$playerID] = array_values(
+                $this->cards->getCardsInLocation('table' . $playerID)
+            );
             self::dump('$tmpResult', $tmpResult);
         }
 
-        self::notifyAllPlayers('endRound', clienttranslate('Round Ended.'), [
-            'score' => $result,
-        ]);
-
+        self::notifyAllPlayers('endRound', clienttranslate('Round Ended.'), $result);
         $this->gamestate->nextState('roundSetup');
     }
 

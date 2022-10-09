@@ -22,6 +22,14 @@ interface BgaPlayCardNotif {
 
 interface BgaEndRoundNotif {
   score: Score;
+  table: {
+    [playerId: string]: Card[];
+  };
 }
 
-export { BgaRequest, BgaNotification, BgaPlayCardNotif, BgaEndRoundNotif };
+export {
+  BgaRequest,
+  BgaNotification,
+  BgaPlayCardNotif,
+  BgaEndRoundNotif,
+};

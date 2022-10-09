@@ -11,7 +11,7 @@ import { ScoreData } from "../type/Score.d";
 
 export class Sub {
   constructor(
-    private playerID: number,
+    public playerID: number, // public for testing purpose
     private gridData: GridData,
     private handData: HandData,
     private scoreData: ScoreData,
@@ -44,6 +44,7 @@ export class Sub {
       case "endRound": {
         const arg = notif.args as BgaEndRoundNotif;
         const score = arg.score;
+        const table = arg.table;
         console.log("endRound", arg, this.playerID);
         for (const pID in score) {
           if (pID === "center") {
@@ -52,6 +53,31 @@ export class Sub {
             this.scoreData.myScore = objToArray(score[pID]);
           } else {
             this.scoreData.oppoScore = objToArray(score[pID]);
+          }
+        }
+
+        // update table (some might have stealth)
+        for (const pID in table) {
+          if (pID === String(this.playerID)) {
+            table[pID].forEach((card) => {
+              const gridID = Number(card.location_arg);
+              console.log("mine", gridID, card.type_arg);
+              const row = Math.floor(gridID / 3) + 3;
+              const col = gridID % 3;
+              if (this.gridData.cardIDs) {
+                this.gridData.cardIDs[col][row] = `mainCard${card.type_arg}`;
+              }
+            });
+          } else {
+            table[pID].forEach((card) => {
+              const gridID = Number(card.location_arg);
+              console.log("oppo", gridID, card.type_arg);
+              const row = 1 - Math.floor(gridID / 3);
+              const col = gridID % 3;
+              if (this.gridData.cardIDs) {
+                this.gridData.cardIDs[col][row] = `mainCard${card.type_arg}`;
+              }
+            });
           }
         }
         break;

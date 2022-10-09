@@ -2,6 +2,7 @@
   <div class="container">
     <template v-if="!prioritizeMini || !miniDef">
       <div
+        :id="'card-' + id"
         class="card"
         v-bind:style="{
           width: size.width,
@@ -29,6 +30,7 @@
 
     <template v-if="miniDef && prioritizeMini">
       <div
+        :id="'card-mini-' + id"
         class="card card-mini"
         :class="{
           ghost: ghost,
@@ -93,6 +95,7 @@
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
 import { Ref } from "vue";
+import { watch } from "vue";
 import Modal from "./Modal.vue";
 import { SizeDef } from "../type/CardDef.d";
 
@@ -160,10 +163,22 @@ export default class GameCard extends Vue {
   public lastTimeHideDetails = 0;
 
   public created(): void {
+    this.updateDef();
+    watch(this.getID, (id: string) => {
+      this.updateDef();
+    });
+  }
+
+  public getID(): string {
+    return this.id;
+  }
+
+  public updateDef() {
     const ids = /([^\d]+)(\d+)/.exec(this.id);
     if (!ids) {
       return;
     }
+
     const cat = ids[1];
     const idx = Number(ids[2]);
     const def = this.cardDef[cat];
