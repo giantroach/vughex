@@ -164,7 +164,7 @@ export default class GameCard extends Vue {
 
   public created(): void {
     this.updateDef();
-    watch(this.getID, (id: string) => {
+    watch(this.getID, () => {
       this.updateDef();
     });
   }

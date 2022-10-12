@@ -191,11 +191,20 @@ export default class App extends Vue {
     });
 
     // init grid data
-    this.gridData.cardIDs = [
-      [undefined, undefined, "centerCard0"],
-      [undefined, undefined, "centerCard1"],
-      [undefined, undefined, "centerCard2"],
-    ];
+    // FIXME: this should apply who controls
+    if (this.gamedata.day_or_night === "night") {
+      this.gridData.cardIDs = [
+        [undefined, undefined, "centerCard3"],
+        [undefined, undefined, "centerCard4"],
+        [undefined, undefined, "centerCard5"],
+      ];
+    } else {
+      this.gridData.cardIDs = [
+        [undefined, undefined, "centerCard0"],
+        [undefined, undefined, "centerCard1"],
+        [undefined, undefined, "centerCard2"],
+      ];
+    }
     this.gamedata.player_table.forEach((c) => {
       const gridID = Number(c.location_arg);
       const row = Math.floor(gridID / 3) + 3;

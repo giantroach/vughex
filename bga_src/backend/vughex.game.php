@@ -117,6 +117,15 @@ class Vughex extends Table
         $this->cards->createCards($cards, 'deck');
         $this->cards->shuffle('deck');
 
+        // set day and night
+        $sql = "INSERT INTO round (round_id, round_side) VALUES (1, '')";
+        self::DbQuery($sql);
+
+        // set center data
+        self::DbQuery("INSERT INTO center (center_id, center_location, center_controller) VALUES (1, 'left', 0)");
+        self::DbQuery("INSERT INTO center (center_id, center_location, center_controller) VALUES (2, 'center', 0)");
+        self::DbQuery("INSERT INTO center (center_id, center_location, center_controller) VALUES (3, 'right', 0)");
+
         $this->gamestate->nextState('roundSetup');
 
         /************ End of the game initialization *****/
@@ -175,6 +184,10 @@ class Vughex extends Table
                 $result['oppo_table'][] = $card;
             }
         }
+
+        $sql = "SELECT round_side FROM round";
+        $round_side = self::getUniqueValueFromDB($sql);
+        $result['day_or_night'] = $round_side;
 
         return $result;
     }
@@ -337,7 +350,19 @@ class Vughex extends Table
 
     function stRoundSetup()
     {
-        // FIXME: this is needed for new round (not the initial)
+        // FIXME: flip day and night
+        $sql = "SELECT round_side FROM round";
+        $round_side = self::getUniqueValueFromDB($sql);
+        if ($round_side != 'day') {
+            // either day or '' (initial)
+            self::DbQuery("UPDATE round SET round_side='day'");
+            $round_side = 'day';
+        } else {
+            self::DbQuery("UPDATE round SET round_side='night'");
+            $round_side = 'night';
+        }
+
+        // this is needed for new round (not the initial)
         $this->cards->moveAllCardsInLocation(null, 'deck');
 
         $players = self::getCollectionFromDb("SELECT player_id id, player_no FROM player");
@@ -438,6 +463,11 @@ class Vughex extends Table
 
         // FIXME: swap this based on day and night
         $result['score']['center'] = [2, 3, 6];
+        $sql = "SELECT round_side FROM round";
+        $round_side = self::getUniqueValueFromDB($sql);
+        if ($round_side == 'night') {
+            $result['score']['center'] = [1, 4, 5];
+        }
 
         foreach ($allData['players'] as $playerID => $player) {
             self::dump('$playerID', $playerID);
@@ -495,6 +525,14 @@ class Vughex extends Table
             );
             self::dump('$tmpResult', $tmpResult);
         }
+
+
+        $sql = "SELECT center_location location, center_controller controller FROM center";
+        $result['center'] = self::getCollectionFromDb($sql);
+
+        // day or night
+        $sql = "SELECT round_side FROM round";
+        $result['day_or_night'] = self::getUniqueValueFromDB($sql);
 
         self::notifyAllPlayers('endRound', clienttranslate('Round Ended.'), $result);
         $this->gamestate->nextState('roundSetup');

@@ -45,6 +45,8 @@ export class Sub {
         const arg = notif.args as BgaEndRoundNotif;
         const score = arg.score;
         const table = arg.table;
+        const center = arg.center;
+        const dayOrNight = arg.day_or_night;
         console.log("endRound", arg, this.playerID);
         for (const pID in score) {
           if (pID === "center") {
@@ -80,6 +82,21 @@ export class Sub {
             });
           }
         }
+
+        // update center
+        if (!this.gridData || !this.gridData.cardIDs) {
+          break;
+        }
+        this.gridData.cardIDs[0][2] =
+          "centerCard" +
+          this.getCenterIdx("left", dayOrNight, center.left.controller);
+        this.gridData.cardIDs[1][2] =
+          "centerCard" +
+          this.getCenterIdx("center", dayOrNight, center.center.controller);
+        this.gridData.cardIDs[2][2] =
+          "centerCard" +
+          this.getCenterIdx("right", dayOrNight, center.right.controller);
+
         break;
       }
 
@@ -87,5 +104,34 @@ export class Sub {
         console.log("unhandled notif", notif);
         break;
     }
+  }
+
+  public getCenterIdx(
+    pos: "left" | "center" | "right",
+    dayOrNight: "day" | "night",
+    controller: string,
+  ) {
+    let idx = 0;
+    switch (pos) {
+      case "left":
+        idx = 0;
+        break;
+      case "center":
+        idx = 1;
+        break;
+      case "right":
+        idx = 2;
+        break;
+    }
+    if (dayOrNight === "night") {
+      idx += 3;
+    }
+    if (Number(controller) === 0) {
+      return idx;
+    }
+    if (Number(controller) === Number(this.playerID)) {
+      return idx + 6;
+    }
+    return (idx += 12);
   }
 }

@@ -16,6 +16,12 @@ interface Score {
   [playerId: string]: string[];
 }
 
+interface Center {
+  id: string;
+  location: "left" | "center" | "right";
+  controller: string;
+}
+
 interface Gamedata {
   current_player_id: string;
   decision: { decision_type: string };
@@ -32,6 +38,7 @@ interface Gamedata {
   player_cards: Card[];
   player_table: Card[];
   oppo_table: Card[];
+  day_or_night: 'day' | 'night';
 }
 
 export { Card, Score, Gamedata };

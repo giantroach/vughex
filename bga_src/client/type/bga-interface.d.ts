@@ -1,4 +1,4 @@
-import { Card, Score } from "./gamedata";
+import { Card, Score, Center } from "./gamedata";
 
 type BgaNotifyName = "playCard" | "endRound";
 
@@ -25,10 +25,17 @@ interface BgaEndRoundNotif {
   table: {
     [playerId: string]: Card[];
   };
+  center: {
+    left: Center;
+    center: Center;
+    right: Center;
+  };
+  day_or_night: "day" | "night";
 }
 
 export {
   BgaRequest,
+  BgaConfirm,
   BgaNotification,
   BgaPlayCardNotif,
   BgaEndRoundNotif,

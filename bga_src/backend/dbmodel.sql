@@ -41,4 +41,15 @@ CREATE TABLE IF NOT EXISTS `cards` (
   `card_location_arg` int(11)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
 
+CREATE TABLE IF NOT EXISTS `center` (
+  `center_id` INT(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  `center_location` varchar(10) NOT NULL,
+  `center_controller` int(10)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
+
+CREATE TABLE IF NOT EXISTS `round` (
+  `round_id` INT(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  `round_side` varchar(10) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
+
 -- ALTER TABLE `player` ADD `player_side` VARCHAR(16);
