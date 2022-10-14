@@ -414,6 +414,10 @@ class Vughex extends Table
             $players[$key]['cards'] = $count;
         }
 
+        // return center controller data
+        $sql = "SELECT center_location location, center_controller controller FROM center";
+        $center = self::getCollectionFromDb($sql);
+
         foreach($players as $key => $value) {
             $player_id = $key;
             $player_cards = array_values(
@@ -421,7 +425,9 @@ class Vughex extends Table
 
             self::notifyPlayer($player_id, 'newRound', clienttranslate('FIXME: New turn'), [
                 'player_cards' => $player_cards,
-                'players' => $players
+                'players' => $players,
+                'day_or_night' => $round_side,
+                'center' => $center,
             ]);
         }
 

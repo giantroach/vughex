@@ -98,9 +98,7 @@ define([
 
       switch (stateName) {
         case "roundSetup":
-          if (this.isCurrentPlayerActive()) {
-            vue.bgaStates.push("roundSetup");
-          }
+          vue.bgaStates.push("roundSetup");
           break;
 
         case "playerTurn":
@@ -245,7 +243,7 @@ define([
       // this.notifqueue.setSynchronous( 'cardPlayed', 3000 );
       //
 
-      const notifications = ["getNum", "playCard", "endRound"];
+      const notifications = ["newRound", "getNum", "playCard", "endRound"];
       notifications.forEach((n) => {
         dojo.subscribe(n, this, (data: any) => {
           vue.bgaNotifications.push({

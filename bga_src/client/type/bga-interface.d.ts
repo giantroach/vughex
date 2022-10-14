@@ -1,6 +1,7 @@
 import { Card, Score, Center } from "./gamedata";
+import { Player } from "./framework.d";
 
-type BgaNotifyName = "playCard" | "endRound";
+type BgaNotifyName = "newRound" | "playCard" | "endRound";
 
 interface BgaRequest {
   name: string;
@@ -9,7 +10,20 @@ interface BgaRequest {
 
 interface BgaNotification {
   name: BgaNotifyName;
-  args: BgaPlayCardNotif | BgaEndRoundNotif;
+  args: BgaNewRoundNotif | BgaPlayCardNotif | BgaEndRoundNotif;
+}
+
+interface BgaNewRoundNotif {
+  player_cards: Card[];
+  // players: {
+  //   { [playerId: number]: Player };
+  // };
+  center: {
+    left: Center;
+    center: Center;
+    right: Center;
+  };
+  day_or_night: "day" | "night";
 }
 
 interface BgaPlayCardNotif {
@@ -37,6 +51,7 @@ export {
   BgaRequest,
   BgaConfirm,
   BgaNotification,
+  BgaNewRoundNotif,
   BgaPlayCardNotif,
   BgaEndRoundNotif,
 };

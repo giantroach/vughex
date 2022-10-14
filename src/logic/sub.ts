@@ -1,5 +1,6 @@
 import {
   BgaNotification,
+  BgaNewRoundNotif,
   BgaPlayCardNotif,
   BgaEndRoundNotif,
 } from "bga_src/client/type/bga-interface.d";
@@ -8,6 +9,10 @@ import { objToArray } from "../util/util";
 import { GridData } from "../type/Grid.d";
 import { HandData } from "../type/Hand.d";
 import { ScoreData } from "../type/Score.d";
+
+//
+// Sub handles BGA notifications and apply data accordingly.
+//
 
 export class Sub {
   constructor(
@@ -19,6 +24,44 @@ export class Sub {
 
   public handle(notif: BgaNotification) {
     switch (notif.name) {
+      case "newRound": {
+        const arg = notif.args as BgaNewRoundNotif;
+        const cards = arg.player_cards;
+        const center = arg.center;
+        const dayOrNight = arg.day_or_night;
+
+        // reset score
+        this.scoreData.centerScore = [];
+        this.scoreData.myScore = [];
+        this.scoreData.oppoScore = [];
+        this.gridData.overlay = [];
+
+        // update table
+        if (!this.gridData || !this.gridData.cardIDs) {
+          break;
+        }
+        this.gridData.cardIDs = [[], [], []];
+        this.gridData.cardIDs[0][2] =
+          "centerCard" +
+          this.getCenterIdx("left", dayOrNight, center.left.controller);
+        this.gridData.cardIDs[1][2] =
+          "centerCard" +
+          this.getCenterIdx("center", dayOrNight, center.center.controller);
+        this.gridData.cardIDs[2][2] =
+          "centerCard" +
+          this.getCenterIdx("right", dayOrNight, center.right.controller);
+
+        // update hand
+        cards.forEach((c) => {
+          this.handData.cardIDs?.push({
+            id: c.id,
+            cid: `mainCard${c.type_arg}`,
+          });
+          this.handData.selectable?.push(true);
+        });
+        break;
+      }
+
       case "playCard": {
         const arg = notif.args as BgaPlayCardNotif;
         const gridID = Number(arg.gridID);

@@ -27,6 +27,10 @@ type CurrentState =
   | "endRound:afterAnim"
   | "otherPlayerTurn";
 
+//
+// State handles data changes / local state changes
+//
+
 class State {
   constructor(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -283,7 +287,6 @@ class State {
       }
 
       case "endRound:afterAnim": {
-        console.log("FIXME: wait for timeout (let player to check)");
         break;
       }
     }

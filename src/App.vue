@@ -110,6 +110,8 @@ export default class App extends Vue {
   public bgaNotifications: BgaNotification[] = [];
   public bgaStates: CurrentState[] = [];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public bgaNotifQueue: Promise<any> = Promise.resolve();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public bgaStateQueue: Promise<any> = Promise.resolve();
   public num = 0;
   public urlBase!: Ref<string>;
@@ -163,6 +165,7 @@ export default class App extends Vue {
     player_table: [],
     oppo_table: [],
     tablespeed: "",
+    day_or_night: "day",
   };
 
   public playerID = -1;
@@ -275,7 +278,23 @@ export default class App extends Vue {
         return;
       }
       console.log("notif", notif);
-      this.sub?.handle(notif);
+
+      this.bgaNotifQueue = this.bgaNotifQueue.then(() => {
+        return new Promise<void>((resolve) => {
+          switch (notif.name) {
+            case "endRound":
+              this.sub?.handle(notif);
+              // FIXME: this should be configurable
+              setTimeout(() => {
+                resolve();
+              }, 10000);
+              break;
+            default:
+              this.sub?.handle(notif);
+              resolve();
+          }
+        });
+      });
     });
   }
 
@@ -288,26 +307,13 @@ export default class App extends Vue {
       this.bgaStateQueue = this.bgaStateQueue.then(() => {
         return new Promise<void>((resolve) => {
           switch (state) {
-            case "roundSetup":
-              this.state?.setState("roundSetup");
-              resolve();
-              break;
-            case "playerTurn:init":
-              this.state?.setState("playerTurn");
-              resolve();
-              break;
-            case "endRound":
-              this.state?.setState("endRound");
-              // FIXME: this should be configurable
+            default:
+              this.state?.setState(state);
               setTimeout(() => {
+                // secure the least time gap
                 resolve();
-              }, 10000);
+              }, 100);
               break;
-            case "waitingForOtherPlayer": {
-              this.state?.setState("waitingForOtherPlayer");
-              resolve();
-              break;
-            }
           }
         });
       });
