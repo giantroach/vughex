@@ -475,6 +475,9 @@ class Vughex extends Table
             $result['score']['center'] = [1, 4, 5];
         }
 
+        // lane data (total score for each lane)
+        $lane = [];
+
         foreach ($allData['players'] as $playerID => $player) {
             self::dump('$playerID', $playerID);
 
@@ -529,9 +532,43 @@ class Vughex extends Table
             $result['table'][$playerID] = array_values(
                 $this->cards->getCardsInLocation('table' . $playerID)
             );
+
+            // update center controller
+            if (count($lane) == 0) {
+                $lane[0] = $tmpResult[0] + $tmpResult[3];
+                $lane[1] = $tmpResult[1] + $tmpResult[4];
+                $lane[2] = $tmpResult[2] + $tmpResult[5];
+                $lane['player'] = $playerID;
+
+            } else {
+                foreach($lane as $pos => $score) {
+                    if ($pos === 'player') {
+                        continue;
+                    }
+
+                    $location = 'left';
+                    if ($pos == 1) {
+                        $location = 'center';
+                    }
+                    if ($pos == 2) {
+                        $location = 'right';
+                    }
+
+                    if ($score == ($tmpResult[$pos] + $tmpResult[$pos + 3])) {
+                        continue;
+                    }
+                    if ($score < ($tmpResult[$pos] + $tmpResult[$pos + 3])) {
+                        $sql = "UPDATE center SET center_controller='" . $playerID . "' WHERE center_location='" . $location . "'";
+                        self::DbQuery($sql);
+                    }
+                    if ($score > ($tmpResult[$pos] + $tmpResult[$pos + 3])) {
+                        $sql = "UPDATE center SET center_controller='" . $lane['player'] . "' WHERE center_location='" . $location . "'";
+                        self::DbQuery($sql);
+                    }
+                }
+            }
             self::dump('$tmpResult', $tmpResult);
         }
-
 
         $sql = "SELECT center_location location, center_controller controller FROM center";
         $result['center'] = self::getCollectionFromDb($sql);
