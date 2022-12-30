@@ -53,4 +53,8 @@ interface CardDef {
   };
 }
 
-export { SizeDef, TextLayoutDef, CardDetail, CardDef };
+interface CardMetaDef {
+  text: string;
+}
+
+export { SizeDef, TextLayoutDef, CardDetail, CardDef, CardMetaDef };

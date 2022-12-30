@@ -52,13 +52,14 @@
             v-if="cardIDs && cardIDs[idx] && cardIDs[idx][idy] !== undefined"
           >
             <GameCard
-              :id="cardIDs[idx][idy]"
+              :id="cardIDs[idx][idy].cid"
               :prioritizeMini="true"
               :ghost="ghosts && ghosts[idx] && ghosts[idx][idy]"
               :detailPos="'right'"
               :selectable="
                 isSelectable(0, idx, idy) || isSelectable(1, idx, idy)
               "
+              :meta="cardIDs[idx][idy].meta"
               @selectCard="selectGrid(getSelectableIdx(idx, idy), idx, idy)"
             ></GameCard>
           </template>

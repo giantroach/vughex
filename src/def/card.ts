@@ -1,4 +1,4 @@
-import { CardDef, CardDetail } from "../type/CardDef.d";
+import { CardDef, CardDetail, CardMetaDef } from "../type/CardDef.d";
 
 const cardDefs: { [cardType: string]: CardDef } = {
   mainCard: {
@@ -176,6 +176,15 @@ const cardDefs: { [cardType: string]: CardDef } = {
   },
 };
 
+const cardMetaDefs: { [cardMetaID: string]: CardMetaDef } = {
+  oracle: {
+    text: "Stealth and the [Combat] ability are disabled.",
+  },
+  watcher: {
+    text: "Stealth is disabled.",
+  },
+};
+
 const cardUtil = {
   getCard: (cid: string): CardDetail => {
     const ids = /([^\d]+)(\d+)/.exec(cid);
@@ -201,4 +210,4 @@ const cardUtil = {
   },
 };
 
-export { cardDefs, cardUtil };
+export { cardDefs, cardUtil, cardMetaDefs };

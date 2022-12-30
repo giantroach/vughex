@@ -133,7 +133,7 @@ class State {
         if (!cardIDs[idx.x] === undefined) {
           cardIDs[idx.x] = [];
         }
-        cardIDs[idx.x][idx.y] = c.cid;
+        cardIDs[idx.x][idx.y] = { cid: c.cid };
 
         this.assign(this.gridData, "cardIDs", cardIDs);
         this.assign(this.gridData, "ghosts", ghosts);
@@ -357,7 +357,7 @@ class State {
     let result = false;
     for (let iy = 0; iy < 5; iy += 1) {
       if (iy !== 2) {
-        const cid = this.gridData?.cardIDs?.[x][iy];
+        const cid = this.gridData?.cardIDs?.[x][iy]?.cid;
         if (cid) {
           const cDetail = cardUtil.getCard(cid);
           if (!cDetail.stealth) {
@@ -384,7 +384,7 @@ class State {
     for (let ix = 0; ix < 3; ix += 1) {
       for (let iy = 0; iy < 5; iy += 1) {
         if (iy !== 2) {
-          const cid = this.gridData?.cardIDs?.[ix][iy];
+          const cid = this.gridData?.cardIDs?.[ix][iy]?.cid;
           if (cid) {
             const cDetail = cardUtil.getCard(cid);
             if (cDetail.stealth) {
@@ -407,7 +407,7 @@ class State {
     let result = false;
     for (let iy = 0; iy < 5; iy += 1) {
       if (iy !== 2) {
-        const cid = this.gridData?.cardIDs?.[x][iy];
+        const cid = this.gridData?.cardIDs?.[x][iy]?.cid;
         if (cid) {
           const cDetail = cardUtil.getCard(cid);
           if (cDetail.stealth) {

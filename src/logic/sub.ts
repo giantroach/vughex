@@ -41,21 +41,32 @@ export class Sub {
           break;
         }
         this.gridData.cardIDs = [[], [], []];
-        this.gridData.cardIDs[0][2] =
-          "centerCard" +
-          this.getCenterIdx("left", dayOrNight, center.left.controller);
-        this.gridData.cardIDs[1][2] =
-          "centerCard" +
-          this.getCenterIdx("center", dayOrNight, center.center.controller);
-        this.gridData.cardIDs[2][2] =
-          "centerCard" +
-          this.getCenterIdx("right", dayOrNight, center.right.controller);
+        this.gridData.cardIDs[0][2] = {
+          cid:
+            "centerCard" +
+            this.getCenterIdx("left", dayOrNight, center.left.controller),
+        };
+        this.gridData.cardIDs[1][2] = {
+          cid:
+            "centerCard" +
+            this.getCenterIdx("center", dayOrNight, center.center.controller),
+        };
+        this.gridData.cardIDs[2][2] = {
+          cid:
+            "centerCard" +
+            this.getCenterIdx("right", dayOrNight, center.right.controller),
+        };
 
         // update hand
         cards.forEach((c) => {
           this.handData.cardIDs?.push({
             id: c.id,
             cid: `mainCard${c.type_arg}`,
+            meta: (c.meta || []).map((m) => {
+              return {
+                metaID: m,
+              };
+            }),
           });
           this.handData.selectable?.push(true);
         });
@@ -72,13 +83,17 @@ export class Sub {
           const row = Math.floor(gridID / 3) + 3;
           const col = gridID % 3;
           if (this.gridData.cardIDs) {
-            this.gridData.cardIDs[col][row] = `mainCard${arg.card.type_arg}`;
+            this.gridData.cardIDs[col][row] = {
+              cid: `mainCard${arg.card.type_arg}`,
+            };
           }
         } else {
           const row = 1 - Math.floor(gridID / 3);
           const col = gridID % 3;
           if (this.gridData.cardIDs) {
-            this.gridData.cardIDs[col][row] = `mainCard${arg.card.type_arg}`;
+            this.gridData.cardIDs[col][row] = {
+              cid: `mainCard${arg.card.type_arg}`,
+            };
           }
         }
         break;
@@ -110,7 +125,9 @@ export class Sub {
               const row = Math.floor(gridID / 3) + 3;
               const col = gridID % 3;
               if (this.gridData.cardIDs) {
-                this.gridData.cardIDs[col][row] = `mainCard${card.type_arg}`;
+                this.gridData.cardIDs[col][row] = {
+                  cid: `mainCard${card.type_arg}`,
+                };
               }
             });
           } else {
@@ -120,7 +137,9 @@ export class Sub {
               const row = 1 - Math.floor(gridID / 3);
               const col = gridID % 3;
               if (this.gridData.cardIDs) {
-                this.gridData.cardIDs[col][row] = `mainCard${card.type_arg}`;
+                this.gridData.cardIDs[col][row] = {
+                  cid: `mainCard${card.type_arg}`,
+                };
               }
             });
           }
@@ -130,15 +149,21 @@ export class Sub {
         if (!this.gridData || !this.gridData.cardIDs) {
           break;
         }
-        this.gridData.cardIDs[0][2] =
-          "centerCard" +
-          this.getCenterIdx("left", dayOrNight, center.left.controller);
-        this.gridData.cardIDs[1][2] =
-          "centerCard" +
-          this.getCenterIdx("center", dayOrNight, center.center.controller);
-        this.gridData.cardIDs[2][2] =
-          "centerCard" +
-          this.getCenterIdx("right", dayOrNight, center.right.controller);
+        this.gridData.cardIDs[0][2] = {
+          cid:
+            "centerCard" +
+            this.getCenterIdx("left", dayOrNight, center.left.controller),
+        };
+        this.gridData.cardIDs[1][2] = {
+          cid:
+            "centerCard" +
+            this.getCenterIdx("center", dayOrNight, center.center.controller),
+        };
+        this.gridData.cardIDs[2][2] = {
+          cid:
+            "centerCard" +
+            this.getCenterIdx("right", dayOrNight, center.right.controller),
+        };
 
         break;
       }

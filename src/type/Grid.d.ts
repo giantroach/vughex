@@ -1,3 +1,5 @@
+import { CardID } from "./Card.d";
+
 type OverlayType = "text";
 type OverlayClass = "largeCenter";
 
@@ -8,7 +10,7 @@ interface Overlay {
 }
 
 interface GridData {
-  cardIDs?: Array<Array<string | undefined>>;
+  cardIDs?: Array<Array<CardID | undefined>>;
   selectable?: boolean[][][];
   selected?: boolean[][][];
   selectableCol?: boolean[];

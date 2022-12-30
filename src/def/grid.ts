@@ -55,7 +55,7 @@ const gridUtil = {
     if (gridData.cardIDs) {
       x = gridData.cardIDs.findIndex((col) => {
         y = (col || []).findIndex((row) => {
-          return row === cid;
+          return row?.cid === cid;
         });
         return y !== -1;
       });

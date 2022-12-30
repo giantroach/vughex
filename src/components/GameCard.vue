@@ -46,7 +46,15 @@
         v-on:mouseenter="showDetails"
         v-on:mouseout="mouseOutFromMini"
         v-on:touchstart="showDetails"
-      ></div>
+      >
+        <div
+          class="detail-meta-mini"
+          v-if="meta && meta.length"
+          v-bind:style="{}"
+        >
+          ⚠️
+        </div>
+      </div>
     </template>
   </div>
 
@@ -84,6 +92,24 @@
       </div>
     </div>
 
+    <ul
+      class="detail-meta-modal"
+      v-if="meta && meta.length"
+      v-bind:style="{
+        width: 100,
+        height: size.height,
+        top: modalTop + 'px',
+        left: modalLeft + parseInt(size.width, 10) + 10 + 'px',
+        borderRadius: size.radius,
+      }"
+    >
+      <li v-for="(m, idx) in meta" :key="idx">
+        <div v-if="m.metaID" class="meta-text">
+          {{ cardMetaDef?.[m.metaID]?.text || "" }}
+        </div>
+      </li>
+    </ul>
+
     <Modal
       v-if="detailPos === 'center'"
       @hide-modal="mouseOutFromDetail"
@@ -98,6 +124,7 @@ import { Ref } from "vue";
 import { watch } from "vue";
 import Modal from "./Modal.vue";
 import { SizeDef } from "../type/CardDef.d";
+import { CardMeta } from "../type/Card.d";
 
 export interface Size {
   // xRatio: number;
@@ -117,8 +144,9 @@ export interface Size {
     selected: Boolean, // for card detail modal
     ghost: Boolean,
     detailPos: String,
+    meta: Array,
   },
-  inject: ["urlBase", "cardDef"],
+  inject: ["urlBase", "cardDef", "cardMetaDef"],
   emits: ["selectCard", "showDetail", "hideDetail"],
 })
 export default class GameCard extends Vue {
@@ -145,6 +173,7 @@ export default class GameCard extends Vue {
   public selectable!: boolean;
   public ghost!: boolean;
   public detailPos!: "center" | "right";
+  public meta!: CardMeta[];
 
   public modal = false;
   public modalTop = 0;
@@ -153,6 +182,8 @@ export default class GameCard extends Vue {
   public id!: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public cardDef!: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public cardMetaDef!: any;
   public urlBase!: Ref<string>;
   public bgPos = "0 0";
   public bgPosMini = "0 0";
@@ -307,7 +338,8 @@ export default class GameCard extends Vue {
   box-shadow: 0 5px 5px 5px rgb(0 0 0 / 30%);
 }
 /* those opacity stuff does not work with detailPos: right */
-.card-modal {
+.card-modal,
+.detail-meta-modal {
   /* opacity: 0; */
   transition: opacity 0.4s;
   position: fixed;
@@ -340,5 +372,30 @@ export default class GameCard extends Vue {
 }
 .ghost {
   opacity: 0.67;
+}
+.detail-meta-mini {
+  border-radius: 5px;
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.4);
+  bottom: 0;
+  right: 0;
+  border: 1px solid white;
+  padding: 2px;
+  font-size: x-large;
+}
+ul.detail-meta-modal {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+
+  > li > div {
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    border-radius: 5px;
+    width: 100px;
+    text-align: left;
+    margin-bottom: 5px;
+    padding: 5px;
+  }
 }
 </style>

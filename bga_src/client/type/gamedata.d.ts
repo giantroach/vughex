@@ -4,12 +4,15 @@
 
 import { Player, Gamestate } from "./framework.d";
 
+type CardMeta = "oracle" | "watcher";
+
 interface Card {
   id: string; // num str
   location: string;
   location_arg: string; // num str
   type: string; // num str
   type_arg: string; // num str
+  meta?: CardMeta[];
 }
 
 interface Score {
@@ -41,4 +44,4 @@ interface Gamedata {
   day_or_night: 'day' | 'night';
 }
 
-export { Card, Score, Gamedata };
+export { CardMeta, Card, Score, Gamedata };

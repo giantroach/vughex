@@ -22,6 +22,7 @@
         :selectable="isSelectable(idx)"
         :selected="isSelected(idx)"
         :detailPos="'center'"
+        :meta="c.meta"
         @selectCard="selectHand(idx)"
         @showDetail="showDetail(idx)"
         @hideDetail="hideDetail()"

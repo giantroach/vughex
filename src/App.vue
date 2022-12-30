@@ -73,7 +73,7 @@ import { GridData } from "./type/Grid.d";
 import { HandData } from "./type/Hand.d";
 import { CtrlButtonData } from "./type/CtrlButton.d";
 import { ScoreData } from "./type/Score.d";
-import { cardDefs } from "./def/card";
+import { cardDefs, cardMetaDefs } from "./def/card";
 import { gridDefs } from "./def/grid";
 import { handDefs } from "./def/hand";
 import { ctrlButtonDefs } from "./def/ctrlButton";
@@ -96,6 +96,7 @@ import CtrlButton from "./components/CtrlButton.vue";
       // provided through main.ts so that it can inject itself
       // urlBase: ref(""),
       cardDef: cardDefs,
+      cardMetaDef: cardMetaDefs,
       gridDef: gridDefs,
       handDef: handDefs,
       ctrlButtonDef: ctrlButtonDefs,
@@ -189,6 +190,11 @@ export default class App extends Vue {
       this.handData.cardIDs?.push({
         id: c.id,
         cid: `mainCard${c.type_arg}`,
+        meta: (c.meta || []).map((m) => {
+          return {
+            metaID: m,
+          };
+        }),
       });
       this.handData.selectable?.push(true);
     });
@@ -197,15 +203,15 @@ export default class App extends Vue {
     // FIXME: this should apply who controls
     if (this.gamedata.day_or_night === "night") {
       this.gridData.cardIDs = [
-        [undefined, undefined, "centerCard3"],
-        [undefined, undefined, "centerCard4"],
-        [undefined, undefined, "centerCard5"],
+        [undefined, undefined, { cid: "centerCard3" }],
+        [undefined, undefined, { cid: "centerCard4" }],
+        [undefined, undefined, { cid: "centerCard5" }],
       ];
     } else {
       this.gridData.cardIDs = [
-        [undefined, undefined, "centerCard0"],
-        [undefined, undefined, "centerCard1"],
-        [undefined, undefined, "centerCard2"],
+        [undefined, undefined, { cid: "centerCard0" }],
+        [undefined, undefined, { cid: "centerCard1" }],
+        [undefined, undefined, { cid: "centerCard2" }],
       ];
     }
     this.gamedata.player_table.forEach((c) => {
@@ -215,7 +221,15 @@ export default class App extends Vue {
       if (!this.gridData.cardIDs) {
         throw "invalid state";
       }
-      this.gridData.cardIDs[col][row] = `mainCard${c.type_arg}`;
+      this.gridData.cardIDs[col][row] = {
+        id: c.id,
+        cid: `mainCard${c.type_arg}`,
+        meta: (c.meta || []).map((m) => {
+          return {
+            metaID: m,
+          };
+        }),
+      };
     });
     this.gamedata.oppo_table.forEach((c) => {
       const gridID = Number(c.location_arg);
@@ -224,7 +238,15 @@ export default class App extends Vue {
       if (!this.gridData.cardIDs) {
         throw "invalid state";
       }
-      this.gridData.cardIDs[col][row] = `mainCard${c.type_arg}`;
+      this.gridData.cardIDs[col][row] = {
+        id: c.id,
+        cid: `mainCard${c.type_arg}`,
+        meta: (c.meta || []).map((m) => {
+          return {
+            metaID: m,
+          };
+        }),
+      };
     });
 
     this.state = new State(
@@ -287,7 +309,7 @@ export default class App extends Vue {
               // FIXME: this should be configurable
               setTimeout(() => {
                 resolve();
-              }, 10000);
+              }, 100000);
               break;
             default:
               this.sub?.handle(notif);
