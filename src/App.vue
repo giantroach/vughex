@@ -309,7 +309,7 @@ export default class App extends Vue {
               // FIXME: this should be configurable
               setTimeout(() => {
                 resolve();
-              }, 100000);
+              }, 10000);
               break;
             default:
               this.sub?.handle(notif);

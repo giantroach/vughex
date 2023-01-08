@@ -218,6 +218,10 @@ class Vughex extends Table
       In this space, you can put any utility methods useful for your game logic
     */
 
+    function getPlayerName($playerID)
+    {
+        return self::getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id='" . $playerID . "'");
+    }
 
 
     //////////////////////////////////////////////////////////////////////////////
@@ -555,15 +559,50 @@ class Vughex extends Table
                     }
 
                     if ($score == ($tmpResult[$pos] + $tmpResult[$pos + 3])) {
+                        self::notifyAllPlayers(
+                            "score",
+                            clienttranslate('${location} lane is tied by ${score}.'),
+                            [
+                                "location" => $location,
+                                "score" => $score,
+                            ]
+                        );
                         continue;
                     }
-                    if ($score < ($tmpResult[$pos] + $tmpResult[$pos + 3])) {
+
+                    $score2 = $tmpResult[$pos] + $tmpResult[$pos + 3];
+                    // FIXME: consider titan
+                    if ($score < $score2) {
+                        // FIXME: if owner is the same, increment the score
                         $sql = "UPDATE center SET center_controller='" . $playerID . "' WHERE center_location='" . $location . "'";
                         self::DbQuery($sql);
+                        self::notifyAllPlayers(
+                            "score",
+                            clienttranslate('${player} took the ${location} lane control by ${scoreW} (vs ${scoreL}).'),
+                            [
+                                "location" => $location,
+                                "scoreW" => $score2,
+                                "scoreL" => $score,
+                                "player" => self::getPlayerName($playerID),
+                            ]
+                        );
+
                     }
-                    if ($score > ($tmpResult[$pos] + $tmpResult[$pos + 3])) {
+                    // FIXME: consider titan
+                    if ($score > $score2) {
+                        // FIXME: if owner is the same, increment the score
                         $sql = "UPDATE center SET center_controller='" . $lane['player'] . "' WHERE center_location='" . $location . "'";
                         self::DbQuery($sql);
+                        self::notifyAllPlayers(
+                            "score",
+                            clienttranslate('${player} took the ${location} lane control by ${scoreW} (vs ${scoreL}).'),
+                            [
+                                "location" => $location,
+                                "scoreW" => $score,
+                                "scoreL" => $score2,
+                                "player" => self::getPlayerName($lane['player']),
+                            ]
+                        );
                     }
                 }
             }
