@@ -20,7 +20,6 @@
  *
  */
 
-
 /*
 
 Example:
@@ -34,20 +33,116 @@ $this->card_types = array(
 */
 
 $this->card_types = [
-    (object) ["id" => "0", "name" => "the Oracle", "powerFixed" => 2, "powerCenter" => 1, "stealth" => false],
-    (object) ["id" => "1", "name" => "the Reincarnation", "powerFixed" => 1, "powerCenter" => 1, "stealth" => false],
-    (object) ["id" => "2", "name" => "the Justice", "powerFixed" => 0, "powerCenter" => 2, "stealth" => false],
-    (object) ["id" => "3", "name" => "the Evil", "powerFixed" => 0, "powerCenter" => 3, "stealth" => false],
-    (object) ["id" => "4", "name" => "the Unstable", "powerFixed" => 0, "powerCenter" => 1, "stealth" => false],
-    (object) ["id" => "5", "name" => "the Watcher", "powerFixed" => 3, "powerCenter" => 1, "stealth" => false],
-    (object) ["id" => "6", "name" => "the Crowd", "powerFixed" => 4, "powerCenter" => 1, "stealth" => false],
-    (object) ["id" => "7", "name" => "the Eclipse", "powerFixed" => 0, "powerCenter" => 1, "stealth" => true],
-    (object) ["id" => "8", "name" => "the Maze", "powerFixed" => 4, "powerCenter" => 0, "stealth" => false],
-    (object) ["id" => "9", "name" => "the Plague", "powerFixed" => 3, "powerCenter" => 0, "stealth" => false],
-    (object) ["id" => "10", "name" => "the Titan", "powerFixed" => 7, "powerCenter" => 0, "stealth" => false],
-    (object) ["id" => "11", "name" => "the Agent", "powerFixed" => 2, "powerCenter" => 0, "stealth" => true],
-    (object) ["id" => "12", "name" => "the Shadow", "powerFixed" => 5, "powerCenter" => 0, "stealth" => true],
-    (object) ["id" => "13", "name" => "the Creeps", "powerFixed" => 1, "powerCenter" => 0, "stealth" => true],
-    (object) ["id" => "14", "name" => "the Creeps", "powerFixed" => 1, "powerCenter" => 0, "stealth" => true],
-    (object) ["id" => "17", "name" => "Stealth", "powerFixed" => 0, "powerCenter" => 0, "stealth" => true],
+  (object) [
+    "id" => "0",
+    "name" => "the Oracle",
+    "powerFixed" => 2,
+    "powerCenter" => 1,
+    "stealth" => false,
+  ],
+  (object) [
+    "id" => "1",
+    "name" => "the Reincarnation",
+    "powerFixed" => 1,
+    "powerCenter" => 1,
+    "stealth" => false,
+  ],
+  (object) [
+    "id" => "2",
+    "name" => "the Justice",
+    "powerFixed" => 0,
+    "powerCenter" => 2,
+    "stealth" => false,
+  ],
+  (object) [
+    "id" => "3",
+    "name" => "the Evil",
+    "powerFixed" => 0,
+    "powerCenter" => 3,
+    "stealth" => false,
+  ],
+  (object) [
+    "id" => "4",
+    "name" => "the Unstable",
+    "powerFixed" => 0,
+    "powerCenter" => 1,
+    "stealth" => false,
+  ],
+  (object) [
+    "id" => "5",
+    "name" => "the Watcher",
+    "powerFixed" => 3,
+    "powerCenter" => 1,
+    "stealth" => false,
+  ],
+  (object) [
+    "id" => "6",
+    "name" => "the Crowd",
+    "powerFixed" => 4,
+    "powerCenter" => 1,
+    "stealth" => false,
+  ],
+  (object) [
+    "id" => "7",
+    "name" => "the Eclipse",
+    "powerFixed" => 0,
+    "powerCenter" => 1,
+    "stealth" => true,
+  ],
+  (object) [
+    "id" => "8",
+    "name" => "the Maze",
+    "powerFixed" => 4,
+    "powerCenter" => 0,
+    "stealth" => false,
+  ],
+  (object) [
+    "id" => "9",
+    "name" => "the Plague",
+    "powerFixed" => 3,
+    "powerCenter" => 0,
+    "stealth" => false,
+  ],
+  (object) [
+    "id" => "10",
+    "name" => "the Titan",
+    "powerFixed" => 7,
+    "powerCenter" => 0,
+    "stealth" => false,
+  ],
+  (object) [
+    "id" => "11",
+    "name" => "the Agent",
+    "powerFixed" => 2,
+    "powerCenter" => 0,
+    "stealth" => true,
+  ],
+  (object) [
+    "id" => "12",
+    "name" => "the Shadow",
+    "powerFixed" => 5,
+    "powerCenter" => 0,
+    "stealth" => true,
+  ],
+  (object) [
+    "id" => "13",
+    "name" => "the Creeps",
+    "powerFixed" => 1,
+    "powerCenter" => 0,
+    "stealth" => true,
+  ],
+  (object) [
+    "id" => "14",
+    "name" => "the Creeps",
+    "powerFixed" => 1,
+    "powerCenter" => 0,
+    "stealth" => true,
+  ],
+  (object) [
+    "id" => "17",
+    "name" => "Stealth",
+    "powerFixed" => 0,
+    "powerCenter" => 0,
+    "stealth" => true,
+  ],
 ];

@@ -49,54 +49,52 @@
 
 //    !! It is not a good idea to modify this file when a game is running !!
 
+$machinestates = [
+  // The initial state. Please do not modify.
+  1 => [
+    "name" => "gameSetup",
+    "description" => "",
+    "type" => "manager",
+    "action" => "stGameSetup",
+    "transitions" => ["roundSetup" => 2],
+  ],
 
-$machinestates = array(
+  // Note: ID=2 => your first state
 
-    // The initial state. Please do not modify.
-    1 => array(
-        "name" => "gameSetup",
-        "description" => "",
-        "type" => "manager",
-        "action" => "stGameSetup",
-        "transitions" => ["roundSetup" => 2]
-    ),
+  2 => [
+    "name" => "roundSetup",
+    "type" => "game",
+    "action" => "stRoundSetup",
+    "updateGameProgression" => true,
+    "transitions" => ["playerTurn" => 3],
+  ],
 
-    // Note: ID=2 => your first state
+  3 => [
+    "name" => "playerTurn",
+    "description" => clienttranslate('${actplayer} must play a card'),
+    "descriptionmyturn" => clienttranslate('${you} must play a card'),
+    "type" => "activeplayer",
+    "possibleactions" => ["playCard"],
+    "transitions" => ["nextPlayer" => 4, "zombiePass" => 4],
+  ],
 
-    2 => [
-        "name" => "roundSetup",
-        "type" => "game",
-        "action" => "stRoundSetup",
-        "updateGameProgression" => true,
-        "transitions" => ["playerTurn" => 3]
-    ],
+  4 => [
+    "name" => "nextPlayer",
+    "type" => "game",
+    "action" => "stNextPlayer",
+    "updateGameProgression" => true,
+    "transitions" => ["playerTurn" => 3, "endRound" => 10],
+  ],
 
-    3 => [
-        "name" => "playerTurn",
-        "description" => clienttranslate('${actplayer} must play a card'),
-        "descriptionmyturn" => clienttranslate('${you} must play a card'),
-        "type" => "activeplayer",
-        "possibleactions" => ["playCard"],
-        "transitions" => ["nextPlayer" => 4, "zombiePass" => 4]
-    ],
+  10 => [
+    "name" => "endRound",
+    "type" => "game",
+    "action" => "stEndRound",
+    "updateGameProgression" => true,
+    "transitions" => ["roundSetup" => 2, "endGame" => 99],
+  ],
 
-    4 => [
-        "name" => "nextPlayer",
-        "type" => "game",
-        "action" => "stNextPlayer",
-        "updateGameProgression" => true,
-        "transitions" => ["playerTurn" => 3, "endRound" => 10]
-    ],
-
-    10 => [
-        "name" => "endRound",
-        "type" => "game",
-        "action" => "stEndRound",
-        "updateGameProgression" => true,
-        "transitions" => ["roundSetup" => 2, "endGame" => 99]
-    ],
-
-/*
+  /*
     Examples:
 
     2 => array(
@@ -119,14 +117,13 @@ $machinestates = array(
 
 */
 
-    // Final state.
-    // Please do not modify (and do not overload action/args methods).
-    99 => array(
-        "name" => "gameEnd",
-        "description" => clienttranslate("End of game"),
-        "type" => "manager",
-        "action" => "stGameEnd",
-        "args" => "argGameEnd"
-    )
-
-);
+  // Final state.
+  // Please do not modify (and do not overload action/args methods).
+  99 => [
+    "name" => "gameEnd",
+    "description" => clienttranslate("End of game"),
+    "type" => "manager",
+    "action" => "stGameEnd",
+    "args" => "argGameEnd",
+  ],
+];

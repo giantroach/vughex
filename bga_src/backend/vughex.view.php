@@ -25,23 +25,23 @@
  *
  */
 
-require_once( APP_BASE_PATH."view/common/game.view.php" );
+require_once APP_BASE_PATH . "view/common/game.view.php";
 
 class view_vughex_vughex extends game_view
 {
-    function getGameName() {
-        return "vughex";
-    }
-    function build_page( $viewArgs )
-    {
-        // Get players & players number
-        $players = $this->game->loadPlayersBasicInfos();
-        $players_nbr = count( $players );
+  function getGameName()
+  {
+    return "vughex";
+  }
+  function build_page($viewArgs)
+  {
+    // Get players & players number
+    $players = $this->game->loadPlayersBasicInfos();
+    $players_nbr = count($players);
 
-        /*********** Place your code below:  ************/
+    /*********** Place your code below:  ************/
 
-
-        /*
+    /*
 
         // Examples: set the value of some element defined in your tpl file like this: {MY_VARIABLE_ELEMENT}
 
@@ -56,7 +56,7 @@ class view_vughex_vughex extends game_view
 
         */
 
-        /*
+    /*
 
         // Example: display a specific HTML block for each player in this game.
         // (note: the block is defined in your .tpl file like this:
@@ -77,8 +77,6 @@ class view_vughex_vughex extends game_view
 
         */
 
-
-
-        /*********** Do not change anything below this line  ************/
-    }
+    /*********** Do not change anything below this line  ************/
+  }
 }
