@@ -249,6 +249,15 @@ class Vughex extends Table
     );
   }
 
+  function isEnabledTitan($card)
+  {
+    // FIXME: oracle
+    if (intval($card["type_arg"]) === 10) {
+      return true;
+    }
+    return false;
+  }
+
   //////////////////////////////////////////////////////////////////////////////
   //////////// Player actions
   ////////////
@@ -540,6 +549,7 @@ class Vughex extends Table
       );
 
       $tmpResult = [];
+      $hasTitan = [false, false, false];
 
       self::dump('$playerCards', $playerCards);
       foreach ($playerCards as $c) {
@@ -558,26 +568,33 @@ class Vughex extends Table
           case 0:
             $center = $result["score"]["center"][0];
             $tmpResult[$posID] = $powerFixed + $powerCenter * $center;
+            // titan
+            $hasTitan[0] = self::isEnabledTitan($c);
             break;
           case 1:
             $center = $result["score"]["center"][1];
             $tmpResult[$posID] = $powerFixed + $powerCenter * $center;
+            $hasTitan[1] = self::isEnabledTitan($c);
             break;
           case 2:
             $center = $result["score"]["center"][2];
             $tmpResult[$posID] = $powerFixed + $powerCenter * $center;
+            $hasTitan[2] = self::isEnabledTitan($c);
             break;
           case 3:
             $center = $result["score"]["center"][0];
             $tmpResult[$posID] = $powerFixed + $powerCenter * $center;
+            $hasTitan[0] = self::isEnabledTitan($c);
             break;
           case 4:
             $center = $result["score"]["center"][1];
             $tmpResult[$posID] = $powerFixed + $powerCenter * $center;
+            $hasTitan[1] = self::isEnabledTitan($c);
             break;
           case 5:
             $center = $result["score"]["center"][2];
             $tmpResult[$posID] = $powerFixed + $powerCenter * $center;
+            $hasTitan[2] = self::isEnabledTitan($c);
             break;
         }
       }
@@ -619,8 +636,10 @@ class Vughex extends Table
           }
 
           $score2 = $tmpResult[$pos] + $tmpResult[$pos + 3];
-          // FIXME: consider titan
-          if ($score < $score2) {
+          if (
+            (!$hasTitan[$pos] && $score < $score2) ||
+            ($hasTitan[$pos] && $score > $score2)
+          ) {
             // FIXME: if owner is the same, increment the score
             $sql =
               "UPDATE center SET center_controller='" .
@@ -629,21 +648,39 @@ class Vughex extends Table
               $location .
               "'";
             self::DbQuery($sql);
-            self::notifyAllPlayers(
-              "score",
-              clienttranslate(
-                '${player} took the ${location} lane control by ${scoreW} (vs ${scoreL}).'
-              ),
-              [
-                "location" => $location,
-                "scoreW" => $score2,
-                "scoreL" => $score,
-                "player" => self::getPlayerName($playerID),
-              ]
-            );
+
+            if ($hasTitan[$pos]) {
+              self::notifyAllPlayers(
+                "score",
+                clienttranslate(
+                  '[${location} lane] control has been taken by ${player} with total power of ${scoreW} (vs ${scoreL}, lower won due to "the Titan").'
+                ),
+                [
+                  "location" => $location,
+                  "scoreW" => $score2,
+                  "scoreL" => $score,
+                  "player" => self::getPlayerName($playerID),
+                ]
+              );
+            } else {
+              self::notifyAllPlayers(
+                "score",
+                clienttranslate(
+                  '[${location} lane] control has been taken by ${player} with the total power of ${scoreW} (vs ${scoreL}).'
+                ),
+                [
+                  "location" => $location,
+                  "scoreW" => $score2,
+                  "scoreL" => $score,
+                  "player" => self::getPlayerName($playerID),
+                ]
+              );
+            }
           }
-          // FIXME: consider titan
-          if ($score > $score2) {
+          if (
+            (!$hasTitan[$pos] && $score > $score2) ||
+            ($hasTitan[$pos] && $score < $score2)
+          ) {
             // FIXME: if owner is the same, increment the score
             $sql =
               "UPDATE center SET center_controller='" .
@@ -652,18 +689,33 @@ class Vughex extends Table
               $location .
               "'";
             self::DbQuery($sql);
-            self::notifyAllPlayers(
-              "score",
-              clienttranslate(
-                '${player} took the ${location} lane control by ${scoreW} (vs ${scoreL}).'
-              ),
-              [
-                "location" => $location,
-                "scoreW" => $score,
-                "scoreL" => $score2,
-                "player" => self::getPlayerName($lane["player"]),
-              ]
-            );
+            if ($hasTitan[$pos]) {
+              self::notifyAllPlayers(
+                "score",
+                clienttranslate(
+                  '[${location} lane] control has been taken by ${player} with total power of ${scoreW} (vs ${scoreL}, lower won due to "the Titan").'
+                ),
+                [
+                  "location" => $location,
+                  "scoreW" => $score,
+                  "scoreL" => $score2,
+                  "player" => self::getPlayerName($lane["player"]),
+                ]
+              );
+            } else {
+              self::notifyAllPlayers(
+                "score",
+                clienttranslate(
+                  '[${location} lane] control has been taken by ${player} with total power of ${scoreW} (vs ${scoreL}).'
+                ),
+                [
+                  "location" => $location,
+                  "scoreW" => $score,
+                  "scoreL" => $score2,
+                  "player" => self::getPlayerName($lane["player"]),
+                ]
+              );
+            }
           }
         }
       }
