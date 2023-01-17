@@ -249,6 +249,15 @@ class Vughex extends Table
     );
   }
 
+  function isEnabledEclipse($card)
+  {
+    // FIXME: oracle
+    if (intval($card["type_arg"]) === 7) {
+      return true;
+    }
+    return false;
+  }
+
   function isEnabledTitan($card)
   {
     // FIXME: oracle
@@ -540,6 +549,8 @@ class Vughex extends Table
 
     // lane data (total score for each lane)
     $lane = [];
+    $hasEclipse = [false, false, false];
+    $hasTitan = [false, false, false];
 
     foreach ($allData["players"] as $playerID => $player) {
       self::dump('$playerID', $playerID);
@@ -549,7 +560,6 @@ class Vughex extends Table
       );
 
       $tmpResult = [];
-      $hasTitan = [false, false, false];
 
       self::dump('$playerCards', $playerCards);
       foreach ($playerCards as $c) {
@@ -569,32 +579,38 @@ class Vughex extends Table
             $center = $result["score"]["center"][0];
             $tmpResult[$posID] = $powerFixed + $powerCenter * $center;
             // titan
-            $hasTitan[0] = self::isEnabledTitan($c);
+            $hasEclipse[0] = $hasEclipse[0] || self::isEnabledEclipse($c);
+            $hasTitan[0] = $hasTitan[0] || self::isEnabledTitan($c);
             break;
           case 1:
             $center = $result["score"]["center"][1];
             $tmpResult[$posID] = $powerFixed + $powerCenter * $center;
-            $hasTitan[1] = self::isEnabledTitan($c);
+            $hasEclipse[1] = $hasEclipse[1] || self::isEnabledEclipse($c);
+            $hasTitan[1] = $hasTitan[1] || self::isEnabledTitan($c);
             break;
           case 2:
             $center = $result["score"]["center"][2];
             $tmpResult[$posID] = $powerFixed + $powerCenter * $center;
-            $hasTitan[2] = self::isEnabledTitan($c);
+            $hasEclipse[2] = $hasEclipse[2] || self::isEnabledEclipse($c);
+            $hasTitan[2] = $hasTitan[2] || self::isEnabledTitan($c);
             break;
           case 3:
             $center = $result["score"]["center"][0];
             $tmpResult[$posID] = $powerFixed + $powerCenter * $center;
-            $hasTitan[0] = self::isEnabledTitan($c);
+            $hasEclipse[0] = $hasEclipse[0] || self::isEnabledEclipse($c);
+            $hasTitan[0] = $hasTitan[0] || self::isEnabledTitan($c);
             break;
           case 4:
             $center = $result["score"]["center"][1];
             $tmpResult[$posID] = $powerFixed + $powerCenter * $center;
-            $hasTitan[1] = self::isEnabledTitan($c);
+            $hasEclipse[1] = $hasEclipse[1] || self::isEnabledEclipse($c);
+            $hasTitan[1] = $hasTitan[1] || self::isEnabledTitan($c);
             break;
           case 5:
             $center = $result["score"]["center"][2];
             $tmpResult[$posID] = $powerFixed + $powerCenter * $center;
-            $hasTitan[2] = self::isEnabledTitan($c);
+            $hasEclipse[2] = $hasEclipse[2] || self::isEnabledEclipse($c);
+            $hasTitan[2] = $hasTitan[2] || self::isEnabledTitan($c);
             break;
         }
       }
@@ -602,6 +618,9 @@ class Vughex extends Table
       $result["table"][$playerID] = array_values(
         $this->cards->getCardsInLocation("table" . $playerID)
       );
+
+      self::dump('$hasEclipse', $hasEclipse);
+      self::dump('$hasTitan', $hasTitan);
 
       // update center controller
       if (count($lane) == 0) {
@@ -632,10 +651,27 @@ class Vughex extends Table
                 "score" => $score,
               ]
             );
+
             continue;
           }
 
           $score2 = $tmpResult[$pos] + $tmpResult[$pos + 3];
+
+          if ($hasEclipse[$pos] && abs($score - $score2) >= 4) {
+            self::notifyAllPlayers(
+              "score",
+              clienttranslate(
+                '[${location} lane] is tied by ${score} vs ${score2} (tied by "the Eclipse").'
+              ),
+              [
+                "location" => $location,
+                "score" => $score,
+                "score2" => $score2,
+              ]
+            );
+            continue;
+          }
+
           if (
             (!$hasTitan[$pos] && $score < $score2) ||
             ($hasTitan[$pos] && $score > $score2)
