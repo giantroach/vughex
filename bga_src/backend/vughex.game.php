@@ -249,22 +249,58 @@ class Vughex extends Table
     );
   }
 
-  function isEnabledEclipse($card)
+  function isEnabledCard($card, $id)
   {
     // FIXME: oracle
-    if (intval($card["type_arg"]) === 7) {
+    if (intval($card["type_arg"]) === $id) {
       return true;
     }
     return false;
   }
 
-  function isEnabledTitan($card)
+  function getNewCenterValue($c, $center, $location)
   {
-    // FIXME: oracle
-    if (intval($card["type_arg"]) === 10) {
-      return true;
+    // 9: plague is the highest priority
+    if (self::isEnabledCard($c, 9)) {
+      self::notifyAllPlayers(
+        "score",
+        clienttranslate(
+          '[${location} lane] center number is set to 0 by "the Plague").'
+        ),
+        [
+          "location" => $location,
+        ]
+      );
+      return 0;
     }
-    return false;
+    // 2: Justice
+    if (self::isEnabledCard($c, 2)) {
+      self::notifyAllPlayers(
+        "score",
+        clienttranslate(
+          '[${location} lane] center number is increased by 1 by "the Justice").'
+        ),
+        [
+          "location" => $location,
+        ]
+      );
+      return $center + 1;
+    }
+    // 12: Shadow
+    if (self::isEnabledCard($c, 12)) {
+      self::notifyAllPlayers(
+        "score",
+        clienttranslate(
+          '[${location} lane] center number is decreased by 2 by "the Shadow").'
+        ),
+        [
+          "location" => $location,
+        ]
+      );
+      return $center - 2;
+    }
+
+    return $center;
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -547,6 +583,66 @@ class Vughex extends Table
       $result["score"]["center"] = [1, 4, 5];
     }
 
+    # get all cards on table
+    $tableCards = [];
+    foreach ($allData["players"] as $playerID => $player) {
+      $tableCards[$playerID] = array_values(
+        $this->cards->getCardsInLocation("table" . $playerID)
+      );
+    }
+
+    # update center value
+    foreach ($allData["players"] as $playerID => $player) {
+      foreach ($tableCards[$playerID] as $c) {
+        $posID = $c["location_arg"];
+
+        switch ($posID) {
+          case 0:
+            $result["score"]["center"][0] = self::getNewCenterValue(
+              $c,
+              $result["score"]["center"][0],
+              "left"
+            );
+            break;
+          case 1:
+            $result["score"]["center"][1] = self::getNewCenterValue(
+              $c,
+              $result["score"]["center"][1],
+              "center"
+            );
+            break;
+          case 2:
+            $result["score"]["center"][2] = self::getNewCenterValue(
+              $c,
+              $result["score"]["center"][2],
+              "right"
+            );
+            break;
+          case 3:
+            $result["score"]["center"][0] = self::getNewCenterValue(
+              $c,
+              $result["score"]["center"][0],
+              "left"
+            );
+            break;
+          case 4:
+            $result["score"]["center"][1] = self::getNewCenterValue(
+              $c,
+              $result["score"]["center"][1],
+              "center"
+            );
+            break;
+          case 5:
+            $result["score"]["center"][2] = self::getNewCenterValue(
+              $c,
+              $result["score"]["center"][2],
+              "right"
+            );
+            break;
+        }
+      }
+    }
+
     // lane data (total score for each lane)
     $lane = [];
     $hasEclipse = [false, false, false];
@@ -555,14 +651,9 @@ class Vughex extends Table
     foreach ($allData["players"] as $playerID => $player) {
       self::dump('$playerID', $playerID);
 
-      $playerCards = array_values(
-        $this->cards->getCardsInLocation("table" . $playerID)
-      );
-
       $tmpResult = [];
 
-      self::dump('$playerCards', $playerCards);
-      foreach ($playerCards as $c) {
+      foreach ($tableCards[$playerID] as $c) {
         $cardInfo = $this->card_types[intval($c["type_arg"])];
         $posID = $c["location_arg"];
 
@@ -579,38 +670,38 @@ class Vughex extends Table
             $center = $result["score"]["center"][0];
             $tmpResult[$posID] = $powerFixed + $powerCenter * $center;
             // titan
-            $hasEclipse[0] = $hasEclipse[0] || self::isEnabledEclipse($c);
-            $hasTitan[0] = $hasTitan[0] || self::isEnabledTitan($c);
+            $hasEclipse[0] = $hasEclipse[0] || self::isEnabledCard($c, 7);
+            $hasTitan[0] = $hasTitan[0] || self::isEnabledCard($c, 10);
             break;
           case 1:
             $center = $result["score"]["center"][1];
             $tmpResult[$posID] = $powerFixed + $powerCenter * $center;
-            $hasEclipse[1] = $hasEclipse[1] || self::isEnabledEclipse($c);
-            $hasTitan[1] = $hasTitan[1] || self::isEnabledTitan($c);
+            $hasEclipse[1] = $hasEclipse[1] || self::isEnabledCard($c, 7);
+            $hasTitan[1] = $hasTitan[1] || self::isEnabledCard($c, 10);
             break;
           case 2:
             $center = $result["score"]["center"][2];
             $tmpResult[$posID] = $powerFixed + $powerCenter * $center;
-            $hasEclipse[2] = $hasEclipse[2] || self::isEnabledEclipse($c);
-            $hasTitan[2] = $hasTitan[2] || self::isEnabledTitan($c);
+            $hasEclipse[2] = $hasEclipse[2] || self::isEnabledCard($c, 7);
+            $hasTitan[2] = $hasTitan[2] || self::isEnabledCard($c, 10);
             break;
           case 3:
             $center = $result["score"]["center"][0];
             $tmpResult[$posID] = $powerFixed + $powerCenter * $center;
-            $hasEclipse[0] = $hasEclipse[0] || self::isEnabledEclipse($c);
-            $hasTitan[0] = $hasTitan[0] || self::isEnabledTitan($c);
+            $hasEclipse[0] = $hasEclipse[0] || self::isEnabledCard($c, 7);
+            $hasTitan[0] = $hasTitan[0] || self::isEnabledCard($c, 10);
             break;
           case 4:
             $center = $result["score"]["center"][1];
             $tmpResult[$posID] = $powerFixed + $powerCenter * $center;
-            $hasEclipse[1] = $hasEclipse[1] || self::isEnabledEclipse($c);
-            $hasTitan[1] = $hasTitan[1] || self::isEnabledTitan($c);
+            $hasEclipse[1] = $hasEclipse[1] || self::isEnabledCard($c, 7);
+            $hasTitan[1] = $hasTitan[1] || self::isEnabledCard($c, 10);
             break;
           case 5:
             $center = $result["score"]["center"][2];
             $tmpResult[$posID] = $powerFixed + $powerCenter * $center;
-            $hasEclipse[2] = $hasEclipse[2] || self::isEnabledEclipse($c);
-            $hasTitan[2] = $hasTitan[2] || self::isEnabledTitan($c);
+            $hasEclipse[2] = $hasEclipse[2] || self::isEnabledCard($c, 7);
+            $hasTitan[2] = $hasTitan[2] || self::isEnabledCard($c, 10);
             break;
         }
       }
