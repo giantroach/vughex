@@ -243,6 +243,10 @@ define([
       // this.notifqueue.setSynchronous( 'cardPlayed', 3000 );
       //
 
+      dojo.subscribe("updateScore", this, (data: any) => {
+        this.scoreCtrl[data.args.playerID].incValue(1);
+      });
+
       const notifications = ["newRound", "getNum", "playCard", "endRound"];
       notifications.forEach((n) => {
         dojo.subscribe(n, this, (data: any) => {
