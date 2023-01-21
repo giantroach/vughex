@@ -258,49 +258,73 @@ class Vughex extends Table
     return false;
   }
 
-  function getNewCenterValue($c, $center, $location)
+  function getNewCenterValue($c, $center, $lane)
   {
     // 9: plague is the highest priority
-    if (self::isEnabledCard($c, 9)) {
+    if ($this->isEnabledCard($c, 9)) {
       self::notifyAllPlayers(
         "score",
         clienttranslate(
-          '[${location} lane] center number is set to 0 by "the Plague").'
+          '[${lane} lane] center number is set to 0 by "the Plague").'
         ),
         [
-          "location" => $location,
+          "lane" => $lane,
         ]
       );
       return 0;
     }
     // 2: Justice
-    if (self::isEnabledCard($c, 2)) {
+    if ($this->isEnabledCard($c, 2)) {
       self::notifyAllPlayers(
         "score",
         clienttranslate(
-          '[${location} lane] center number is increased by 1 by "the Justice").'
+          '[${lane} lane] center number is increased by 1 by "the Justice").'
         ),
         [
-          "location" => $location,
+          "lane" => $lane,
         ]
       );
       return $center + 1;
     }
     // 12: Shadow
-    if (self::isEnabledCard($c, 12)) {
+    if ($this->isEnabledCard($c, 12)) {
       self::notifyAllPlayers(
         "score",
         clienttranslate(
-          '[${location} lane] center number is decreased by 2 by "the Shadow").'
+          '[${lane} lane] center number is decreased by 2 by "the Shadow").'
         ),
         [
-          "location" => $location,
+          "lane" => $lane,
         ]
       );
       return $center - 2;
     }
 
     return $center;
+  }
+
+  function getPower($c, $center, $lane)
+  {
+    $cardInfo = $this->card_types[intval($c["type_arg"])];
+
+    $powerFixed = $cardInfo->powerFixed;
+    $powerCenter = $cardInfo->powerCenter;
+
+    if ($this->isEnabledCard($c, 4) && ($center >= 6 || $center <= 0)) {
+      self::notifyAllPlayers(
+        "score",
+        clienttranslate(
+          '[${lane} lane] "the Unstable" became power 15 since center is ${center}.'
+        ),
+        [
+          "lane" => $lane,
+          "center" => $center,
+        ]
+      );
+      return 15;
+    }
+
+    return $powerFixed + $powerCenter * $center;
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -598,42 +622,42 @@ class Vughex extends Table
 
         switch ($posID) {
           case 0:
-            $result["score"]["center"][0] = self::getNewCenterValue(
+            $result["score"]["center"][0] = $this->getNewCenterValue(
               $c,
               $result["score"]["center"][0],
               "left"
             );
             break;
           case 1:
-            $result["score"]["center"][1] = self::getNewCenterValue(
+            $result["score"]["center"][1] = $this->getNewCenterValue(
               $c,
               $result["score"]["center"][1],
               "center"
             );
             break;
           case 2:
-            $result["score"]["center"][2] = self::getNewCenterValue(
+            $result["score"]["center"][2] = $this->getNewCenterValue(
               $c,
               $result["score"]["center"][2],
               "right"
             );
             break;
           case 3:
-            $result["score"]["center"][0] = self::getNewCenterValue(
+            $result["score"]["center"][0] = $this->getNewCenterValue(
               $c,
               $result["score"]["center"][0],
               "left"
             );
             break;
           case 4:
-            $result["score"]["center"][1] = self::getNewCenterValue(
+            $result["score"]["center"][1] = $this->getNewCenterValue(
               $c,
               $result["score"]["center"][1],
               "center"
             );
             break;
           case 5:
-            $result["score"]["center"][2] = self::getNewCenterValue(
+            $result["score"]["center"][2] = $this->getNewCenterValue(
               $c,
               $result["score"]["center"][2],
               "right"
@@ -644,7 +668,7 @@ class Vughex extends Table
     }
 
     // lane data (total score for each lane)
-    $lane = [];
+    $laneScore = [];
     $hasEclipse = [false, false, false];
     $hasTitan = [false, false, false];
 
@@ -663,45 +687,47 @@ class Vughex extends Table
         self::dump('$powerFixed', $powerFixed);
         self::dump('$powerCenter', $powerCenter);
 
+        // FIXME getPower
+
         // 0 - 1 - 2
         // 3 - 4 - 5
         switch ($posID) {
           case 0:
             $center = $result["score"]["center"][0];
-            $tmpResult[$posID] = $powerFixed + $powerCenter * $center;
+            $tmpResult[$posID] = $this->getPower($c, $center, "left");
             // titan
-            $hasEclipse[0] = $hasEclipse[0] || self::isEnabledCard($c, 7);
-            $hasTitan[0] = $hasTitan[0] || self::isEnabledCard($c, 10);
+            $hasEclipse[0] = $hasEclipse[0] || $this->isEnabledCard($c, 7);
+            $hasTitan[0] = $hasTitan[0] || $this->isEnabledCard($c, 10);
             break;
           case 1:
             $center = $result["score"]["center"][1];
-            $tmpResult[$posID] = $powerFixed + $powerCenter * $center;
-            $hasEclipse[1] = $hasEclipse[1] || self::isEnabledCard($c, 7);
-            $hasTitan[1] = $hasTitan[1] || self::isEnabledCard($c, 10);
+            $tmpResult[$posID] = $this->getPower($c, $center, "center");
+            $hasEclipse[1] = $hasEclipse[1] || $this->isEnabledCard($c, 7);
+            $hasTitan[1] = $hasTitan[1] || $this->isEnabledCard($c, 10);
             break;
           case 2:
             $center = $result["score"]["center"][2];
-            $tmpResult[$posID] = $powerFixed + $powerCenter * $center;
-            $hasEclipse[2] = $hasEclipse[2] || self::isEnabledCard($c, 7);
-            $hasTitan[2] = $hasTitan[2] || self::isEnabledCard($c, 10);
+            $tmpResult[$posID] = $this->getPower($c, $center, "right");
+            $hasEclipse[2] = $hasEclipse[2] || $this->isEnabledCard($c, 7);
+            $hasTitan[2] = $hasTitan[2] || $this->isEnabledCard($c, 10);
             break;
           case 3:
             $center = $result["score"]["center"][0];
-            $tmpResult[$posID] = $powerFixed + $powerCenter * $center;
-            $hasEclipse[0] = $hasEclipse[0] || self::isEnabledCard($c, 7);
-            $hasTitan[0] = $hasTitan[0] || self::isEnabledCard($c, 10);
+            $tmpResult[$posID] = $this->getPower($c, $center, "left");
+            $hasEclipse[0] = $hasEclipse[0] || $this->isEnabledCard($c, 7);
+            $hasTitan[0] = $hasTitan[0] || $this->isEnabledCard($c, 10);
             break;
           case 4:
             $center = $result["score"]["center"][1];
-            $tmpResult[$posID] = $powerFixed + $powerCenter * $center;
-            $hasEclipse[1] = $hasEclipse[1] || self::isEnabledCard($c, 7);
-            $hasTitan[1] = $hasTitan[1] || self::isEnabledCard($c, 10);
+            $tmpResult[$posID] = $this->getPower($c, $center, "center");
+            $hasEclipse[1] = $hasEclipse[1] || $this->isEnabledCard($c, 7);
+            $hasTitan[1] = $hasTitan[1] || $this->isEnabledCard($c, 10);
             break;
           case 5:
             $center = $result["score"]["center"][2];
-            $tmpResult[$posID] = $powerFixed + $powerCenter * $center;
-            $hasEclipse[2] = $hasEclipse[2] || self::isEnabledCard($c, 7);
-            $hasTitan[2] = $hasTitan[2] || self::isEnabledCard($c, 10);
+            $tmpResult[$posID] = $this->getPower($c, $center, "right");
+            $hasEclipse[2] = $hasEclipse[2] || $this->isEnabledCard($c, 7);
+            $hasTitan[2] = $hasTitan[2] || $this->isEnabledCard($c, 10);
             break;
         }
       }
@@ -714,31 +740,31 @@ class Vughex extends Table
       self::dump('$hasTitan', $hasTitan);
 
       // update center controller
-      if (count($lane) == 0) {
-        $lane[0] = $tmpResult[0] + $tmpResult[3];
-        $lane[1] = $tmpResult[1] + $tmpResult[4];
-        $lane[2] = $tmpResult[2] + $tmpResult[5];
-        $lane["player"] = $playerID;
+      if (count($laneScore) == 0) {
+        $laneScore[0] = $tmpResult[0] + $tmpResult[3];
+        $laneScore[1] = $tmpResult[1] + $tmpResult[4];
+        $laneScore[2] = $tmpResult[2] + $tmpResult[5];
+        $laneScore["player"] = $playerID;
       } else {
-        foreach ($lane as $pos => $score) {
+        foreach ($laneScore as $pos => $score) {
           if ($pos === "player") {
             continue;
           }
 
-          $location = "left";
+          $lane = "left";
           if ($pos == 1) {
-            $location = "center";
+            $lane = "center";
           }
           if ($pos == 2) {
-            $location = "right";
+            $lane = "right";
           }
 
           if ($score == $tmpResult[$pos] + $tmpResult[$pos + 3]) {
             self::notifyAllPlayers(
               "score",
-              clienttranslate('${location} lane is tied by ${score}.'),
+              clienttranslate('${lane} lane is tied by ${score}.'),
               [
-                "location" => $location,
+                "lane" => $lane,
                 "score" => $score,
               ]
             );
@@ -752,10 +778,10 @@ class Vughex extends Table
             self::notifyAllPlayers(
               "score",
               clienttranslate(
-                '[${location} lane] is tied by ${score} vs ${score2} (tied by "the Eclipse").'
+                '[${lane} lane] is tied by ${score} vs ${score2} (tied by "the Eclipse").'
               ),
               [
-                "location" => $location,
+                "lane" => $lane,
                 "score" => $score,
                 "score2" => $score2,
               ]
@@ -772,7 +798,7 @@ class Vughex extends Table
               "UPDATE center SET center_controller='" .
               $playerID .
               "' WHERE center_location='" .
-              $location .
+              $lane .
               "'";
             self::DbQuery($sql);
 
@@ -780,26 +806,26 @@ class Vughex extends Table
               self::notifyAllPlayers(
                 "score",
                 clienttranslate(
-                  '[${location} lane] control has been taken by ${player} with total power of ${scoreW} (vs ${scoreL}, lower won due to "the Titan").'
+                  '[${lane} lane] control has been taken by ${player} with total power of ${scoreW} (vs ${scoreL}, lower won due to "the Titan").'
                 ),
                 [
-                  "location" => $location,
+                  "lane" => $lane,
                   "scoreW" => $score2,
                   "scoreL" => $score,
-                  "player" => self::getPlayerName($playerID),
+                  "player" => $this->getPlayerName($playerID),
                 ]
               );
             } else {
               self::notifyAllPlayers(
                 "score",
                 clienttranslate(
-                  '[${location} lane] control has been taken by ${player} with the total power of ${scoreW} (vs ${scoreL}).'
+                  '[${lane} lane] control has been taken by ${player} with the total power of ${scoreW} (vs ${scoreL}).'
                 ),
                 [
-                  "location" => $location,
+                  "lane" => $lane,
                   "scoreW" => $score2,
                   "scoreL" => $score,
-                  "player" => self::getPlayerName($playerID),
+                  "player" => $this->getPlayerName($playerID),
                 ]
               );
             }
@@ -811,35 +837,35 @@ class Vughex extends Table
             // FIXME: if owner is the same, increment the score
             $sql =
               "UPDATE center SET center_controller='" .
-              $lane["player"] .
+              $laneScore["player"] .
               "' WHERE center_location='" .
-              $location .
+              $lane .
               "'";
             self::DbQuery($sql);
             if ($hasTitan[$pos]) {
               self::notifyAllPlayers(
                 "score",
                 clienttranslate(
-                  '[${location} lane] control has been taken by ${player} with total power of ${scoreW} (vs ${scoreL}, lower won due to "the Titan").'
+                  '[${lane} lane] control has been taken by ${player} with total power of ${scoreW} (vs ${scoreL}, lower won due to "the Titan").'
                 ),
                 [
-                  "location" => $location,
+                  "lane" => $lane,
                   "scoreW" => $score,
                   "scoreL" => $score2,
-                  "player" => self::getPlayerName($lane["player"]),
+                  "player" => $this->getPlayerName($laneScore["player"]),
                 ]
               );
             } else {
               self::notifyAllPlayers(
                 "score",
                 clienttranslate(
-                  '[${location} lane] control has been taken by ${player} with total power of ${scoreW} (vs ${scoreL}).'
+                  '[${lane} lane] control has been taken by ${player} with total power of ${scoreW} (vs ${scoreL}).'
                 ),
                 [
-                  "location" => $location,
+                  "lane" => $lane,
                   "scoreW" => $score,
                   "scoreL" => $score2,
-                  "player" => self::getPlayerName($lane["player"]),
+                  "player" => $this->getPlayerName($laneScore["player"]),
                 ]
               );
             }
