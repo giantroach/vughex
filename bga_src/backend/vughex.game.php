@@ -334,24 +334,39 @@ class Vughex extends Table
     $score = intval(
       self::getUniqueValueFromDB(
         "SELECT player_score score FROM player WHERE player_id='" .
-        $playerID .
+          $playerID .
           "'"
       )
     );
     $updatedScore = $score + 1;
     self::DbQuery(
       "UPDATE player SET player_score='" .
-      $updatedScore .
+        $updatedScore .
         "' WHERE player_id='" .
         $playerID .
         "'"
     );
 
     // notify to update the score
-    self::notifyAllPlayers('updateScore', clienttranslate('${playerName} scored.'), [
-      'playerID' => $playerID,
-      'playerName' => $playerName,
-    ]);
+    self::notifyAllPlayers(
+      "updateScore",
+      clienttranslate('${playerName} scored.'),
+      [
+        "playerID" => $playerID,
+        "playerName" => $playerName,
+      ]
+    );
+  }
+
+  function setLaneController($playerID, $lane)
+  {
+    $sql =
+      "UPDATE center SET center_controller='" .
+      $playerID .
+      "' WHERE center_location='" .
+      $lane .
+      "'";
+    self::DbQuery($sql);
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -823,18 +838,6 @@ class Vughex extends Table
             (!$hasTitan[$pos] && $score < $score2) ||
             ($hasTitan[$pos] && $score > $score2)
           ) {
-            if (intval($centerCtrler[$lane]["controller"]) === $playerID) {
-              $this->addScore($playerID);
-
-            } else {
-              $sql =
-                "UPDATE center SET center_controller='" .
-                $playerID .
-                "' WHERE center_location='" .
-                $lane .
-                "'";
-              self::DbQuery($sql);
-            }
             if ($hasTitan[$pos]) {
               self::notifyAllPlayers(
                 "score",
@@ -861,23 +864,17 @@ class Vughex extends Table
                   "player" => $this->getPlayerName($playerID),
                 ]
               );
+            }
+            if (intval($centerCtrler[$lane]["controller"]) === $playerID) {
+              $this->addScore($playerID);
+            } else {
+              $this->setLaneController($playerID, $lane);
             }
           }
           if (
             (!$hasTitan[$pos] && $score > $score2) ||
             ($hasTitan[$pos] && $score < $score2)
           ) {
-            if (intval($centerCtrler[$lane]["controller"]) === $laneScore["player"]) {
-              $this->addScore($laneScore["player"]);
-            } else {
-              $sql =
-                "UPDATE center SET center_controller='" .
-                $laneScore["player"] .
-                "' WHERE center_location='" .
-                $lane .
-                "'";
-              self::DbQuery($sql);
-            }
             if ($hasTitan[$pos]) {
               self::notifyAllPlayers(
                 "score",
@@ -904,6 +901,14 @@ class Vughex extends Table
                   "player" => $this->getPlayerName($laneScore["player"]),
                 ]
               );
+            }
+            if (
+              intval($centerCtrler[$lane]["controller"]) ===
+              $laneScore["player"]
+            ) {
+              $this->addScore($laneScore["player"]);
+            } else {
+              $this->setLaneController($laneScore["player"], $lane);
             }
           }
         }
