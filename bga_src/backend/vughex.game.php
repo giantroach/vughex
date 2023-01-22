@@ -369,6 +369,44 @@ class Vughex extends Table
     self::DbQuery($sql);
   }
 
+  function hndlEvelAndAgent(
+    int $wPlayerID,
+    int $lPlayerID,
+    int $hasEvil,
+    int $hasAgent
+  ) {
+    if ($hasEvil) {
+      if ($lPlayerID === $hasEvil) {
+        // deal one damage!
+        $playerName = $this->getPlayerName($lPlayerID);
+        self::notifyAllPlayers(
+          "score",
+          clienttranslate('"the Evil" dealt 1 damage to ${playerName}.'),
+          [
+            "playerID" => $wPlayerID,
+            "playerName" => $playerName,
+          ]
+        );
+        $this->addScore($wPlayerID);
+      }
+    }
+    if ($hasAgent) {
+      if ($wPlayerID === $hasAgent) {
+        // scores!
+        $playerName = $this->getPlayerName($lPlayerID);
+        self::notifyAllPlayers(
+          "score",
+          clienttranslate('"the Agent" dealt 1 damage to ${playerName}.'),
+          [
+            "playerID" => $wPlayerID,
+            "playerName" => $playerName,
+          ]
+        );
+        $this->addScore($wPlayerID);
+      }
+    }
+  }
+
   //////////////////////////////////////////////////////////////////////////////
   //////////// Player actions
   ////////////
@@ -718,6 +756,8 @@ class Vughex extends Table
     $laneScore = [];
     $hasEclipse = [false, false, false];
     $hasTitan = [false, false, false];
+    $hasEvil = [0, 0, 0];
+    $hasAgent = [0, 0, 0];
 
     foreach ($allData["players"] as $playerID => $player) {
       self::dump('$playerID', $playerID);
@@ -740,39 +780,62 @@ class Vughex extends Table
           case 0:
             $center = $result["score"]["center"][0];
             $tmpResult[$posID] = $this->getPower($c, $center, "left");
-            // titan
             $hasEclipse[0] = $hasEclipse[0] || $this->isEnabledCard($c, 7);
             $hasTitan[0] = $hasTitan[0] || $this->isEnabledCard($c, 10);
+            $hasEvil[0] =
+              $hasEvil[0] || $this->isEnabledCard($c, 3) ? $playerID : false;
+            $hasAgent[0] =
+              $hasAgent[0] || $this->isEnabledCard($c, 11) ? $playerID : false;
             break;
           case 1:
             $center = $result["score"]["center"][1];
             $tmpResult[$posID] = $this->getPower($c, $center, "center");
             $hasEclipse[1] = $hasEclipse[1] || $this->isEnabledCard($c, 7);
             $hasTitan[1] = $hasTitan[1] || $this->isEnabledCard($c, 10);
+            $hasEvil[1] =
+              $hasEvil[1] || $this->isEnabledCard($c, 3) ? $playerID : false;
+            $hasAgent[1] =
+              $hasAgent[1] || $this->isEnabledCard($c, 11) ? $playerID : false;
             break;
           case 2:
             $center = $result["score"]["center"][2];
             $tmpResult[$posID] = $this->getPower($c, $center, "right");
             $hasEclipse[2] = $hasEclipse[2] || $this->isEnabledCard($c, 7);
             $hasTitan[2] = $hasTitan[2] || $this->isEnabledCard($c, 10);
+            $hasEvil[2] =
+              $hasEvil[2] || $this->isEnabledCard($c, 3) ? $playerID : false;
+            $hasAgent[2] =
+              $hasAgent[2] || $this->isEnabledCard($c, 11) ? $playerID : false;
             break;
           case 3:
             $center = $result["score"]["center"][0];
             $tmpResult[$posID] = $this->getPower($c, $center, "left");
             $hasEclipse[0] = $hasEclipse[0] || $this->isEnabledCard($c, 7);
             $hasTitan[0] = $hasTitan[0] || $this->isEnabledCard($c, 10);
+            $hasEvil[0] =
+              $hasEvil[0] || $this->isEnabledCard($c, 3) ? $playerID : false;
+            $hasAgent[0] =
+              $hasAgent[0] || $this->isEnabledCard($c, 11) ? $playerID : false;
             break;
           case 4:
             $center = $result["score"]["center"][1];
             $tmpResult[$posID] = $this->getPower($c, $center, "center");
             $hasEclipse[1] = $hasEclipse[1] || $this->isEnabledCard($c, 7);
             $hasTitan[1] = $hasTitan[1] || $this->isEnabledCard($c, 10);
+            $hasEvil[1] =
+              $hasEvil[1] || $this->isEnabledCard($c, 3) ? $playerID : false;
+            $hasAgent[1] =
+              $hasAgent[1] || $this->isEnabledCard($c, 11) ? $playerID : false;
             break;
           case 5:
             $center = $result["score"]["center"][2];
             $tmpResult[$posID] = $this->getPower($c, $center, "right");
             $hasEclipse[2] = $hasEclipse[2] || $this->isEnabledCard($c, 7);
             $hasTitan[2] = $hasTitan[2] || $this->isEnabledCard($c, 10);
+            $hasEvil[2] =
+              $hasEvil[2] || $this->isEnabledCard($c, 3) ? $playerID : false;
+            $hasAgent[2] =
+              $hasAgent[2] || $this->isEnabledCard($c, 11) ? $playerID : false;
             break;
         }
       }
@@ -865,12 +928,19 @@ class Vughex extends Table
                 ]
               );
             }
+            $this->hndlEvelAndAgent(
+              $playerID,
+              $laneScore["player"],
+              $hasEvil[$pos],
+              $hasAgent[$pos]
+            );
             if (intval($centerCtrler[$lane]["controller"]) === $playerID) {
               $this->addScore($playerID);
             } else {
               $this->setLaneController($playerID, $lane);
             }
           }
+
           if (
             (!$hasTitan[$pos] && $score > $score2) ||
             ($hasTitan[$pos] && $score < $score2)
@@ -902,6 +972,12 @@ class Vughex extends Table
                 ]
               );
             }
+            $this->hndlEvelAndAgent(
+              $laneScore["player"],
+              $playerID,
+              $hasEvil[$pos],
+              $hasAgent[$pos]
+            );
             if (
               intval($centerCtrler[$lane]["controller"]) ===
               $laneScore["player"]
