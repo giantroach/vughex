@@ -43,8 +43,10 @@ class action_vughex extends APP_GameAction
     self::setAjaxMode();
     $cardID = self::getArg("card", AT_alphanum, true);
     $gridID = self::getArg("gridID", AT_posint, true);
+    $targetGridID = self::getArg("targetGridID", AT_int, false);
+    $targetGridSide = self::getArg("targetGridSide", AT_alphanum, false);
 
-    $this->game->playCard($cardID, $gridID);
+    $this->game->playCard($cardID, $gridID, $targetGridID, $targetGridSide);
     self::ajaxResponse();
   }
 }

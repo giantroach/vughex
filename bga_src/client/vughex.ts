@@ -247,7 +247,7 @@ define([
         this.scoreCtrl[data.args.playerID].incValue(1);
       });
 
-      const notifications = ["newRound", "getNum", "playCard", "endRound"];
+      const notifications = ["newRound", "getNum", "playCard", "updateCard", "endRound"];
       notifications.forEach((n) => {
         dojo.subscribe(n, this, (data: any) => {
           vue.bgaNotifications.push({

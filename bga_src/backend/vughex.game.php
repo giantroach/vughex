@@ -181,10 +181,12 @@ class Vughex extends Table
       $this->cards->getCardsInLocation("hand", $current_player_id)
     );
 
-    // FIXME: Hide enemy stealth units
-    $result["player_table"] = array_values(
-      $this->cards->getCardsInLocation("table" . $current_player_id)
+    // Hide enemy stealth units
+    $result["player_table"] = $this->getCardsInLocation(
+      "table" . $current_player_id
     );
+
+    self::dump("player_table", $result["player_table"]);
 
     $sql =
       "SELECT player_id id FROM player WHERE player_id<>'" .
@@ -192,12 +194,11 @@ class Vughex extends Table
       "'";
     $oppo_id = self::getUniqueValueFromDB($sql);
     $result["oppo_table"] = [];
-    foreach (
-      array_values($this->cards->getCardsInLocation("table" . $oppo_id))
-      as $card
-    ) {
+
+    foreach ($this->getCardsInLocation("table" . $oppo_id) as $card) {
       $c = $this->card_types[intval($card["type_arg"])];
-      if ($c->stealth) {
+      // FIXME: it looks like getCardsInLocation does not return those newly added props..
+      if ($c->stealth && !$card["meta"]) {
         $result["oppo_table"][] = [
           "id" => "0",
           "type" => "stealth",
@@ -241,6 +242,14 @@ class Vughex extends Table
   /*
       In this space, you can put any utility methods useful for your game logic
     */
+
+  function getOppoID($playerID)
+  {
+    $sql =
+      "SELECT player_id id FROM player WHERE player_id<>'" . $playerID . "'";
+    $oppoID = self::getUniqueValueFromDB($sql);
+    return $oppoID;
+  }
 
   function getPlayerName($playerID)
   {
@@ -407,6 +416,32 @@ class Vughex extends Table
     }
   }
 
+  function getCardsInLocation($location)
+  {
+    $sql = "SELECT ";
+    $sql .= "card_id id, ";
+    $sql .= "card_type type, ";
+    $sql .= "card_type_arg type_arg, ";
+    $sql .= "card_location location, ";
+    $sql .= "card_location_arg location_arg, ";
+    $sql .= "card_meta meta from cards ";
+    $sql .= "WHERE card_location='" . $location . "'";
+    return self::getObjectListFromDB($sql);
+  }
+
+  function getCard($cardID)
+  {
+    $sql = "SELECT ";
+    $sql .= "card_id id, ";
+    $sql .= "card_type type, ";
+    $sql .= "card_type_arg type_arg, ";
+    $sql .= "card_location location, ";
+    $sql .= "card_location_arg location_arg, ";
+    $sql .= "card_meta meta from cards ";
+    $sql .= "WHERE card_id='" . $cardID . "'";
+    return self::getObjectFromDB($sql);
+  }
+
   //////////////////////////////////////////////////////////////////////////////
   //////////// Player actions
   ////////////
@@ -416,10 +451,11 @@ class Vughex extends Table
       (note: each method below must match an input method in vughex.action.php)
     */
 
-  function playCard($cardID, $gridID)
+  function playCard($cardID, $gridID, $targetGridID, $targetGridSide)
   {
-    $cardInfo = $this->cards->getCard($cardID);
+    $cardInfo = $this->getCard($cardID);
     $actorID = self::getActivePlayerId();
+    $oppoID = $this->getOppoID($actorID);
 
     if (!$cardInfo) {
       self::notifyPlayer($actorID, "logError", "", [
@@ -459,11 +495,64 @@ class Vughex extends Table
     //     return;
     // }
 
+    // FIXME: oracle
+    if (intval($cardInfo["type_arg"]) === 0) {
+      if ($targetGridID === null) {
+        self::notifyPlayer($actorID, "logError", "", [
+          "message" => clienttranslate(
+            "Invalid target selection! You must select a target."
+          ),
+        ]);
+        return;
+      }
+
+      // target player
+      $targetPlayerID = $actorID;
+      if ($targetGridSide != "player") {
+        $targetPlayerID = $oppoID;
+      }
+
+      // get card info
+      $sql =
+        "SELECT card_id FROM cards WHERE card_location_arg='" .
+        abs(intval($targetGridID)) .
+        "' AND card_location='table" .
+        $targetPlayerID .
+        "'";
+      $targetCardID = self::getUniqueValueFromDB($sql);
+      $targetCardInfo = $this->getCard($targetCardID);
+
+      // append meta
+      $sql =
+        "SELECT card_meta FROM cards WHERE card_id='" . $targetCardID . "'";
+      $meta = self::getUniqueValueFromDB($sql);
+      $meta .= "oracle,";
+      $sql =
+        "UPDATE cards SET card_meta='" .
+        $meta .
+        "' WHERE card_id='" .
+        $targetCardID .
+        "'";
+      self::DbQuery($sql);
+      $targetCardInfo["meta"] = $meta;
+
+      // reveal notification
+      self::notifyAllPlayers(
+        "updateCard",
+        clienttranslate('"the Oracle" disabled stealth and [Combat] ability.'),
+        [
+          "player_id" => $targetPlayerID,
+          "player_name" => $this->getPlayerName($targetPlayerID),
+          "card" => $targetCardInfo,
+          "gridID" => abs(intval($targetGridID)),
+        ]
+      );
+    }
+
     $this->cards->moveCard($cardID, "table" . $actorID, $gridID);
 
     $numberOfcards = $this->cards->countCardInLocation("hand", $actorID);
 
-    // FIXME: hide card info if it is stealth
     self::notifyPlayer(
       $actorID,
       "playCard",
@@ -477,13 +566,10 @@ class Vughex extends Table
       ]
     );
 
-    $sql =
-      "SELECT player_id id FROM player WHERE player_id<>'" . $actorID . "'";
-    $oppo_id = self::getUniqueValueFromDB($sql);
     $c = $this->card_types[intval($cardInfo["type_arg"])];
     if ($c->stealth) {
       self::notifyPlayer(
-        $oppo_id,
+        $oppoID,
         "playCard",
         clienttranslate('${player_name} played a stealth card.'),
         [
@@ -502,7 +588,7 @@ class Vughex extends Table
       );
     } else {
       self::notifyPlayer(
-        $oppo_id,
+        $oppoID,
         "playCard",
         clienttranslate('${player_name} played a card.'),
         [
@@ -569,6 +655,10 @@ class Vughex extends Table
 
     // this is needed for new round (not the initial)
     $this->cards->moveAllCardsInLocation(null, "deck");
+
+    // clear card meta
+    $sql = "UPDATE cards SET card_meta = ''";
+    self::DbQuery($sql);
 
     $players = self::getCollectionFromDb(
       "SELECT player_id id, player_no FROM player"

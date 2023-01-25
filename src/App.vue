@@ -190,11 +190,13 @@ export default class App extends Vue {
       this.handData.cardIDs?.push({
         id: c.id,
         cid: `mainCard${c.type_arg}`,
-        meta: (c.meta || []).map((m) => {
-          return {
-            metaID: m,
-          };
-        }),
+        meta: !c.meta
+          ? []
+          : c.meta.split(",").map((m) => {
+              return {
+                metaID: m,
+              };
+            }),
       });
       this.handData.selectable?.push(true);
     });
@@ -224,11 +226,13 @@ export default class App extends Vue {
       this.gridData.cardIDs[col][row] = {
         id: c.id,
         cid: `mainCard${c.type_arg}`,
-        meta: (c.meta || []).map((m) => {
-          return {
-            metaID: m,
-          };
-        }),
+        meta: !c.meta
+          ? []
+          : c.meta.split(",").map((m) => {
+              return {
+                metaID: m,
+              };
+            }),
       };
     });
     this.gamedata.oppo_table.forEach((c) => {
@@ -241,11 +245,13 @@ export default class App extends Vue {
       this.gridData.cardIDs[col][row] = {
         id: c.id,
         cid: `mainCard${c.type_arg}`,
-        meta: (c.meta || []).map((m) => {
-          return {
-            metaID: m,
-          };
-        }),
+        meta: !c.meta
+          ? []
+          : c.meta.split(",").map((m) => {
+              return {
+                metaID: m,
+              };
+            }),
       };
     });
 

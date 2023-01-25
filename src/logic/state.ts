@@ -26,6 +26,7 @@ type CurrentState =
   | "endRound"
   | "endRound:afterAnim"
   | "otherPlayerTurn";
+type BoardSide = "player" | "oppo";
 
 //
 // State handles data changes / local state changes
@@ -257,12 +258,14 @@ class State {
         this.assign(this.handData, "active", false);
         this.assign(this.gridData, "active", false);
 
-        const gridID = this.getSelectedGridID(0);
+        const gridID = this.getSelectedGrid(0).id;
+        const targetGrid = this.getSelectedGrid(1);
 
-        // FIXME: this better to use submit button
         this.request("playCard", {
           card: c.id,
           gridID: gridID,
+          targetGridID: targetGrid.id,
+          targetGridSide: targetGrid.side,
         });
         this.setState("playerTurn:afterSubmit");
         break;
@@ -539,8 +542,15 @@ class State {
     return [x, y + 3];
   }
 
-  private getSelectedGridID(gridIdx: number): number {
-    let gridID = 0;
+  private getSelectedGrid(gridIdx: number): {
+    id: number | null;
+    side: BoardSide;
+  } {
+    let gridID = null;
+    const result = {
+      id: null,
+      side: "player" as BoardSide,
+    };
     this.gridData.selected?.[gridIdx]?.find((row, colIdx) => {
       const rowIdx = row?.indexOf(true);
       if (rowIdx === undefined || rowIdx === -1) {
@@ -549,8 +559,16 @@ class State {
       // 0 - 1 - 2
       // 3 - 4 - 5
       gridID = colIdx + (rowIdx - 3) * 3;
+      if (gridID < 0) {
+        // opponent side (possible when gridIdx > 1+)
+        // 3 - 4 - 5
+        // 0 - 1 - 2
+        gridID = colIdx + (1 - rowIdx) * 3;
+        result.side = "oppo" as BoardSide;
+      }
     });
-    return gridID;
+    result.id = gridID;
+    return result;
   }
 
   // avoid unnecessary update

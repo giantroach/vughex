@@ -2,6 +2,7 @@ import {
   BgaNotification,
   BgaNewRoundNotif,
   BgaPlayCardNotif,
+  BgaUpdateCardNotif,
   BgaEndRoundNotif,
 } from "bga_src/client/type/bga-interface.d";
 import { objToArray } from "../util/util";
@@ -62,11 +63,13 @@ export class Sub {
           this.handData.cardIDs?.push({
             id: c.id,
             cid: `mainCard${c.type_arg}`,
-            meta: (c.meta || []).map((m) => {
-              return {
-                metaID: m,
-              };
-            }),
+            meta: !c.meta
+              ? []
+              : c.meta.split(",").map((m) => {
+                  return {
+                    metaID: m,
+                  };
+                }),
           });
           this.handData.selectable?.push(true);
         });
@@ -95,6 +98,38 @@ export class Sub {
               cid: `mainCard${arg.card.type_arg}`,
             };
           }
+        }
+        break;
+      }
+
+      case "updateCard": {
+        // i.e. oracle, watcher and maze
+        const arg = notif.args as BgaUpdateCardNotif;
+        const gridID = Number(arg.gridID);
+        const c = arg.card;
+        let row = 0;
+        let col = 0;
+
+        if (Number(arg.player_id) === Number(this.playerID)) {
+          row = Math.floor(gridID / 3) + 3;
+          col = gridID % 3;
+        } else {
+          row = 1 - Math.floor(gridID / 3);
+          col = gridID % 3;
+        }
+
+        if (this.gridData.cardIDs) {
+          this.gridData.cardIDs[col][row] = {
+            id: c.id,
+            cid: `mainCard${arg.card.type_arg}`,
+            meta: !c.meta
+              ? []
+              : c.meta.split(",").map((m) => {
+                  return {
+                    metaID: m,
+                  };
+                }),
+          };
         }
         break;
       }

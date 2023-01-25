@@ -38,7 +38,8 @@ CREATE TABLE IF NOT EXISTS `cards` (
   `card_type` varchar(16) NOT NULL,
   `card_type_arg` TINYINT UNSIGNED NOT NULL,
   `card_location` VARCHAR(16) NOT NULL,
-  `card_location_arg` int(11)
+  `card_location_arg` int(11),
+  `card_meta` VARCHAR(16)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
 
 CREATE TABLE IF NOT EXISTS `center` (

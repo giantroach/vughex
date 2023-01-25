@@ -12,7 +12,7 @@ interface Card {
   location_arg: string; // num str
   type: string; // num str
   type_arg: string; // num str
-  meta?: CardMeta[];
+  meta?: string;
 }
 
 interface Score {
