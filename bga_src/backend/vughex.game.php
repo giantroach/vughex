@@ -260,7 +260,9 @@ class Vughex extends Table
 
   function isEnabledCard($card, $id)
   {
-    // FIXME: oracle
+    if (str_contains($card["meta"], "oracle")) {
+      return false;
+    }
     if (intval($card["type_arg"]) === $id) {
       return true;
     }
@@ -442,6 +444,67 @@ class Vughex extends Table
     return self::getObjectFromDB($sql);
   }
 
+  // resolve effect of oracle / eclipse
+  function applyOracleOrEclipseEffect(
+    $cardName,
+    $playerID,
+    $oppoID,
+    $targetGridID,
+    $targetGridSide
+  ) {
+    if ($targetGridID === null) {
+      self::notifyPlayer($playerID, "logError", "", [
+        "message" => clienttranslate(
+          "Invalid target selection! You must select a target."
+        ),
+      ]);
+      return;
+    }
+
+    // target player
+    $targetPlayerID = $playerID;
+    if ($targetGridSide != "player") {
+      $targetPlayerID = $oppoID;
+    }
+
+    // get card info
+    $sql =
+      "SELECT card_id FROM cards WHERE card_location_arg='" .
+      abs(intval($targetGridID)) .
+      "' AND card_location='table" .
+      $targetPlayerID .
+      "'";
+    $targetCardID = self::getUniqueValueFromDB($sql);
+    $targetCardInfo = $this->getCard($targetCardID);
+
+    // append meta
+    $sql = "SELECT card_meta FROM cards WHERE card_id='" . $targetCardID . "'";
+    $meta = self::getUniqueValueFromDB($sql);
+    $meta .= $cardName . ",";
+    $sql =
+      "UPDATE cards SET card_meta='" .
+      $meta .
+      "' WHERE card_id='" .
+      $targetCardID .
+      "'";
+    self::DbQuery($sql);
+    $targetCardInfo["meta"] = $meta;
+
+    // reveal notification
+    $msg = clienttranslate(
+      '"the Oracle" disabled stealth and [Combat] ability.'
+    );
+    if ($cardName === "watcher") {
+      $msg = clienttranslate('"the Watcher" disabled stealth.');
+    }
+    self::notifyAllPlayers("updateCard", $msg, [
+      "player_id" => $targetPlayerID,
+      "player_name" => $this->getPlayerName($targetPlayerID),
+      "card" => $targetCardInfo,
+      "gridID" => abs(intval($targetGridID)),
+    ]);
+  }
+
   //////////////////////////////////////////////////////////////////////////////
   //////////// Player actions
   ////////////
@@ -495,57 +558,25 @@ class Vughex extends Table
     //     return;
     // }
 
-    // FIXME: oracle
+    // oracle
     if (intval($cardInfo["type_arg"]) === 0) {
-      if ($targetGridID === null) {
-        self::notifyPlayer($actorID, "logError", "", [
-          "message" => clienttranslate(
-            "Invalid target selection! You must select a target."
-          ),
-        ]);
-        return;
-      }
+      $this->applyOracleOrEclipseEffect(
+        "oracle",
+        $actorID,
+        $oppoID,
+        $targetGridID,
+        $targetGridSide
+      );
+    }
 
-      // target player
-      $targetPlayerID = $actorID;
-      if ($targetGridSide != "player") {
-        $targetPlayerID = $oppoID;
-      }
-
-      // get card info
-      $sql =
-        "SELECT card_id FROM cards WHERE card_location_arg='" .
-        abs(intval($targetGridID)) .
-        "' AND card_location='table" .
-        $targetPlayerID .
-        "'";
-      $targetCardID = self::getUniqueValueFromDB($sql);
-      $targetCardInfo = $this->getCard($targetCardID);
-
-      // append meta
-      $sql =
-        "SELECT card_meta FROM cards WHERE card_id='" . $targetCardID . "'";
-      $meta = self::getUniqueValueFromDB($sql);
-      $meta .= "oracle,";
-      $sql =
-        "UPDATE cards SET card_meta='" .
-        $meta .
-        "' WHERE card_id='" .
-        $targetCardID .
-        "'";
-      self::DbQuery($sql);
-      $targetCardInfo["meta"] = $meta;
-
-      // reveal notification
-      self::notifyAllPlayers(
-        "updateCard",
-        clienttranslate('"the Oracle" disabled stealth and [Combat] ability.'),
-        [
-          "player_id" => $targetPlayerID,
-          "player_name" => $this->getPlayerName($targetPlayerID),
-          "card" => $targetCardInfo,
-          "gridID" => abs(intval($targetGridID)),
-        ]
+    // watcher
+    if (intval($cardInfo["type_arg"]) === 5) {
+      $this->applyOracleOrEclipseEffect(
+        "watcher",
+        $actorID,
+        $oppoID,
+        $targetGridID,
+        $targetGridSide
       );
     }
 
