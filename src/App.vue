@@ -1,4 +1,9 @@
 <template>
+  <div id="preload">
+    <img src="@/assets/cardset-mini.png" />
+    <img src="@/assets/cardset.png" />
+  </div>
+
   <div>
     {{ num }}
     <button v-on:click="getNum">Get Num</button>
@@ -357,6 +362,11 @@ export default class App extends Vue {
 </script>
 
 <style lang="scss">
+#preload {
+  position: fixed;
+  top: -10000px;
+  left: -10000px;
+}
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;

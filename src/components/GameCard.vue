@@ -176,8 +176,8 @@ export default class GameCard extends Vue {
   public meta!: CardMeta[];
 
   public modal = false;
-  public modalTop = 0;
-  public modalLeft = 0;
+  public modalTop = -10000;
+  public modalLeft = -10000;
 
   public id!: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
