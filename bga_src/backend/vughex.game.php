@@ -817,7 +817,7 @@ class Vughex extends Table
     $tableCards = [];
     foreach ($allData["players"] as $playerID => $player) {
       $tableCards[$playerID] = array_values(
-        $this->cards->getCardsInLocation("table" . $playerID)
+        $this->getCardsInLocation("table" . $playerID)
       );
     }
 
@@ -962,7 +962,7 @@ class Vughex extends Table
       }
       $result["score"][$playerID] = $tmpResult;
       $result["table"][$playerID] = array_values(
-        $this->cards->getCardsInLocation("table" . $playerID)
+        $this->getCardsInLocation("table" . $playerID)
       );
 
       self::dump('$hasEclipse', $hasEclipse);
