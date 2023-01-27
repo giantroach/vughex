@@ -2,6 +2,7 @@ import {
   BgaNotification,
   BgaNewRoundNotif,
   BgaPlayCardNotif,
+  BgaMoveCardNotif,
   BgaUpdateCardNotif,
   BgaEndRoundNotif,
 } from "bga_src/client/type/bga-interface.d";
@@ -103,7 +104,7 @@ export class Sub {
       }
 
       case "updateCard": {
-        // i.e. oracle, watcher and maze
+        // i.e. oracle or watcher
         const arg = notif.args as BgaUpdateCardNotif;
         const gridID = Number(arg.gridID);
         const c = arg.card;
@@ -130,6 +131,37 @@ export class Sub {
                   };
                 }),
           };
+        }
+        break;
+      }
+
+      case "moveCard": {
+        // i.e. maze
+        const arg = notif.args as BgaMoveCardNotif;
+        const fromGridID = Number(arg.fromGridID);
+        const toGridID = Number(arg.toGridID);
+        let fromRow = 0;
+        let fromCol = 0;
+        let toRow = 0;
+        let toCol = 0;
+
+        if (Number(arg.player_id) === Number(this.playerID)) {
+          fromRow = Math.floor(fromGridID / 3) + 3;
+          fromCol = fromGridID % 3;
+          toRow = Math.floor(toGridID / 3) + 3;
+          toCol = toGridID % 3;
+        } else {
+          fromRow = 1 - Math.floor(fromGridID / 3);
+          fromCol = fromGridID % 3;
+          toRow = 1 - Math.floor(toGridID / 3);
+          toCol = toGridID % 3;
+        }
+
+        if (this.gridData.cardIDs) {
+          // if same id exists, remove it
+          const c = this.gridData.cardIDs[fromCol][fromRow];
+          this.gridData.cardIDs[fromCol][fromRow] = undefined;
+          this.gridData.cardIDs[toCol][toRow] = c;
         }
         break;
       }

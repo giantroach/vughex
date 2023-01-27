@@ -1,12 +1,7 @@
 <template>
   <div id="preload">
-    <img src="@/assets/cardset-mini.png" />
-    <img src="@/assets/cardset.png" />
-  </div>
-
-  <div>
-    {{ num }}
-    <button v-on:click="getNum">Get Num</button>
+    <img :src="urlBase.value + require('@/assets/cardset-mini.png')" />
+    <img :src="urlBase.value + require('@/assets/cardset.png')" />
   </div>
 
   <div>
@@ -350,12 +345,6 @@ export default class App extends Vue {
           }
         });
       });
-    });
-  }
-
-  public getNum(): void {
-    this.request("getNum", {
-      num: this.num,
     });
   }
 }

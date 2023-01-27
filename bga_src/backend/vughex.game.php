@@ -470,7 +470,7 @@ class Vughex extends Table
     // get card info
     $sql =
       "SELECT card_id FROM cards WHERE card_location_arg='" .
-      abs(intval($targetGridID)) .
+      intval($targetGridID) .
       "' AND card_location='table" .
       $targetPlayerID .
       "'";
@@ -501,7 +501,79 @@ class Vughex extends Table
       "player_id" => $targetPlayerID,
       "player_name" => $this->getPlayerName($targetPlayerID),
       "card" => $targetCardInfo,
-      "gridID" => abs(intval($targetGridID)),
+      "gridID" => intval($targetGridID),
+    ]);
+  }
+
+  function applyMazeEffect(
+    $playerID,
+    $oppoID,
+    $targetGridID,
+    $targetGridSide,
+    $targetCol
+  ) {
+    if ($targetGridID === null || $targetCol === null) {
+      self::notifyPlayer($playerID, "logError", "", [
+        "message" => clienttranslate(
+          "Invalid target selection! You must select a target / target column."
+        ),
+      ]);
+      return;
+    }
+
+    // target player
+    $targetPlayerID = $playerID;
+    if ($targetGridSide != "player") {
+      $targetPlayerID = $oppoID;
+    }
+
+    // get card info
+    $sql =
+      "SELECT card_id FROM cards WHERE card_location_arg='" .
+      intval($targetGridID) .
+      "' AND card_location='table" .
+      $targetPlayerID .
+      "'";
+    $targetCardID = self::getUniqueValueFromDB($sql);
+    $targetCardInfo = $this->getCard($targetCardID);
+
+    // find the grid ID
+    $lID1 = $targetCol;
+    $lID2 = $targetCol + 3;
+    $sql =
+      "SELECT count(*) FROM cards WHERE (card_location_arg='" .
+      $lID1 .
+      "' OR card_location_arg='" .
+      $lID2 .
+      "') AND card_location_arg='" .
+      $targetPlayerID .
+      "'";
+    $numOfCards = intval(self::getUniqueValueFromDB($sql));
+    if ($numOfCards > 1) {
+      self::notifyPlayer($playerID, "logError", "", [
+        "message" => clienttranslate(
+          "Invalid destination! You cannot select this column."
+        ),
+      ]);
+      return;
+    }
+    $gridID = $targetCol + $numOfCards * 3;
+    self::dump("$targetCol", $targetCol);
+    self::dump("$numOfCards", $numOfCards);
+    self::dump("$gridID", $gridID);
+
+    // move card
+    $this->cards->moveCard($targetCardID, "table" . $targetPlayerID, $gridID);
+    $targetCardInfo["location_arg"] = $gridID;
+
+    // move notification
+    $msg = clienttranslate('"the Maze" moved a stealth card.');
+    // FIXME: this reveals steal content
+    self::notifyAllPlayers("moveCard", $msg, [
+      "player_id" => $targetPlayerID,
+      "player_name" => $this->getPlayerName($targetPlayerID),
+      "fromGridID" => $targetGridID,
+      "toGridID" => $gridID,
     ]);
   }
 
@@ -514,8 +586,13 @@ class Vughex extends Table
       (note: each method below must match an input method in vughex.action.php)
     */
 
-  function playCard($cardID, $gridID, $targetGridID, $targetGridSide)
-  {
+  function playCard(
+    $cardID,
+    $gridID,
+    $targetGridID,
+    $targetGridSide,
+    $targetCol
+  ) {
     $cardInfo = $this->getCard($cardID);
     $actorID = self::getActivePlayerId();
     $oppoID = $this->getOppoID($actorID);
@@ -580,6 +657,18 @@ class Vughex extends Table
       );
     }
 
+    // maze
+    if (intval($cardInfo["type_arg"]) === 8) {
+      self::dump("$targetCol", $targetCol);
+      $this->applyMazeEffect(
+        $actorID,
+        $oppoID,
+        $targetGridID,
+        $targetGridSide,
+        $targetCol
+      );
+    }
+
     $this->cards->moveCard($cardID, "table" . $actorID, $gridID);
 
     $numberOfcards = $this->cards->countCardInLocation("hand", $actorID);
@@ -631,22 +720,6 @@ class Vughex extends Table
         ]
       );
     }
-
-    $this->gamestate->nextState("nextPlayer");
-  }
-
-  function getNum($num)
-  {
-    $actorID = self::getActivePlayerId();
-    self::notifyAllPlayers(
-      "getNum",
-      clienttranslate('${player_name} got ${num}.'),
-      [
-        "player_id" => $actorID,
-        "player_name" => self::getActivePlayerName(),
-        "num" => $num + 1,
-      ]
-    );
 
     $this->gamestate->nextState("nextPlayer");
   }

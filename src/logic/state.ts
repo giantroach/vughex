@@ -260,12 +260,14 @@ class State {
 
         const gridID = this.getSelectedGrid(0).id;
         const targetGrid = this.getSelectedGrid(1);
+        const targetCol = this.getSelectedCol();
 
         this.request("playCard", {
           card: c.id,
           gridID: gridID,
           targetGridID: targetGrid.id,
           targetGridSide: targetGrid.side,
+          targetCol: targetCol,
         });
         this.setState("playerTurn:afterSubmit");
         break;
@@ -441,7 +443,7 @@ class State {
       }
       let ymax = 5;
       if (y < 2) {
-        ymax = 1;
+        ymax = 0;
       }
       if (this.gridData.cardIDs?.[ix]?.[ymax]) {
         selectableCol[ix] = false;
@@ -569,6 +571,29 @@ class State {
     });
     result.id = gridID;
     return result;
+  }
+
+  private getSelectedCol(): number | null {
+    const idx = (this.gridData.selectedCol || []).findIndex((col) => {
+      if (!col) {
+        return false;
+      }
+      return true;
+    });
+
+    if (idx < 0) {
+      return null;
+    }
+
+    return idx;
+    // return (
+    //   this.gridData.selectedCol?.findIndex((col, colIdx) => {
+    //     if (col) {
+    //       return false;
+    //     }
+    //     return true;
+    //   }) ?? null
+    // );
   }
 
   // avoid unnecessary update
