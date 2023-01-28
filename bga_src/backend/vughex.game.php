@@ -444,8 +444,7 @@ class Vughex extends Table
     return self::getObjectFromDB($sql);
   }
 
-  // resolve effect of oracle / eclipse
-  function applyOracleOrEclipseEffect(
+  function applyWatcherEffect(
     $cardName,
     $playerID,
     $oppoID,
@@ -453,14 +452,70 @@ class Vughex extends Table
     $targetGridSide
   ) {
     if ($targetGridID === null) {
+      // allow only if there is no valid target
+      $sql = "select card_type_arg type_arg from cards where card_meta=''";
+      $types = self::getObjectListFromDB($sql);
+      foreach ($types as $t) {
+        $cardInfo = $this->card_types[intval($t)];
+        if ($cardInfo->stealth) {
+          self::notifyPlayer($playerID, "logError", "", [
+            "message" => clienttranslate(
+              "Invalid target selection! You must select a target."
+            ),
+          ]);
+          return false;
+        }
+      }
+      return true;
+    }
+
+    $this->applyMetaChange(
+      $cardName,
+      $playerID,
+      $oppoID,
+      $targetGridID,
+      $targetGridSide
+    );
+
+    return true;
+  }
+
+  // resolve effect of oracle / eclipse
+  function applyOracleEffect(
+    $cardName,
+    $playerID,
+    $oppoID,
+    $targetGridID,
+    $targetGridSide
+  ) {
+    if ($targetGridID === null) {
+      // oracle never has no target
       self::notifyPlayer($playerID, "logError", "", [
         "message" => clienttranslate(
           "Invalid target selection! You must select a target."
         ),
       ]);
-      return;
+      return false;
     }
 
+    $this->applyMetaChange(
+      $cardName,
+      $playerID,
+      $oppoID,
+      $targetGridID,
+      $targetGridSide
+    );
+
+    return true;
+  }
+
+  function applyMetaChange(
+    $cardName,
+    $playerID,
+    $oppoID,
+    $targetGridID,
+    $targetGridSide
+  ) {
     // target player
     $targetPlayerID = $playerID;
     if ($targetGridSide != "player") {
@@ -518,7 +573,7 @@ class Vughex extends Table
           "Invalid target selection! You must select a target / target column."
         ),
       ]);
-      return;
+      return false;
     }
 
     // target player
@@ -568,13 +623,14 @@ class Vughex extends Table
 
     // move notification
     $msg = clienttranslate('"the Maze" moved a stealth card.');
-    // FIXME: this reveals steal content
     self::notifyAllPlayers("moveCard", $msg, [
       "player_id" => $targetPlayerID,
       "player_name" => $this->getPlayerName($targetPlayerID),
       "fromGridID" => $targetGridID,
       "toGridID" => $gridID,
     ]);
+
+    return true;
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -637,36 +693,50 @@ class Vughex extends Table
 
     // oracle
     if (intval($cardInfo["type_arg"]) === 0) {
-      $this->applyOracleOrEclipseEffect(
-        "oracle",
-        $actorID,
-        $oppoID,
-        $targetGridID,
-        $targetGridSide
-      );
+      if (
+        !$this->applyOracleEffect(
+          "oracle",
+          $actorID,
+          $oppoID,
+          $targetGridID,
+          $targetGridSide
+        )
+      ) {
+        // invalid target
+        return;
+      }
     }
 
     // watcher
     if (intval($cardInfo["type_arg"]) === 5) {
-      $this->applyOracleOrEclipseEffect(
-        "watcher",
-        $actorID,
-        $oppoID,
-        $targetGridID,
-        $targetGridSide
-      );
+      if (
+        !$this->applyWatcherEffect(
+          "watcher",
+          $actorID,
+          $oppoID,
+          $targetGridID,
+          $targetGridSide
+        )
+      ) {
+        // invalid target
+        return;
+      }
     }
 
     // maze
     if (intval($cardInfo["type_arg"]) === 8) {
-      self::dump("$targetCol", $targetCol);
-      $this->applyMazeEffect(
-        $actorID,
-        $oppoID,
-        $targetGridID,
-        $targetGridSide,
-        $targetCol
-      );
+      if (
+        !$this->applyMazeEffect(
+          $actorID,
+          $oppoID,
+          $targetGridID,
+          $targetGridSide,
+          $targetCol
+        )
+      ) {
+        // invalid target
+        return;
+      }
     }
 
     $this->cards->moveCard($cardID, "table" . $actorID, $gridID);
