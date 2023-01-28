@@ -568,12 +568,28 @@ class Vughex extends Table
     $targetCol
   ) {
     if ($targetGridID === null || $targetCol === null) {
-      self::notifyPlayer($playerID, "logError", "", [
-        "message" => clienttranslate(
-          "Invalid target selection! You must select a target / target column."
-        ),
-      ]);
-      return false;
+      // allow if there is no stealth unit (without meta)
+      $loc1 = intval($targetGridID);
+      $loc2 = $loc1 > 2 ? $loc1 + 3 : $loc1 - 3;
+      $sql =
+        "select card_type_arg type_arg from cards where card_meta='' AND (card_location_arg='" .
+        $loc1 .
+        "' OR card_location_arg='" .
+        $loc2 .
+        "')";
+      $types = self::getObjectListFromDB($sql);
+      foreach ($types as $t) {
+        $cardInfo = $this->card_types[intval($t)];
+        if ($cardInfo->stealth) {
+          self::notifyPlayer($playerID, "logError", "", [
+            "message" => clienttranslate(
+              "Invalid target selection! You must select a target / target column."
+            ),
+          ]);
+          return false;
+        }
+      }
+      return true;
     }
 
     // target player
@@ -600,7 +616,7 @@ class Vughex extends Table
       $lID1 .
       "' OR card_location_arg='" .
       $lID2 .
-      "') AND card_location_arg='" .
+      "') AND card_location='table" .
       $targetPlayerID .
       "'";
     $numOfCards = intval(self::getUniqueValueFromDB($sql));
