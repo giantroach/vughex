@@ -41,7 +41,9 @@ interface Gamedata {
   player_cards: Card[];
   player_table: Card[];
   oppo_table: Card[];
-  day_or_night: 'day' | 'night';
+  day_or_night: "day" | "night";
+  reincarnated_card_id?: string | null;
+  reincarnated_col?: string | null;
 }
 
 export { CardMeta, Card, Score, Gamedata };

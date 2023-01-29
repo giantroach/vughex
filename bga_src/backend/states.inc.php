@@ -75,7 +75,11 @@ $machinestates = [
     "descriptionmyturn" => clienttranslate('${you} must play a card'),
     "type" => "activeplayer",
     "possibleactions" => ["playCard"],
-    "transitions" => ["nextPlayer" => 4, "zombiePass" => 4],
+    "transitions" => [
+      "nextPlayer" => 4,
+      "zombiePass" => 4,
+      "reincarnation" => 5,
+    ],
   ],
 
   4 => [
@@ -84,6 +88,27 @@ $machinestates = [
     "action" => "stNextPlayer",
     "updateGameProgression" => true,
     "transitions" => ["playerTurn" => 3, "endRound" => 10],
+  ],
+
+  5 => [
+    "name" => "reincarnation",
+    "type" => "game",
+    "action" => "stReincarnationNextPlayer",
+    "updateGameProgression" => true,
+    "transitions" => ["reincarnationTurn" => 6],
+  ],
+
+  6 => [
+    "name" => "reincarnationTurn",
+    "description" => clienttranslate(
+      '${actplayer} must play the reincarnated card'
+    ),
+    "descriptionmyturn" => clienttranslate(
+      '${you} must play the reincarnated card'
+    ),
+    "type" => "activeplayer",
+    "possibleactions" => ["playCard"],
+    "transitions" => ["nextPlayer" => 4, "zombiePass" => 4],
   ],
 
   10 => [

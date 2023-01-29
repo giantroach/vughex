@@ -1,7 +1,13 @@
 import { Card, Score, Center } from "./gamedata";
 import { Player } from "./framework.d";
 
-type BgaNotifyName = "newRound" | "playCard" | "moveCard" | "updateCard" | "endRound";
+type BgaNotifyName =
+  | "newRound"
+  | "playCard"
+  | "moveCard"
+  | "updateCard"
+  | "reincarnateCard"
+  | "endRound";
 
 interface BgaRequest {
   name: string;
@@ -10,7 +16,13 @@ interface BgaRequest {
 
 interface BgaNotification {
   name: BgaNotifyName;
-  args: BgaNewRoundNotif | BgaPlayCardNotif | BgaMoveCardNotif | BgaEndRoundNotif;
+  args:
+    | BgaNewRoundNotif
+    | BgaPlayCardNotif
+    | BgaMoveCardNotif
+    | BgaUpdateCardNotif
+    | BgaReincarnateCardNotif
+    | BgaEndRoundNotif;
 }
 
 interface BgaNewRoundNotif {
@@ -48,6 +60,14 @@ interface BgaUpdateCardNotif {
   gridID: string;
 }
 
+interface BgaReincarnateCardNotif {
+  player_id: string; // num string
+  player_name: string;
+  card?: Card;
+  col?: string;
+  gridID: string;
+}
+
 interface BgaEndRoundNotif {
   score: Score;
   table: {
@@ -69,5 +89,6 @@ export {
   BgaPlayCardNotif,
   BgaMoveCardNotif,
   BgaUpdateCardNotif,
+  BgaReincarnateCardNotif,
   BgaEndRoundNotif,
 };

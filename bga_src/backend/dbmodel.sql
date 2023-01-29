@@ -53,4 +53,11 @@ CREATE TABLE IF NOT EXISTS `round` (
   `round_side` varchar(10) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
 
+CREATE TABLE IF NOT EXISTS `reincarnation` (
+  `reincarnation_card_id` INT(10) UNSIGNED,
+  `reincarnation_col` INT(10) UNSIGNED,
+  `reincarnation_current_player` INT(10) UNSIGNED,
+  `reincarnation_next_player` INT(10) UNSIGNED
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
+
 -- ALTER TABLE `player` ADD `player_side` VARCHAR(16);

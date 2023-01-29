@@ -73,6 +73,7 @@ import { GridData } from "./type/Grid.d";
 import { HandData } from "./type/Hand.d";
 import { CtrlButtonData } from "./type/CtrlButton.d";
 import { ScoreData } from "./type/Score.d";
+import { ReincarnationData } from "./type/Reincarnation.d";
 import { cardDefs, cardMetaDefs } from "./def/card";
 import { gridDefs } from "./def/grid";
 import { handDefs } from "./def/hand";
@@ -152,6 +153,10 @@ export default class App extends Vue {
     myScore: [],
   };
 
+  public reincarnationData: ReincarnationData = {
+    reincarnatedCardID: null,
+  };
+
   public gamedata: Gamedata = {
     current_player_id: "",
     decision: { decision_type: "" },
@@ -167,6 +172,7 @@ export default class App extends Vue {
     oppo_table: [],
     tablespeed: "",
     day_or_night: "day",
+    reincarnated_card_id: null,
   };
 
   public playerID = -1;
@@ -255,12 +261,20 @@ export default class App extends Vue {
       };
     });
 
+    this.reincarnationData.reincarnatedCardID =
+      this.gamedata.reincarnated_card_id || null;
+
+    this.reincarnationData.reincarnatedCol = this.gamedata.reincarnated_col
+      ? Number(this.gamedata.reincarnated_col)
+      : null;
+
     this.state = new State(
       this.request,
       this.gridData,
       this.handData,
       this.scoreData,
       this.ctrlButtonData,
+      this.reincarnationData,
     );
     this.state.refresh();
     this.sub = new Sub(
@@ -268,6 +282,7 @@ export default class App extends Vue {
       this.gridData,
       this.handData,
       this.scoreData,
+      this.reincarnationData,
     );
   }
 

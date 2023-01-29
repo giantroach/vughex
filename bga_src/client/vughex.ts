@@ -107,6 +107,12 @@ define([
           }
           break;
 
+        case "reincarnationTurn":
+          if (this.isCurrentPlayerActive()) {
+            vue.bgaStates.push("reincarnationTurn:init");
+          }
+          break;
+
         case "endRound":
           vue.bgaStates.push("endRound");
           break;
@@ -124,6 +130,10 @@ define([
 
       switch (stateName) {
         case "playerTurn":
+          vue.bgaStates.push("waitingForOtherPlayer");
+          break;
+
+        case "reincarnationTurn":
           vue.bgaStates.push("waitingForOtherPlayer");
           break;
 
@@ -247,7 +257,15 @@ define([
         this.scoreCtrl[data.args.playerID].incValue(1);
       });
 
-      const notifications = ["newRound", "getNum", "playCard", "moveCard", "updateCard", "endRound"];
+      const notifications = [
+        "newRound",
+        "getNum",
+        "playCard",
+        "moveCard",
+        "updateCard",
+        "reincarnateCard",
+        "endRound",
+      ];
       notifications.forEach((n) => {
         dojo.subscribe(n, this, (data: any) => {
           vue.bgaNotifications.push({

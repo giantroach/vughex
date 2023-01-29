@@ -4,6 +4,7 @@ import {
   BgaPlayCardNotif,
   BgaMoveCardNotif,
   BgaUpdateCardNotif,
+  BgaReincarnateCardNotif,
   BgaEndRoundNotif,
 } from "bga_src/client/type/bga-interface.d";
 import { objToArray } from "../util/util";
@@ -11,6 +12,7 @@ import { objToArray } from "../util/util";
 import { GridData } from "../type/Grid.d";
 import { HandData } from "../type/Hand.d";
 import { ScoreData } from "../type/Score.d";
+import { ReincarnationData } from "../type/Reincarnation.d";
 
 //
 // Sub handles BGA notifications and apply data accordingly.
@@ -22,6 +24,7 @@ export class Sub {
     private gridData: GridData,
     private handData: HandData,
     private scoreData: ScoreData,
+    private reincarnationData: ReincarnationData,
   ) {}
 
   public handle(notif: BgaNotification) {
@@ -163,6 +166,51 @@ export class Sub {
           this.gridData.cardIDs[fromCol][fromRow] = undefined;
           this.gridData.cardIDs[toCol][toRow] = c;
         }
+        break;
+      }
+
+      case "reincarnateCard": {
+        // i.e. reincarnation
+        const arg = notif.args as BgaReincarnateCardNotif;
+        console.log("reincarnateCard", arg);
+        const gridID = Number(arg.gridID);
+        const playerID = Number(arg.player_id);
+        const c = arg.card;
+        const reincarnatedCol = arg.col;
+        let row = 0;
+        let col = 0;
+
+        if (playerID === Number(this.playerID)) {
+          row = Math.floor(gridID / 3) + 3;
+          col = gridID % 3;
+        } else {
+          row = 1 - Math.floor(gridID / 3);
+          col = gridID % 3;
+        }
+
+        if (this.gridData.cardIDs) {
+          this.gridData.cardIDs[col][row] = undefined;
+        }
+
+        if (playerID === Number(this.playerID) && c) {
+          this.handData.cardIDs?.push({
+            id: c.id,
+            cid: `mainCard${c.type_arg}`,
+            meta: !c.meta
+              ? []
+              : c.meta.split(",").map((m) => {
+                  return {
+                    metaID: m,
+                  };
+                }),
+          });
+        }
+
+        this.reincarnationData.reincarnatedCardID = c?.id || null;
+        this.reincarnationData.reincarnatedCol = reincarnatedCol
+          ? Number(reincarnatedCol)
+          : null;
+
         break;
       }
 

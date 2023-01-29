@@ -197,7 +197,6 @@ class Vughex extends Table
 
     foreach ($this->getCardsInLocation("table" . $oppo_id) as $card) {
       $c = $this->card_types[intval($card["type_arg"])];
-      // FIXME: it looks like getCardsInLocation does not return those newly added props..
       if ($c->stealth && !$card["meta"]) {
         $result["oppo_table"][] = [
           "id" => "0",
@@ -214,6 +213,18 @@ class Vughex extends Table
     $sql = "SELECT round_side FROM round";
     $round_side = self::getUniqueValueFromDB($sql);
     $result["day_or_night"] = $round_side;
+
+    // FIXME: return only when current player is matched
+    $sql =
+      "SELECT reincarnation_card_id card_id, reincarnation_col col, reincarnation_current_player current_player FROM reincarnation";
+    $reincarnation = self::getObjectFromDB($sql);
+    if (
+      $reincarnation &&
+      intval($reincarnation["current_player"]) === intval($current_player_id)
+    ) {
+      $result["reincarnated_card_id"] = $reincarnation["card_id"];
+      $result["reincarnated_col"] = $reincarnation["col"];
+    }
 
     return $result;
   }
@@ -649,6 +660,95 @@ class Vughex extends Table
     return true;
   }
 
+  function applyReincarnationEffect(
+    $playerID,
+    $oppoID,
+    $targetGridID,
+    $targetGridSide
+  ) {
+    if ($targetGridID === null) {
+      // reincarnation never has no target
+      self::notifyPlayer($playerID, "logError", "", [
+        "message" => clienttranslate(
+          "Invalid target selection! You must select a target."
+        ),
+      ]);
+      return false;
+    }
+
+    // target col
+    $targetCol = intval($targetGridID);
+    if ($targetCol > 2) {
+      $targetCol = $targetCol - 3;
+    }
+
+    // target player
+    $targetPlayerID = $playerID;
+    $nonTargetPlayerID = $playerID;
+    if ($targetGridSide != "player") {
+      $targetPlayerID = $oppoID;
+    } else {
+      $nonTargetPlayerID = $oppoID;
+    }
+
+    // Check if the card in the grid is non-stealth
+    $sql =
+      "SELECT card_id id, card_type_arg type_arg, card_meta meta FROM cards WHERE card_location='table" .
+      $targetPlayerID .
+      "' AND card_location_arg='" .
+      $targetGridID .
+      "'";
+    $targetCard = self::getObjectFromDB($sql);
+    $targetCardInfo = $this->card_types[intval($targetCard["type_arg"])];
+    if (!$targetCard["meta"] && $targetCardInfo->stealth) {
+      self::notifyPlayer($playerID, "logError", "", [
+        "message" => clienttranslate(
+          "Invalid target selection! You cannot select a stealth unit."
+        ),
+      ]);
+      return false;
+    }
+
+    // remove card from a table
+    $this->cards->moveCard($targetCard["id"], "discard", 0);
+    $newCard = $this->cards->pickCard("deck", $targetPlayerID);
+    $msg = clienttranslate('"the Reincarnation" removed a stealth card.');
+    // this cannot be AllPlayers
+    self::notifyPlayer($targetPlayerID, "reincarnateCard", $msg, [
+      "player_id" => $targetPlayerID,
+      "player_name" => $this->getPlayerName($targetPlayerID),
+      "gridID" => $targetGridID,
+      "col" => $targetCol,
+      "card" => $newCard,
+    ]);
+    self::notifyPlayer($nonTargetPlayerID, "reincarnateCard", $msg, [
+      "player_id" => $targetPlayerID,
+      "player_name" => $this->getPlayerName($targetPlayerID),
+      "gridID" => $targetGridID,
+    ]);
+
+    // Update reincarnation table
+    $currentPlayerID = $playerID;
+    $nextPlayerID = $oppoID;
+    if (intval($playerID) !== intval($targetPlayerID)) {
+      $currentPlayerID = $oppoID;
+    }
+    $sql =
+      "INSERT INTO reincarnation (" .
+      "reincarnation_card_id, reincarnation_col, reincarnation_current_player, reincarnation_next_player" .
+      ") VALUES ('" .
+      $newCard["id"] .
+      "', '" .
+      $targetCol .
+      "', '" .
+      $currentPlayerID .
+      "', '" .
+      $nextPlayerID .
+      "');";
+    self::DbQuery($sql);
+    return true;
+  }
+
   //////////////////////////////////////////////////////////////////////////////
   //////////// Player actions
   ////////////
@@ -807,6 +907,23 @@ class Vughex extends Table
       );
     }
 
+    // reincarnation
+    if (intval($cardInfo["type_arg"]) === 1) {
+      if (
+        !$this->applyReincarnationEffect(
+          $actorID,
+          $oppoID,
+          $targetGridID,
+          $targetGridSide
+        )
+      ) {
+        // invalid target (suppose not happen)
+        return;
+      }
+      $this->gamestate->nextState("reincarnation");
+      return;
+    }
+
     $this->gamestate->nextState("nextPlayer");
   }
 
@@ -938,16 +1055,40 @@ class Vughex extends Table
     foreach ($allData["players"] as $playerID => $player) {
       // if any player has a card, go next player
       if ($this->cards->countCardInLocation("hand", $playerID) > 0) {
-        $playerID = self::activeNextPlayer();
-
-        self::giveExtraTime($playerID);
-        $this->gamestate->nextState("playerTurn");
+        // clear reincarnation table
+        $sql =
+          "SELECT reincarnation_next_player next_player FROM reincarnation";
+        $nextPlayer = self::getUniqueValueFromDB($sql);
+        if ($nextPlayer) {
+          $sql = "DELETE FROM reincarnation";
+          self::DbQuery($sql);
+          $this->gamestate->changeActivePlayer($nextPlayer);
+          self::giveExtraTime($nextPlayer);
+          $this->gamestate->nextState("playerTurn");
+        } else {
+          $playerID = self::activeNextPlayer();
+          self::giveExtraTime($playerID);
+          $this->gamestate->nextState("playerTurn");
+        }
 
         return;
       }
     }
 
+    // clear reincarnation table
+    $sql = "DELETE FROM reincarnation";
+    self::DbQuery($sql);
+
     $this->gamestate->nextState("endRound");
+  }
+
+  function stReincarnationNextPlayer()
+  {
+    $sql =
+      "select reincarnation_current_player current_player, reincarnation_next_player next_player from reincarnation";
+    $reincarnation = self::getObjectFromDB($sql);
+    $this->gamestate->changeActivePlayer($reincarnation["current_player"]);
+    $this->gamestate->nextState("reincarnationTurn");
   }
 
   function stEndRound()

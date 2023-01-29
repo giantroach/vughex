@@ -2,6 +2,7 @@ import { GridData, Overlay } from "../type/Grid.d";
 import { HandData } from "../type/Hand.d";
 import { ScoreData } from "../type/Score.d";
 import { CtrlButtonData } from "../type/CtrlButton.d";
+import { ReincarnationData } from "../type/Reincarnation.d";
 import { watch } from "vue";
 import { cardUtil } from "../def/card";
 import { gridUtil } from "../def/grid";
@@ -23,9 +24,32 @@ type CurrentState =
   | "playerTurn:afterTargetSelect"
   | "playerTurn:submit"
   | "playerTurn:afterSubmit"
+  | "reincarnationTurn:init"
+  | "reincarnationTurn:beforeCardSelect"
+  | "reincarnationTurn:afterCardSelect"
+  | "reincarnationTurn:beforeGridSelect"
+  | "reincarnationTurn:afterGridSelect"
+  | "reincarnationTurn:beforeTargetSelect"
+  | "reincarnationTurn:beforeTargetSelect2"
+  | "reincarnationTurn:afterTargetSelect"
+  | "reincarnationTurn:submit"
+  | "reincarnationTurn:afterSubmit"
   | "endRound"
   | "endRound:afterAnim"
   | "otherPlayerTurn";
+
+type SubState =
+  | "init"
+  | "beforeCardSelect"
+  | "afterCardSelect"
+  | "beforeGridSelect"
+  | "afterGridSelect"
+  | "beforeTargetSelect"
+  | "beforeTargetSelect2"
+  | "afterTargetSelect"
+  | "submit"
+  | "afterSubmit";
+
 type BoardSide = "player" | "oppo";
 
 //
@@ -40,6 +64,7 @@ class State {
     private handData: HandData,
     private scoreData: ScoreData,
     private ctrlButtonData: CtrlButtonData,
+    private reincarnationData: ReincarnationData,
   ) {
     this.throttledRefresh = throttle(this.refresh, 100, this);
     watch(
@@ -81,28 +106,57 @@ class State {
         this.assign(this.gridData, "selectedCol", []);
         this.assign(this.gridData, "selectableCol", []);
         this.assign(this.gridData, "ghosts", []);
-        this.setState("playerTurn:beforeCardSelect");
+        this.setSubState("beforeCardSelect");
         this.ctrlButtonData.submit.display = false;
         this.ctrlButtonData.cancel.display = false;
         break;
 
+      case "reincarnationTurn:init": {
+        this.assign(this.handData, "active", true);
+        this.assign(this.handData, "selected", []);
+        const selectable = new Array(this.handData.cardIDs?.length || 0).fill(
+          false,
+        );
+        // here we should select only the reincarnated card id
+        this.handData.cardIDs?.forEach((c, idx) => {
+          if (
+            Number(c.id) === Number(this.reincarnationData.reincarnatedCardID)
+          ) {
+            selectable[idx] = true;
+          }
+        });
+        this.assign(this.handData, "selectable", selectable);
+        this.assign(this.gridData, "selected", []);
+        this.assign(this.gridData, "selectable", []);
+        this.assign(this.gridData, "selectedCol", []);
+        this.assign(this.gridData, "selectableCol", []);
+        this.assign(this.gridData, "ghosts", []);
+        this.setSubState("beforeCardSelect");
+        this.ctrlButtonData.submit.display = false;
+        this.ctrlButtonData.cancel.display = false;
+        break;
+      }
+
       case "playerTurn:beforeCardSelect":
+      case "reincarnationTurn:beforeCardSelect":
         if (this.handData.selected?.includes(true)) {
-          this.setState("playerTurn:afterCardSelect");
+          this.setSubState("afterCardSelect");
           break;
         }
         break;
 
       case "playerTurn:afterCardSelect":
+      case "reincarnationTurn:afterCardSelect":
         this.ctrlButtonData.cancel.display = true;
-        this.setState("playerTurn:beforeGridSelect");
+        this.setSubState("beforeGridSelect");
         break;
 
       case "playerTurn:beforeGridSelect":
+      case "reincarnationTurn:beforeGridSelect":
         if (!this.handData.selected?.includes(true)) {
           this.assign(this.gridData, "active", false);
           this.assign(this.gridData, "selected", []);
-          this.setState("playerTurn:beforeCardSelect");
+          this.setSubState("beforeCardSelect");
           break;
         }
         if (
@@ -110,14 +164,15 @@ class State {
             return row?.includes(true);
           })
         ) {
-          this.setState("playerTurn:afterGridSelect");
+          this.setSubState("afterGridSelect");
           break;
         }
         this.assign(this.gridData, "active", true);
         this.setPlayerGridSelectable();
         break;
 
-      case "playerTurn:afterGridSelect": {
+      case "playerTurn:afterGridSelect":
+      case "reincarnationTurn:afterGridSelect": {
         const c = handUtil.findFirstSelectedID(this.handData);
         if (!c) {
           this.current = "playerTurn:afterCardSelect";
@@ -140,11 +195,12 @@ class State {
         this.assign(this.gridData, "ghosts", ghosts);
         this.assign(this.gridData, "selectable", []);
         this.assign(this.handData, "selectable", []);
-        this.setState("playerTurn:beforeTargetSelect");
+        this.setSubState("beforeTargetSelect");
         break;
       }
 
-      case "playerTurn:beforeTargetSelect": {
+      case "playerTurn:beforeTargetSelect":
+      case "reincarnationTurn:beforeTargetSelect": {
         const cardIdx = this.handData.selected?.indexOf(true);
         if (cardIdx === undefined) {
           throw "unexpected state";
@@ -156,11 +212,11 @@ class State {
 
         const def = cardUtil.getCard(c.cid);
         if (!def) {
-          this.setState("playerTurn:beforeGridSelect");
+          this.setSubState("beforeGridSelect");
           break;
         }
         if (!def.onPlay) {
-          this.setState("playerTurn:afterTargetSelect");
+          this.setSubState("afterTargetSelect");
           break;
         }
 
@@ -170,10 +226,10 @@ class State {
         });
         if (targetSelected) {
           if (def.onPlay === "TargetSameLaneToAnother:Maze") {
-            this.setState("playerTurn:beforeTargetSelect2");
+            this.setSubState("beforeTargetSelect2");
             break;
           } else {
-            this.setState("playerTurn:afterTargetSelect");
+            this.setSubState("afterTargetSelect");
             break;
           }
         }
@@ -183,56 +239,58 @@ class State {
         switch (def.onPlay) {
           case "TargetSameLane:Silence": {
             if (!this.setTargetSameLane(x)) {
-              this.setState("playerTurn:afterTargetSelect");
+              this.setSubState("afterTargetSelect");
               break;
             }
             break;
           }
           case "TargetNonStealthSameLane:Reincanate": {
             if (!this.setTargetSameLaneNonStealth(x, y)) {
-              this.setState("playerTurn:afterTargetSelect");
+              this.setSubState("afterTargetSelect");
               break;
             }
             break;
           }
           case "TargeAnytStealth:Reveal": {
             if (!this.setTargetAnyStealth()) {
-              this.setState("playerTurn:afterTargetSelect");
+              this.setSubState("afterTargetSelect");
               break;
             }
             break;
           }
           case "TargetSameLaneToAnother:Maze": {
             if (!this.setTargetSameLaneStealth(x)) {
-              this.setState("playerTurn:afterTargetSelect");
+              this.setSubState("afterTargetSelect");
               break;
             }
             break;
           }
           default: {
-            this.setState("playerTurn:afterTargetSelect");
+            this.setSubState("afterTargetSelect");
             break;
           }
         }
         break;
       }
 
-      case "playerTurn:beforeTargetSelect2": {
+      case "playerTurn:beforeTargetSelect2":
+      case "reincarnationTurn:beforeTargetSelect2": {
         const [x, y] = this.getSelectedCoordinate(1);
         const laneSelectable = this.setTargetAnotherLane(x, y);
         this.gridData.selectable = [];
         if (!laneSelectable) {
-          this.setState("playerTurn:afterTargetSelect");
+          this.setSubState("afterTargetSelect");
           break;
         }
         if (this.gridData.selectedCol?.includes(true)) {
-          this.setState("playerTurn:afterTargetSelect");
+          this.setSubState("afterTargetSelect");
           break;
         }
         break;
       }
 
-      case "playerTurn:afterTargetSelect": {
+      case "playerTurn:afterTargetSelect":
+      case "reincarnationTurn:afterTargetSelect": {
         const cardIdx = this.handData.selected?.indexOf(true);
         if (cardIdx === undefined) {
           throw "unexpected state";
@@ -246,7 +304,8 @@ class State {
         break;
       }
 
-      case "playerTurn:submit": {
+      case "playerTurn:submit":
+      case "reincarnationTurn:submit": {
         const cardIdx = this.handData.selected?.indexOf(true);
         if (cardIdx === undefined) {
           throw "unexpected state";
@@ -269,11 +328,16 @@ class State {
           targetGridSide: targetGrid.side,
           targetCol: targetCol,
         });
-        this.setState("playerTurn:afterSubmit");
+        this.setSubState("afterSubmit");
         break;
       }
 
       case "playerTurn:afterSubmit": {
+        break;
+      }
+      case "reincarnationTurn:afterSubmit": {
+        this.reincarnationData.reincarnatedCardID = null;
+        this.reincarnationData.reincarnatedCol = null;
         break;
       }
 
@@ -295,8 +359,6 @@ class State {
         break;
       }
     }
-
-    // console.log("debug", this.current, this.gridData, this.handData);
   }
 
   public setState(state: CurrentState): void {
@@ -304,9 +366,21 @@ class State {
     this.throttledRefresh();
   }
 
+  public setSubState(subState: SubState): void {
+    this.current = this.current.replace(/:.+/, `:${subState}`) as CurrentState;
+    this.throttledRefresh();
+  }
+
   public cancelState(): void {
     if (/^playerTurn/.test(this.current)) {
       this.current = "playerTurn:init";
+      this.ctrlButtonData.cancel.display = false;
+      this.ctrlButtonData.submit.display = false;
+      this.undoPlayedCard();
+      this.throttledRefresh();
+    }
+    if (/^reincarnationTurn/.test(this.current)) {
+      this.current = "reincarnationTurn:init";
       this.ctrlButtonData.cancel.display = false;
       this.ctrlButtonData.submit.display = false;
       this.undoPlayedCard();
@@ -321,11 +395,23 @@ class State {
       this.ctrlButtonData.submit.display = false;
       this.throttledRefresh();
     }
+    if (/^reincarnationTurn/.test(this.current)) {
+      this.current = "reincarnationTurn:submit";
+      this.ctrlButtonData.cancel.display = false;
+      this.ctrlButtonData.submit.display = false;
+      this.throttledRefresh();
+    }
   }
 
   private setPlayerGridSelectable(): void {
     const selectable: boolean[][][] = [[[], [], []]];
     for (let i = 0; i < 3; i += 1) {
+      if (
+        this.reincarnationData.reincarnatedCol !== null &&
+        this.reincarnationData.reincarnatedCol !== i
+      ) {
+        continue;
+      }
       if (!this.gridData?.cardIDs?.[i][3]) {
         selectable[0][i][3] = true;
       } else if (!this.gridData?.cardIDs[i][4]) {
