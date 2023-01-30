@@ -37,6 +37,7 @@ class Vughex extends Table
       //    "my_first_game_variant" => 100,
       //    "my_second_game_variant" => 101,
       //      ...
+      "max_score" => 100,
     ]);
 
     // create instance specifying card module
@@ -214,7 +215,7 @@ class Vughex extends Table
     $round_side = self::getUniqueValueFromDB($sql);
     $result["day_or_night"] = $round_side;
 
-    // FIXME: return only when current player is matched
+    // return only when current player is matched
     $sql =
       "SELECT reincarnation_card_id card_id, reincarnation_col col, reincarnation_current_player current_player FROM reincarnation";
     $reincarnation = self::getObjectFromDB($sql);
@@ -349,6 +350,7 @@ class Vughex extends Table
     return $powerFixed + $powerCenter * $center;
   }
 
+  // return true if game ended
   function addScore($playerID)
   {
     $playerName = $this->getPlayerName($playerID);
@@ -378,6 +380,14 @@ class Vughex extends Table
         "playerName" => $playerName,
       ]
     );
+
+    // check game end condition
+    $maxScore = intval($this->getGameStateValue("max_score"));
+    if ($updatedScore >= $maxScore) {
+      return true;
+    }
+
+    return false;
   }
 
   function setLaneController($playerID, $lane)
@@ -391,7 +401,8 @@ class Vughex extends Table
     self::DbQuery($sql);
   }
 
-  function hndlEvelAndAgent(
+  // return true if game ended
+  function hndlEvilAndAgent(
     int $wPlayerID,
     int $lPlayerID,
     int $hasEvil,
@@ -409,7 +420,7 @@ class Vughex extends Table
             "playerName" => $playerName,
           ]
         );
-        $this->addScore($wPlayerID);
+        return $this->addScore($wPlayerID);
       }
     }
     if ($hasAgent) {
@@ -424,9 +435,10 @@ class Vughex extends Table
             "playerName" => $playerName,
           ]
         );
-        $this->addScore($wPlayerID);
+        return $this->addScore($wPlayerID);
       }
     }
+    return false;
   }
 
   function getCardsInLocation($location)
@@ -453,6 +465,22 @@ class Vughex extends Table
     $sql .= "card_meta meta from cards ";
     $sql .= "WHERE card_id='" . $cardID . "'";
     return self::getObjectFromDB($sql);
+  }
+
+  function isValidPlayGrid($gridID, $playerID)
+  {
+    $sql =
+      "SELECT count(*) FROM cards " .
+      "WHERE card_location='table" .
+      $playerID .
+      "' AND card_location_arg='" .
+      $gridID .
+      "'";
+    $cnt = intval(self::getUniqueValueFromDB($sql));
+    if ($cnt > 0) {
+      return false;
+    }
+    return true;
   }
 
   function applyWatcherEffect(
@@ -790,22 +818,15 @@ class Vughex extends Table
       return;
     }
 
-    // FIXME: check if the card is playable
-    // $tCards = array_values(
-    //     $this->cards->getCardsInLocation("ontable"));
-    // usort($tCards, function ($a, $b) {
-    //     return -($a['location_arg'] <=> $b['location_arg']);
-    // });
-    // $pCard = null;
-    // if (count($tCards) > 1) {
-    //     $pCard = $tCards[1];
-    // }
-    // if (!count($tCards) == 0 && !self::isCardPlayable($tCards[0], $cardInfo, $pCard, self::isEclipsed())) {
-    //     self::notifyPlayer($actorID, 'logError', '', [
-    //         'message' => clienttranslate('Invalid card selection! Reload the page.')
-    //     ]);
-    //     return;
-    // }
+    // check if the card is playable
+    if (!$this->isValidPlayGrid($gridID, $actorID)) {
+      self::notifyPlayer($actorID, "logError", "", [
+        "message" => clienttranslate(
+          "Invalid card selection! You cannot choose it."
+        ),
+      ]);
+      return;
+    }
 
     // oracle
     if (intval($cardInfo["type_arg"]) === 0) {
@@ -1040,7 +1061,9 @@ class Vughex extends Table
       if ($round_side === "night") {
         $creep = 13;
       }
-      $sql = "SELECT card_location_arg active_player FROM cards WHERE card_type_arg=" . $creep;
+      $sql =
+        "SELECT card_location_arg active_player FROM cards WHERE card_type_arg=" .
+        $creep;
       $active_player = self::getUniqueValueFromDB($sql);
       $this->gamestate->changeActivePlayer($active_player);
       $this->gamestate->nextState("playerTurn");
@@ -1268,6 +1291,7 @@ class Vughex extends Table
       self::dump('$hasTitan', $hasTitan);
 
       // update center controller
+      $gameEnded = false;
       if (count($laneScore) == 0) {
         $laneScore[0] = $tmpResult[0] + $tmpResult[3];
         $laneScore[1] = $tmpResult[1] + $tmpResult[4];
@@ -1348,14 +1372,22 @@ class Vughex extends Table
                 ]
               );
             }
-            $this->hndlEvelAndAgent(
-              $playerID,
-              $laneScore["player"],
-              $hasEvil[$pos],
-              $hasAgent[$pos]
-            );
+            if (
+              $this->hndlEvilAndAgent(
+                $playerID,
+                $laneScore["player"],
+                $hasEvil[$pos],
+                $hasAgent[$pos]
+              )
+            ) {
+              $gameEnded = true;
+              break;
+            }
             if (intval($centerCtrler[$lane]["controller"]) === $playerID) {
-              $this->addScore($playerID);
+              if ($this->addScore($playerID)) {
+                $gameEnded = true;
+                break;
+              }
             } else {
               $this->setLaneController($playerID, $lane);
             }
@@ -1392,17 +1424,25 @@ class Vughex extends Table
                 ]
               );
             }
-            $this->hndlEvelAndAgent(
-              $laneScore["player"],
-              $playerID,
-              $hasEvil[$pos],
-              $hasAgent[$pos]
-            );
+            if (
+              $this->hndlEvilAndAgent(
+                $laneScore["player"],
+                $playerID,
+                $hasEvil[$pos],
+                $hasAgent[$pos]
+              )
+            ) {
+              $gameEnded = true;
+              break;
+            }
             if (
               intval($centerCtrler[$lane]["controller"]) ===
               $laneScore["player"]
             ) {
-              $this->addScore($laneScore["player"]);
+              if ($this->addScore($laneScore["player"])) {
+                $gameEnded = true;
+                break;
+              }
             } else {
               $this->setLaneController($laneScore["player"], $lane);
             }
@@ -1425,7 +1465,17 @@ class Vughex extends Table
       clienttranslate("Round Ended."),
       $result
     );
-    $this->gamestate->nextState("roundSetup");
+
+    if ($gameEnded) {
+      // no further action
+      $this->gamestate->nextState("endGame");
+    } else {
+      $this->gamestate->nextState("roundSetup");
+    }
+  }
+
+  function stGameEnd()
+  {
   }
 
   //////////////////////////////////////////////////////////////////////////////

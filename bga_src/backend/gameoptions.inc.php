@@ -51,4 +51,15 @@ $game_options = [
             ),
 
     */
+
+  100 => [
+    "name" => totranslate("Number of scores to win"),
+    "values" => [
+      // A simple value for this option:
+      0 => ["name" => totranslate("0 scores (for test)")],
+      2 => ["name" => totranslate("2 scores")],
+      3 => ["name" => totranslate("3 scores (default)")],
+    ],
+    "default" => 0,
+  ],
 ];
