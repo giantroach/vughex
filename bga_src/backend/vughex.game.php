@@ -987,11 +987,10 @@ class Vughex extends Table
       }
     }
     foreach ($players as $playerID => $player) {
-      // FIXME:
-      if ($player["player_no"] == 1) {
+      if ($player["player_no"] == 2) {
         $this->cards->moveCard($creepSun["id"], "hand", $playerID);
       }
-      if ($player["player_no"] == 2) {
+      if ($player["player_no"] == 1) {
         $this->cards->moveCard($creepNgt["id"], "hand", $playerID);
       }
     }
@@ -999,15 +998,6 @@ class Vughex extends Table
     foreach ($players as $playerID => $value) {
       $this->cards->pickCards(5, "deck", $playerID);
     }
-
-    // $players = self::getCollectionFromDb("SELECT player_id id FROM player");
-    // // self::DbQuery("UPDATE player SET player_passed=0");
-
-    // // FIXME: adjust who's turn is next (based on day and night)
-    // $apID = $this->getActivePlayerId();
-    // self::giveExtraTime($apID);
-    // $sql = "SELECT player_id id, player_score score FROM player ";
-    // $players = self::getCollectionFromDb($sql);
 
     // return number of cards in the hand
     foreach ($players as $key => $value) {
@@ -1044,6 +1034,15 @@ class Vughex extends Table
     if (!$actorID) {
       $this->activeNextPlayer();
     } else {
+      # FIXME: activate day / night based player
+      // 13 (night) / 14 (sun)
+      $creep = 14;
+      if ($round_side === "night") {
+        $creep = 13;
+      }
+      $sql = "SELECT card_location_arg active_player FROM cards WHERE card_type_arg=" . $creep;
+      $active_player = self::getUniqueValueFromDB($sql);
+      $this->gamestate->changeActivePlayer($active_player);
       $this->gamestate->nextState("playerTurn");
     }
   }
