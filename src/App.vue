@@ -1,8 +1,9 @@
 <template>
-  <div id="preload">
-    <img :src="urlBase.value + require('@/assets/cardset-mini.png')" />
-    <img :src="urlBase.value + require('@/assets/cardset.png')" />
-  </div>
+  <link
+    rel="preload"
+    as="image"
+    :href="urlBase.value + require('@/assets/cardset.png')"
+  />
 
   <div>
     <div id="common_table" class="whiteblock">
