@@ -448,10 +448,11 @@ class State {
     let result = false;
     for (let iy = 0; iy < 5; iy += 1) {
       if (iy !== 2) {
-        const cid = this.gridData?.cardIDs?.[x][iy]?.cid;
+        const c = this.gridData?.cardIDs?.[x][iy];
+        const cid = c?.cid;
         if (cid) {
           const cDetail = cardUtil.getCard(cid);
-          if (!cDetail.stealth) {
+          if (!cDetail.stealth || c.meta?.length) {
             selectable[x][iy] = true;
             result = true;
           }
@@ -475,10 +476,11 @@ class State {
     for (let ix = 0; ix < 3; ix += 1) {
       for (let iy = 0; iy < 5; iy += 1) {
         if (iy !== 2) {
-          const cid = this.gridData?.cardIDs?.[ix][iy]?.cid;
+          const c = this.gridData?.cardIDs?.[ix][iy];
+          const cid = c?.cid;
           if (cid) {
             const cDetail = cardUtil.getCard(cid);
-            if (cDetail.stealth) {
+            if (cDetail.stealth && !c.meta?.length) {
               selectable[ix][iy] = true;
               result = true;
             }
@@ -498,10 +500,11 @@ class State {
     let result = false;
     for (let iy = 0; iy < 5; iy += 1) {
       if (iy !== 2) {
-        const cid = this.gridData?.cardIDs?.[x][iy]?.cid;
+        const c = this.gridData?.cardIDs?.[x][iy];
+        const cid = c?.cid;
         if (cid) {
           const cDetail = cardUtil.getCard(cid);
-          if (cDetail.stealth) {
+          if (cDetail.stealth && !c.meta?.length) {
             selectable[x][iy] = true;
             result = true;
           }

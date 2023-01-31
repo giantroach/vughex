@@ -969,7 +969,6 @@ class Vughex extends Table
 
   function stRoundSetup()
   {
-    // FIXME: flip day and night
     $sql = "SELECT round_side FROM round";
     $round_side = self::getUniqueValueFromDB($sql);
     if ($round_side != "day") {
@@ -983,6 +982,7 @@ class Vughex extends Table
 
     // this is needed for new round (not the initial)
     $this->cards->moveAllCardsInLocation(null, "deck");
+    $this->cards->shuffle("deck");
 
     // clear card meta
     $sql = "UPDATE cards SET card_meta = ''";
@@ -995,8 +995,6 @@ class Vughex extends Table
     $allCards = array_values($this->cards->getCardsInLocation("deck"));
     self::dump('stRoundSetup:$allCards', $allCards);
 
-    // FIXME: should be shortcut like:
-    // $creeps = $this->cards->getCardsOfType('creep', 14);
     $creepSun = null;
     $creepNgt = null;
     foreach ($allCards as $val) {
@@ -1041,7 +1039,7 @@ class Vughex extends Table
       self::notifyPlayer(
         $player_id,
         "newRound",
-        clienttranslate("FIXME: New turn"),
+        clienttranslate("New round started"),
         [
           "player_cards" => $player_cards,
           "players" => $players,
@@ -1055,7 +1053,7 @@ class Vughex extends Table
     if (!$actorID) {
       $this->activeNextPlayer();
     } else {
-      # FIXME: activate day / night based player
+      # activate day / night based player
       // 13 (night) / 14 (sun)
       $creep = 14;
       if ($round_side === "night") {
