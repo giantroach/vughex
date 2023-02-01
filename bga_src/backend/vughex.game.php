@@ -281,49 +281,56 @@ class Vughex extends Table
     return false;
   }
 
-  function getNewCenterValue($c, $center, $lane)
+  function accumulateTmpCenter($c, $lane, &$tmpCenter)
   {
     // 9: plague is the highest priority
     if ($this->isEnabledCard($c, 9)) {
       self::notifyAllPlayers(
         "score",
         clienttranslate(
-          '[${lane} lane] center number is set to 0 by "the Plague").'
+          '[${lane} lane] center number is set to 0 by "the Plague".'
         ),
         [
           "lane" => $lane,
         ]
       );
-      return 0;
+      $tmpCenter["set0"] = true;
     }
     // 2: Justice
     if ($this->isEnabledCard($c, 2)) {
       self::notifyAllPlayers(
         "score",
         clienttranslate(
-          '[${lane} lane] center number is increased by 1 by "the Justice").'
+          '[${lane} lane] center number is increased by 1 by "the Justice".'
         ),
         [
           "lane" => $lane,
         ]
       );
-      return $center + 1;
+      $tmpCenter["adjust"] += 1;
     }
     // 12: Shadow
     if ($this->isEnabledCard($c, 12)) {
       self::notifyAllPlayers(
         "score",
         clienttranslate(
-          '[${lane} lane] center number is decreased by 2 by "the Shadow").'
+          '[${lane} lane] center number is decreased by 2 by "the Shadow".'
         ),
         [
           "lane" => $lane,
         ]
       );
-      return $center - 2;
+      $tmpCenter["adjust"] -= 2;
     }
+  }
 
-    return $center;
+  function getNewCenterValue($tmpCenter)
+  {
+    $center = $tmpCenter["orig"];
+    if ($tmpCenter["set0"]) {
+      $center = 0;
+    }
+    return $center + $tmpCenter["adjust"];
   }
 
   function getPower($c, $center, $lane)
@@ -492,7 +499,7 @@ class Vughex extends Table
   ) {
     if ($targetGridID === null) {
       // allow only if there is no valid target
-      $sql = "select card_type_arg type_arg from cards where card_meta=''";
+      $sql = "SELECT card_type_arg type_arg FROM cards WHERE card_meta=''";
       $types = self::getObjectListFromDB($sql);
       foreach ($types as $t) {
         $cardInfo = $this->card_types[intval($t)];
@@ -506,6 +513,29 @@ class Vughex extends Table
         }
       }
       return true;
+    }
+
+    // target player
+    $targetPlayerID = $playerID;
+    if ($targetGridSide != "player") {
+      $targetPlayerID = $oppoID;
+    }
+
+    // check if the target is valid = not disabled stealth
+    $sql =
+      "SELECT card_type_arg type_arg, card_meta meta FROM cards WHERE card_location_arg='" .
+      $targetGridID .
+      "' AND card_location='table" .
+      $targetPlayerID .
+      "'";
+    $tc = self::getObjectFromDB($sql);
+    if (!$this->card_types[intval($tc["type_arg"])]->stealth || $tc["meta"]) {
+      self::notifyPlayer($playerID, "logError", "", [
+        "message" => clienttranslate(
+          "Invalid target selection! You cannot choose non stealth target."
+        ),
+      ]);
+      return false;
     }
 
     $this->applyMetaChange(
@@ -524,6 +554,7 @@ class Vughex extends Table
     $cardName,
     $playerID,
     $oppoID,
+    $gridID,
     $targetGridID,
     $targetGridSide
   ) {
@@ -532,6 +563,16 @@ class Vughex extends Table
       self::notifyPlayer($playerID, "logError", "", [
         "message" => clienttranslate(
           "Invalid target selection! You must select a target."
+        ),
+      ]);
+      return false;
+    }
+
+    // check if target is in the same lane
+    if (intval($gridID) % 3 !== intval($targetGridID) % 3) {
+      self::notifyPlayer($playerID, "logError", "", [
+        "message" => clienttranslate(
+          "Invalid target selection! You cannot select a target in differen lane."
         ),
       ]);
       return false;
@@ -602,6 +643,7 @@ class Vughex extends Table
   function applyMazeEffect(
     $playerID,
     $oppoID,
+    $gridID,
     $targetGridID,
     $targetGridSide,
     $targetCol
@@ -611,7 +653,7 @@ class Vughex extends Table
       $loc1 = intval($targetGridID);
       $loc2 = $loc1 > 2 ? $loc1 + 3 : $loc1 - 3;
       $sql =
-        "select card_type_arg type_arg from cards where card_meta='' AND (card_location_arg='" .
+        "SELECT card_type_arg type_arg FROM cards WHERE card_meta='' AND (card_location_arg='" .
         $loc1 .
         "' OR card_location_arg='" .
         $loc2 .
@@ -635,6 +677,33 @@ class Vughex extends Table
     $targetPlayerID = $playerID;
     if ($targetGridSide != "player") {
       $targetPlayerID = $oppoID;
+    }
+
+    // check if target is in the same lane
+    if (intval($gridID) % 3 !== intval($targetGridID) % 3) {
+      self::notifyPlayer($playerID, "logError", "", [
+        "message" => clienttranslate(
+          "Invalid target selection! You cannot select a target in a different lane."
+        ),
+      ]);
+      return false;
+    }
+
+    // check if the target is valid = not disabled stealth
+    $sql =
+      "SELECT card_type_arg type_arg, card_meta meta FROM cards WHERE card_location_arg='" .
+      $targetGridID .
+      "' AND card_location='table" .
+      $targetPlayerID .
+      "'";
+    $tc = self::getObjectFromDB($sql);
+    if (!$this->card_types[intval($tc["type_arg"])]->stealth || $tc["meta"]) {
+      self::notifyPlayer($playerID, "logError", "", [
+        "message" => clienttranslate(
+          "Invalid target selection! You cannot choose non stealth target."
+        ),
+      ]);
+      return false;
     }
 
     // get card info
@@ -691,6 +760,7 @@ class Vughex extends Table
   function applyReincarnationEffect(
     $playerID,
     $oppoID,
+    $gridID,
     $targetGridID,
     $targetGridSide
   ) {
@@ -704,10 +774,14 @@ class Vughex extends Table
       return false;
     }
 
-    // target col
-    $targetCol = intval($targetGridID);
-    if ($targetCol > 2) {
-      $targetCol = $targetCol - 3;
+    // check if target is in the same lane
+    if (intval($gridID) % 3 !== intval($targetGridID) % 3) {
+      self::notifyPlayer($playerID, "logError", "", [
+        "message" => clienttranslate(
+          "Invalid target selection! You cannot select a target in differen lane."
+        ),
+      ]);
+      return false;
     }
 
     // target player
@@ -717,6 +791,29 @@ class Vughex extends Table
       $targetPlayerID = $oppoID;
     } else {
       $nonTargetPlayerID = $oppoID;
+    }
+
+    // check if target is valid = non-stealth / disabled stealth
+    $sql =
+      "SELECT card_type_arg type_arg, card_meta meta FROM cards WHERE card_location_arg='" .
+      $targetGridID .
+      "' AND card_location='table" .
+      $targetPlayerID .
+      "'";
+    $tc = self::getObjectFromDB($sql);
+    if ($this->card_types[intval($tc["type_arg"])]->stealth && !$tc["meta"]) {
+      self::notifyPlayer($playerID, "logError", "", [
+        "message" => clienttranslate(
+          "Invalid target selection! You cannot choose stealth target."
+        ),
+      ]);
+      return false;
+    }
+
+    // target col
+    $targetCol = intval($targetGridID);
+    if ($targetCol > 2) {
+      $targetCol = $targetCol - 3;
     }
 
     // Check if the card in the grid is non-stealth
@@ -835,6 +932,7 @@ class Vughex extends Table
           "oracle",
           $actorID,
           $oppoID,
+          $gridID,
           $targetGridID,
           $targetGridSide
         )
@@ -866,6 +964,7 @@ class Vughex extends Table
         !$this->applyMazeEffect(
           $actorID,
           $oppoID,
+          $gridID,
           $targetGridID,
           $targetGridSide,
           $targetCol
@@ -934,6 +1033,7 @@ class Vughex extends Table
         !$this->applyReincarnationEffect(
           $actorID,
           $oppoID,
+          $gridID,
           $targetGridID,
           $targetGridSide
         )
@@ -1142,56 +1242,52 @@ class Vughex extends Table
     }
 
     // update center value
+    $tmpCenters = [
+      [
+        "orig" => $result["score"]["center"][0],
+        "set0" => false,
+        "adjust" => 0,
+      ],
+      [
+        "orig" => $result["score"]["center"][1],
+        "set0" => false,
+        "adjust" => 0,
+      ],
+      [
+        "orig" => $result["score"]["center"][2],
+        "set0" => false,
+        "adjust" => 0,
+      ],
+    ];
     foreach ($allData["players"] as $playerID => $player) {
       foreach ($tableCards[$playerID] as $c) {
         $posID = $c["location_arg"];
 
         switch ($posID) {
           case 0:
-            $result["score"]["center"][0] = $this->getNewCenterValue(
-              $c,
-              $result["score"]["center"][0],
-              "left"
-            );
+            $this->accumulateTmpCenter($c, "left", $tmpCenters[0]);
             break;
           case 1:
-            $result["score"]["center"][1] = $this->getNewCenterValue(
-              $c,
-              $result["score"]["center"][1],
-              "center"
-            );
+            $this->accumulateTmpCenter($c, "center", $tmpCenters[1]);
             break;
           case 2:
-            $result["score"]["center"][2] = $this->getNewCenterValue(
-              $c,
-              $result["score"]["center"][2],
-              "right"
-            );
+            $this->accumulateTmpCenter($c, "right", $tmpCenters[2]);
             break;
           case 3:
-            $result["score"]["center"][0] = $this->getNewCenterValue(
-              $c,
-              $result["score"]["center"][0],
-              "left"
-            );
+            $this->accumulateTmpCenter($c, "left", $tmpCenters[0]);
             break;
           case 4:
-            $result["score"]["center"][1] = $this->getNewCenterValue(
-              $c,
-              $result["score"]["center"][1],
-              "center"
-            );
+            $this->accumulateTmpCenter($c, "center", $tmpCenters[1]);
             break;
           case 5:
-            $result["score"]["center"][2] = $this->getNewCenterValue(
-              $c,
-              $result["score"]["center"][2],
-              "right"
-            );
+            $this->accumulateTmpCenter($c, "right", $tmpCenters[2]);
             break;
         }
       }
     }
+    $result["score"]["center"][0] = $this->getNewCenterValue($tmpCenters[0]);
+    $result["score"]["center"][1] = $this->getNewCenterValue($tmpCenters[1]);
+    $result["score"]["center"][2] = $this->getNewCenterValue($tmpCenters[2]);
 
     // lane data (total score for each lane)
     $laneScore = [];
@@ -1465,7 +1561,6 @@ class Vughex extends Table
     );
 
     if ($gameEnded) {
-      // no further action
       $this->gamestate->nextState("endGame");
     } else {
       $this->gamestate->nextState("roundSetup");
