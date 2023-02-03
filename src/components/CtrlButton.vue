@@ -14,12 +14,13 @@
       selectable: active,
     }"
     @click="btnClick()"
-    >{{ def.label }}
+    >{{ i18n(def.label) }}
   </Button>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
+import { Ref } from "vue";
 import {
   ButtonType,
   ButtonSizeDef,
@@ -33,7 +34,7 @@ import {
     type: String,
     display: Boolean,
   },
-  inject: ["ctrlButtonDef"],
+  inject: ["ctrlButtonDef", "i18n"],
   emits: ["btnClick"],
 })
 export default class CtrlButton extends Vue {
@@ -46,6 +47,8 @@ export default class CtrlButton extends Vue {
   // etc
   public def!: CtrlButtonDef;
   public size!: ButtonSizeDef;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public i18n!: Ref<any>;
 
   public created() {
     this.def = this.ctrlButtonDef[this.type];

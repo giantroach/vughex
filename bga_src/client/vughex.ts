@@ -23,11 +23,17 @@ import { BgaRequest } from "./type/bga-interface.d";
 declare const define: any;
 declare const ebg: any;
 declare const $: any;
-declare const _: any;
+// declare const _: any;
 declare const dojo: Dojo;
 declare const g_gamethemeurl: string;
+declare const window: any;
 
 const appName = "vughex";
+
+let i18n: any;
+const _ = (text: string): string[] => {
+  return [text, i18n(text)];
+};
 
 define([
   "dojo",
@@ -77,6 +83,48 @@ define([
       // Setup game notifications to handle (see "setupNotifications" method below)
       this.setupNotifications();
       this.setupActions();
+
+      // inject translation
+      i18n = window["_"];
+      vue.translation = [
+        _(
+          "[Placement] Choose a unit already placed in this lane. Disable stealth and [Combat] ability from the unit.",
+        ),
+        _(
+          "[Placement] Discard a non-stealth unit in this lane. The owner draws a unit card from the pile and immediately places it on the same lane.",
+        ),
+        _("[Combat] Increases ◆ in this lane by 1."),
+        _("[Combat] Receive 1 damage if you lose in this lane."),
+        _(
+          "[Combat] Power of this unit becomes 15 if ◆ in this lane is either 6+ or 0-.",
+        ),
+        _(
+          "[Placement] Choose and disable stealth from a unit (regardless of the lane).",
+        ),
+        _("None."),
+        _(
+          "[Combat] Ties the Combat in this lane if the power gap is 4+. (Prior to the Titan).",
+        ),
+        _(
+          "[Placement] Choose a stealth unit in this lane. Move it to another lane.",
+        ),
+        _(
+          "[Combat] Change ◆ in this lane to 0. (Apply this before any other abilities)",
+        ),
+        _(
+          "[Combat] The lower power wins in this lane. (Unless the combat is tied by the Eclipseʼs ability).",
+        ),
+        _("[Combat] Deals 1 damage to the opponent if you win this lane."),
+        _("[Combat] Reduces ◆ in this lane by 2."),
+        _("(Reviealed at the battle phase!)"),
+        _("Stealth and the [Combat] ability are disabled."),
+        _("Stealth is disabled."),
+        _("Cancel"),
+        _("Submit"),
+      ].reduce((acc, [text, translated]) => {
+        acc[text] = translated;
+        return acc;
+      }, {} as { [key: string]: string });
 
       console.log("Ending game setup");
     },

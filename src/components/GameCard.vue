@@ -22,7 +22,7 @@
               borderWidth: textDef.padding || 0,
             }"
           >
-            {{ text }}
+            {{ i18n(text) }}
           </div>
         </div>
       </div>
@@ -87,7 +87,7 @@
             borderWidth: textDef.padding || 0,
           }"
         >
-          {{ text }}
+          {{ i18n(text) }}
         </div>
       </div>
     </div>
@@ -105,7 +105,7 @@
     >
       <li v-for="(m, idx) in meta" :key="idx">
         <div v-if="m.metaID" class="meta-text">
-          {{ cardMetaDef?.[m.metaID]?.text || "" }}
+          {{ i18n(cardMetaDef?.[m.metaID]?.text || "") }}
         </div>
       </li>
     </ul>
@@ -146,7 +146,7 @@ export interface Size {
     detailPos: String,
     meta: Array,
   },
-  inject: ["urlBase", "cardDef", "cardMetaDef"],
+  inject: ["urlBase", "cardDef", "cardMetaDef", "i18n"],
   emits: ["selectCard", "showDetail", "hideDetail"],
 })
 export default class GameCard extends Vue {
@@ -185,6 +185,8 @@ export default class GameCard extends Vue {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public cardMetaDef!: any;
   public urlBase!: Ref<string>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public i18n!: Ref<any>;
   public bgPos = "0 0";
   public bgPosMini = "0 0";
   public onlyMini = false;
