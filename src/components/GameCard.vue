@@ -339,17 +339,21 @@ export default class GameCard extends Vue {
   position: relative;
   box-shadow: 0 5px 5px 5px rgb(0 0 0 / 30%);
 }
-/* those opacity stuff does not work with detailPos: right */
 .card-modal,
 .detail-meta-modal {
-  /* opacity: 0; */
-  transition: opacity 0.4s;
   position: fixed;
   z-index: 1000;
+  animation: fadein 0.4s ease-out forwards;
 }
-/* .card-modal:hover { */
-/*   opacity: 1; */
-/* } */
+@keyframes fadein {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
 .container-text,
 .text {
   position: absolute;
