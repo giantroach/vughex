@@ -1408,7 +1408,7 @@ class Vughex extends Table
           if ($score == $tmpResult[$pos] + $tmpResult[$pos + 3]) {
             self::notifyAllPlayers(
               "score",
-              clienttranslate('${lane} lane is tied by ${score}.'),
+              clienttranslate('[${lane} lane] is tied by ${score}.'),
               [
                 "lane" => $lane,
                 "score" => $score,

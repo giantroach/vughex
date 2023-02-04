@@ -121,6 +121,8 @@ define([
         _("Stealth is disabled."),
         _("Cancel"),
         _("Submit"),
+        _("On Table"),
+        _("Your Hand"),
       ].reduce((acc, [text, translated]) => {
         acc[text] = translated;
         return acc;

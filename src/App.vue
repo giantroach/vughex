@@ -8,7 +8,7 @@
   <div>
     <div id="common_table" class="whiteblock">
       <h3 id="ontable_header">
-        <span>{ON_TABLE}:</span>
+        <span>{{ i18n("On Table") }}:</span>
       </h3>
       <Grid
         ref="grid"
@@ -42,7 +42,7 @@
 
     <div id="player_hand" class="whiteblock">
       <h3 id="inhand_header">
-        <span>{IN_HAND}:</span>
+        <span>{{ i18n("Your Hand") }}:</span>
       </h3>
 
       <Hand
