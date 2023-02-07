@@ -970,7 +970,7 @@ class Vughex extends Table
         self::notifyPlayer(
           $oppoID,
           "mulligan",
-          clienttranslate('${player_name} discarded "${card_name}" face down.'),
+          clienttranslate('${player_name} discarded "${card_name}".'),
           [
             "player_name" => self::getActivePlayerName(),
             "card_name" => $cardDef->name,
