@@ -103,7 +103,7 @@ $machinestates = [
     "transitions" => [
       "nextPlayer" => 22,
       "zombiePass" => 22,
-      "reincarnation" => 5,
+      "reincarnation" => 32,
     ],
   ],
 
