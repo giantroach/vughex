@@ -38,6 +38,18 @@
         :display="ctrlButtonData.cancel.display"
         @btnClick="cancelState()"
       ></CtrlButton>
+      <CtrlButton
+        type="mulligan"
+        :active="ctrlButtonData.mulligan.active"
+        :display="ctrlButtonData.mulligan.display"
+        @btnClick="submitState('submit')"
+      ></CtrlButton>
+      <CtrlButton
+        type="noMulligan"
+        :active="ctrlButtonData.noMulligan.active"
+        :display="ctrlButtonData.noMulligan.display"
+        @btnClick="submitState()"
+      ></CtrlButton>
     </div>
 
     <div id="player_hand" class="whiteblock">
@@ -147,6 +159,14 @@ export default class App extends Vue {
       display: false,
     },
     cancel: {
+      active: true,
+      display: false,
+    },
+    mulligan: {
+      active: true,
+      display: false,
+    },
+    noMulligan: {
       active: true,
       display: false,
     },
@@ -295,8 +315,8 @@ export default class App extends Vue {
     this.state?.cancelState();
   }
 
-  public submitState(): void {
-    this.state?.submitState();
+  public submitState(mode?: string): void {
+    this.state?.submitState(mode);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

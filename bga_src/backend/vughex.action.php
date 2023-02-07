@@ -38,6 +38,17 @@ class action_vughex extends APP_GameAction
 
   // TODO: defines your action entry points there
 
+  public function mulligan()
+  {
+    self::setAjaxMode();
+    $cardID = self::getArg("card", AT_alphanum, false);
+
+    $this->game->mulligan(
+      $cardID,
+    );
+    self::ajaxResponse();
+  }
+
   public function playCard()
   {
     self::setAjaxMode();

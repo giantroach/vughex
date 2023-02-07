@@ -4,6 +4,7 @@ import {
   BgaPlayCardNotif,
   BgaMoveCardNotif,
   BgaUpdateCardNotif,
+  BgaMulliganNotif,
   BgaReincarnateCardNotif,
   BgaEndRoundNotif,
 } from "bga_src/client/type/bga-interface.d";
@@ -165,6 +166,34 @@ export class Sub {
           const c = this.gridData.cardIDs[fromCol][fromRow];
           this.gridData.cardIDs[fromCol][fromRow] = undefined;
           this.gridData.cardIDs[toCol][toRow] = c;
+        }
+        break;
+      }
+
+      case "mulligan": {
+        // i.e. mulligan
+        const arg = notif.args as BgaMulliganNotif;
+        const c = arg.card;
+        const discardedCardID = arg.discardedCardID;
+
+        if (discardedCardID) {
+          this.handData.cardIDs = this.handData.cardIDs?.filter((ids) => {
+            return ids.id !== discardedCardID;
+          });
+        }
+
+        if (c) {
+          this.handData.cardIDs?.push({
+            id: c.id,
+            cid: `mainCard${c.type_arg}`,
+            meta: !c.meta
+              ? []
+              : c.meta.split(",").map((m) => {
+                  return {
+                    metaID: m,
+                  };
+                }),
+          });
         }
         break;
       }

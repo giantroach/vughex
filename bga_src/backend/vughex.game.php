@@ -130,7 +130,8 @@ class Vughex extends Table
     $this->cards->shuffle("deck");
 
     // set day and night
-    $sql = "INSERT INTO round (round_id, round_side) VALUES (1, '')";
+    $sql =
+      "INSERT INTO round (round_id, round_side, round_num) VALUES (1, '', 0)";
     self::DbQuery($sql);
 
     // set center data
@@ -242,9 +243,23 @@ class Vughex extends Table
     */
   function getGameProgression()
   {
-    // TODO: compute and return the game progression
+    // sum up score / (number of players * (number of max score - 1) + 1)
+    $sql = "SELECT player_id id, player_score score FROM player ";
+    $players = self::getCollectionFromDb($sql);
+    $numOfPlayers = count($players);
 
-    return 0;
+    $maxScore = intval($this->getGameStateValue("max_score"));
+
+    $totalScore = 0;
+    foreach ($players as $k => $v) {
+      $totalScore += intval($v["score"]);
+    }
+    $pct = $totalScore / ($numOfPlayers * ($maxScore - 1) + 1);
+
+    // use sqrt to adjust the progress
+    $adjustedPct = sqrt($pct);
+    $progress = $adjustedPct * 100;
+    return $progress;
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -883,6 +898,99 @@ class Vughex extends Table
       (note: each method below must match an input method in vughex.action.php)
     */
 
+  function mulligan($cardID)
+  {
+    $playerID = intval(self::getActivePlayerId());
+
+    $sql = "SELECT round_side FROM round";
+    $round_side = self::getUniqueValueFromDB($sql);
+
+    // day
+    $sql = "SELECT card_location_arg FROM cards WHERE card_type_arg=14";
+    $dayPlayerID = intval(self::getUniqueValueFromDB($sql));
+
+    // night
+    $sql = "SELECT card_location_arg FROM cards WHERE card_type_arg=13";
+    $nightPlayerID = intval(self::getUniqueValueFromDB($sql));
+
+    // something is wrong around here
+    $oppoID = $playerID !== $dayPlayerID ? $dayPlayerID : $nightPlayerID;
+
+    if (!$cardID) {
+      self::notifyAllPlayers(
+        "score",
+        clienttranslate('${player_name} chose not to discard a card.'),
+        [
+          "player_name" => self::getActivePlayerName(),
+        ]
+      );
+    } else {
+      $sql = "SELECT round_num FROM round";
+      $round_num = intval(self::getUniqueValueFromDB($sql));
+      $cardInfo = $this->getCard($cardID);
+      $cardDef = $this->card_types[intval($cardInfo["type_arg"])];
+
+      // discard and draw a card
+      $newCard = $this->cards->pickCard("deck", $playerID);
+      $this->cards->moveCard($cardID, "discard", 0);
+
+      if ($round_num === 1 && $playerID === $dayPlayerID) {
+        // for the first round of sun player, do not reveal the card
+        self::notifyPlayer(
+          $playerID,
+          "mulligan",
+          clienttranslate('${player_name} discarded "${card_name}" face down.'),
+          [
+            "player_name" => self::getActivePlayerName(),
+            "card_name" => $cardDef->name,
+            "card" => $newCard,
+            "discardedCardID" => $cardID,
+          ]
+        );
+        self::notifyPlayer(
+          $oppoID,
+          "mulligan",
+          clienttranslate('${player_name} discarded a card face down.'),
+          [
+            "player_name" => self::getActivePlayerName(),
+          ]
+        );
+      } else {
+        self::notifyPlayer(
+          $playerID,
+          "mulligan",
+          clienttranslate('${player_name} discarded "${card_name}".'),
+          [
+            "player_name" => self::getActivePlayerName(),
+            "card_name" => $cardDef->name,
+            "card" => $newCard,
+            "discardedCardID" => $cardID,
+          ]
+        );
+        self::notifyPlayer(
+          $oppoID,
+          "mulligan",
+          clienttranslate('${player_name} discarded "${card_name}" face down.'),
+          [
+            "player_name" => self::getActivePlayerName(),
+            "card_name" => $cardDef->name,
+          ]
+        );
+      }
+    }
+
+    if (
+      ($round_side === "day" && $playerID !== $dayPlayerID) ||
+      ($round_side === "night" && $playerID !== $nightPlayerID)
+    ) {
+      $this->gamestate->nextState("nextPlayer");
+      return;
+    }
+
+    $this->gamestate->nextState("mulliganNextPlayer");
+    return;
+  }
+
   function playCard(
     $cardID,
     $gridID,
@@ -1069,14 +1177,19 @@ class Vughex extends Table
 
   function stRoundSetup()
   {
-    $sql = "SELECT round_side FROM round";
-    $round_side = self::getUniqueValueFromDB($sql);
+    $sql = "SELECT round_side, round_num FROM round";
+    $round = self::getObjectFromDB($sql);
+    $round_side = $round["round_side"];
+    $round_num = intval($round["round_num"]) + 1;
+
     if ($round_side != "day") {
       // either day or '' (initial)
-      self::DbQuery("UPDATE round SET round_side='day'");
+      self::DbQuery(
+        "UPDATE round SET round_side='day', round_num=" . $round_num);
       $round_side = "day";
     } else {
-      self::DbQuery("UPDATE round SET round_side='night'");
+      self::DbQuery(
+        "UPDATE round SET round_side='night', round_num=" . $round_num);
       $round_side = "night";
     }
 
@@ -1099,17 +1212,17 @@ class Vughex extends Table
     $creepNgt = null;
     foreach ($allCards as $val) {
       if ($val["type_arg"] == 13) {
-        $creepSun = $val;
+        $creepNgt = $val;
       }
       if ($val["type_arg"] == 14) {
-        $creepNgt = $val;
+        $creepSun = $val;
       }
     }
     foreach ($players as $playerID => $player) {
-      if ($player["player_no"] == 2) {
+      if ($player["player_no"] == 1) {
         $this->cards->moveCard($creepSun["id"], "hand", $playerID);
       }
-      if ($player["player_no"] == 1) {
+      if ($player["player_no"] == 2) {
         $this->cards->moveCard($creepNgt["id"], "hand", $playerID);
       }
     }
@@ -1145,6 +1258,7 @@ class Vughex extends Table
           "players" => $players,
           "day_or_night" => $round_side,
           "center" => $center,
+          "round_num" => $round_num,
         ]
       );
     }
@@ -1164,7 +1278,7 @@ class Vughex extends Table
         $creep;
       $active_player = self::getUniqueValueFromDB($sql);
       $this->gamestate->changeActivePlayer($active_player);
-      $this->gamestate->nextState("playerTurn");
+      $this->gamestate->nextState("mulliganTurn");
     }
   }
 
@@ -1208,7 +1322,14 @@ class Vughex extends Table
       "select reincarnation_current_player current_player, reincarnation_next_player next_player from reincarnation";
     $reincarnation = self::getObjectFromDB($sql);
     $this->gamestate->changeActivePlayer($reincarnation["current_player"]);
+    self::giveExtraTime($reincarnation["current_player"]);
     $this->gamestate->nextState("reincarnationTurn");
+  }
+
+  function stMulliganNextPlayer()
+  {
+    $playerID = self::activeNextPlayer();
+    $this->gamestate->nextState("mulliganTurn");
   }
 
   function stEndRound()

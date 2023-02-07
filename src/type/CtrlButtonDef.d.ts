@@ -1,4 +1,4 @@
-type ButtonType = "cancel" | "submit";
+type ButtonType = "cancel" | "submit" | "mulligan" | "noMulligan";
 
 interface ButtonSizeDef {
   width: string;

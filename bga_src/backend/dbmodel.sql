@@ -50,7 +50,8 @@ CREATE TABLE IF NOT EXISTS `center` (
 
 CREATE TABLE IF NOT EXISTS `round` (
   `round_id` INT(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  `round_side` varchar(10) NOT NULL
+  `round_side` varchar(10) NOT NULL,
+  `round_num` INT(10) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
 
 CREATE TABLE IF NOT EXISTS `reincarnation` (

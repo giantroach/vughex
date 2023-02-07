@@ -12,7 +12,7 @@
       :class="{
         selectable: isSelectable(idx),
         selected: isSelected(idx),
-        focued: focused[idx],
+        focued: cardIDs.length > 1 && focused[idx],
       }"
       @click="selectHand(idx)"
     >

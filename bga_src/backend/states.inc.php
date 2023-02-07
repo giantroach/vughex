@@ -66,39 +66,56 @@ $machinestates = [
     "type" => "game",
     "action" => "stRoundSetup",
     "updateGameProgression" => true,
-    "transitions" => ["playerTurn" => 3],
+    "transitions" => ["mulliganTurn" => 11],
   ],
 
-  3 => [
+  11 => [
+    "name" => "mulliganTurn",
+    "description" => clienttranslate(
+      '${actplayer} may discard to draw a new card'
+    ),
+    "descriptionmyturn" => clienttranslate(
+      '${you} may discard a card to draw a new card'
+    ),
+    "type" => "activeplayer",
+    "possibleactions" => ["mulligan"],
+    "transitions" => [
+      "mulliganNextPlayer" => 12,
+      "nextPlayer" => 22,
+      "zombiePass" => 22,
+    ],
+  ],
+
+  12 => [
+    "name" => "mulliganNextPlayer",
+    "type" => "game",
+    "action" => "stMulliganNextPlayer",
+    "updateGameProgression" => true,
+    "transitions" => ["mulliganTurn" => 11],
+  ],
+
+  21 => [
     "name" => "playerTurn",
     "description" => clienttranslate('${actplayer} must play a card'),
     "descriptionmyturn" => clienttranslate('${you} must play a card'),
     "type" => "activeplayer",
     "possibleactions" => ["playCard"],
     "transitions" => [
-      "nextPlayer" => 4,
-      "zombiePass" => 4,
+      "nextPlayer" => 22,
+      "zombiePass" => 22,
       "reincarnation" => 5,
     ],
   ],
 
-  4 => [
+  22 => [
     "name" => "nextPlayer",
     "type" => "game",
     "action" => "stNextPlayer",
     "updateGameProgression" => true,
-    "transitions" => ["playerTurn" => 3, "endRound" => 10],
+    "transitions" => ["playerTurn" => 21, "endRound" => 51],
   ],
 
-  5 => [
-    "name" => "reincarnation",
-    "type" => "game",
-    "action" => "stReincarnationNextPlayer",
-    "updateGameProgression" => true,
-    "transitions" => ["reincarnationTurn" => 6],
-  ],
-
-  6 => [
+  31 => [
     "name" => "reincarnationTurn",
     "description" => clienttranslate(
       '${actplayer} must play the reincarnated card'
@@ -108,10 +125,18 @@ $machinestates = [
     ),
     "type" => "activeplayer",
     "possibleactions" => ["playCard"],
-    "transitions" => ["nextPlayer" => 4, "zombiePass" => 4],
+    "transitions" => ["nextPlayer" => 22, "zombiePass" => 22],
   ],
 
-  10 => [
+  32 => [
+    "name" => "reincarnation",
+    "type" => "game",
+    "action" => "stReincarnationNextPlayer",
+    "updateGameProgression" => true,
+    "transitions" => ["reincarnationTurn" => 31],
+  ],
+
+  51 => [
     "name" => "endRound",
     "type" => "game",
     "action" => "stEndRound",

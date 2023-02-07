@@ -13,7 +13,12 @@ type CurrentState =
   | "init"
   | "roundSetup"
   | "waitingForOtherPlayer"
-  | "playerTurn"
+  | "mulligan:init"
+  | "mulligan:beforeCardSelect"
+  | "mulligan:afterCardSelect"
+  | "mulligan:submit"
+  | "mulligan:submitNoMulligan"
+  | "mulligan:afterSubmit"
   | "playerTurn:init"
   | "playerTurn:beforeCardSelect"
   | "playerTurn:afterCardSelect"
@@ -92,7 +97,19 @@ class State {
         this.assign(this.gridData, "ghosts", []);
         break;
 
-      case "playerTurn":
+      case "mulligan:init": {
+        this.assign(this.handData, "active", true);
+        this.assign(this.handData, "selected", []);
+        // filter 13 / 14 (the Creeps)
+        const selectable = this.handData.cardIDs?.map((c) => {
+          return c.cid !== "mainCard13" && c.cid !== "mainCard14";
+        });
+        this.assign(this.handData, "selectable", selectable);
+        this.setSubState("beforeCardSelect");
+        this.ctrlButtonData.noMulligan.display = true;
+        break;
+      }
+
       case "playerTurn:init":
         this.assign(this.handData, "active", true);
         this.assign(this.handData, "selected", []);
@@ -137,12 +154,22 @@ class State {
         break;
       }
 
+      case "mulligan:beforeCardSelect":
       case "playerTurn:beforeCardSelect":
       case "reincarnationTurn:beforeCardSelect":
         if (this.handData.selected?.includes(true)) {
           this.setSubState("afterCardSelect");
           break;
         }
+        break;
+
+      case "mulligan:afterCardSelect":
+        if (!this.handData.selected?.includes(true)) {
+          this.ctrlButtonData.mulligan.display = false;
+          this.setSubState("beforeCardSelect");
+          break;
+        }
+        this.ctrlButtonData.mulligan.display = true;
         break;
 
       case "playerTurn:afterCardSelect":
@@ -304,6 +331,32 @@ class State {
         break;
       }
 
+      case "mulligan:submit": {
+        const cardIdx = this.handData.selected?.indexOf(true);
+        if (cardIdx === undefined) {
+          throw "unexpected state";
+        }
+        const c = this.handData.cardIDs?.[cardIdx];
+        if (!c) {
+          throw "unexpected state";
+        }
+        this.assign(this.handData, "active", false);
+
+        this.request("mulligan", {
+          card: c.id,
+        });
+        this.setSubState("afterSubmit");
+        break;
+      }
+
+      case "mulligan:submitNoMulligan": {
+        this.assign(this.handData, "active", false);
+
+        this.request("mulligan", {});
+        this.setSubState("afterSubmit");
+        break;
+      }
+
       case "playerTurn:submit":
       case "reincarnationTurn:submit": {
         const cardIdx = this.handData.selected?.indexOf(true);
@@ -332,6 +385,9 @@ class State {
         break;
       }
 
+      case "mulligan:afterSubmit":
+        this.assign(this.handData, "selected", []);
+        break;
       case "playerTurn:afterSubmit": {
         break;
       }
@@ -388,7 +444,17 @@ class State {
     }
   }
 
-  public submitState(): void {
+  public submitState(mode?: string): void {
+    if (/^mulligan/.test(this.current)) {
+      if (mode === "submit") {
+        this.current = "mulligan:submit";
+      } else {
+        this.current = "mulligan:submitNoMulligan";
+      }
+      this.ctrlButtonData.mulligan.display = false;
+      this.ctrlButtonData.noMulligan.display = false;
+      this.throttledRefresh();
+    }
     if (/^playerTurn/.test(this.current)) {
       this.current = "playerTurn:submit";
       this.ctrlButtonData.cancel.display = false;

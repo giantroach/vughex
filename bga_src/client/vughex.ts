@@ -151,6 +151,12 @@ define([
           vue.bgaStates.push("roundSetup");
           break;
 
+        case "mulliganTurn":
+          if (this.isCurrentPlayerActive()) {
+            vue.bgaStates.push("mulligan:init");
+          }
+          break;
+
         case "playerTurn":
           if (this.isCurrentPlayerActive()) {
             vue.bgaStates.push("playerTurn:init");
@@ -179,6 +185,10 @@ define([
       console.log("Leaving state: " + stateName);
 
       switch (stateName) {
+        case "mulliganTurn":
+          vue.bgaStates.push("waitingForOtherPlayer");
+          break;
+
         case "playerTurn":
           vue.bgaStates.push("waitingForOtherPlayer");
           break;
@@ -309,7 +319,7 @@ define([
 
       const notifications = [
         "newRound",
-        "getNum",
+        "mulligan",
         "playCard",
         "moveCard",
         "updateCard",

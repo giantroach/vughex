@@ -6,6 +6,7 @@ type BgaNotifyName =
   | "playCard"
   | "moveCard"
   | "updateCard"
+  | "mulligan"
   | "reincarnateCard"
   | "endRound";
 
@@ -60,6 +61,11 @@ interface BgaUpdateCardNotif {
   gridID: string;
 }
 
+interface BgaMulliganNotif {
+  card?: Card;
+  discardedCardID?: string;
+}
+
 interface BgaReincarnateCardNotif {
   player_id: string; // num string
   player_name: string;
@@ -89,6 +95,8 @@ export {
   BgaPlayCardNotif,
   BgaMoveCardNotif,
   BgaUpdateCardNotif,
+  BgaDrawCardNotif,
+  BgaMulliganNotif,
   BgaReincarnateCardNotif,
   BgaEndRoundNotif,
 };
