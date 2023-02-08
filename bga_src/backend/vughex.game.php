@@ -188,8 +188,6 @@ class Vughex extends Table
       "table" . $current_player_id
     );
 
-    self::dump("player_table", $result["player_table"]);
-
     $sql =
       "SELECT player_id id FROM player WHERE player_id<>'" .
       $current_player_id .
@@ -752,9 +750,6 @@ class Vughex extends Table
       return;
     }
     $gridID = $targetCol + $numOfCards * 3;
-    self::dump("$targetCol", $targetCol);
-    self::dump("$numOfCards", $numOfCards);
-    self::dump("$gridID", $gridID);
 
     // move card
     $this->cards->moveCard($targetCardID, "table" . $targetPlayerID, $gridID);
@@ -1206,7 +1201,6 @@ class Vughex extends Table
     );
     // deal appropriate creep
     $allCards = array_values($this->cards->getCardsInLocation("deck"));
-    self::dump('stRoundSetup:$allCards', $allCards);
 
     $creepSun = null;
     $creepNgt = null;
@@ -1418,8 +1412,6 @@ class Vughex extends Table
     $hasAgent = [0, 0, 0];
 
     foreach ($allData["players"] as $playerID => $player) {
-      self::dump('$playerID', $playerID);
-
       $tmpResult = [];
 
       foreach ($tableCards[$playerID] as $c) {
@@ -1428,9 +1420,6 @@ class Vughex extends Table
 
         $powerFixed = $cardInfo->powerFixed;
         $powerCenter = $cardInfo->powerCenter;
-        self::dump('$cardInfo->name', $cardInfo->name);
-        self::dump('$powerFixed', $powerFixed);
-        self::dump('$powerCenter', $powerCenter);
 
         // 0 - 1 - 2
         // 3 - 4 - 5
@@ -1501,9 +1490,6 @@ class Vughex extends Table
       $result["table"][$playerID] = array_values(
         $this->getCardsInLocation("table" . $playerID)
       );
-
-      self::dump('$hasEclipse', $hasEclipse);
-      self::dump('$hasTitan', $hasTitan);
 
       // update center controller
       $gameEnded = false;
@@ -1664,7 +1650,6 @@ class Vughex extends Table
           }
         }
       }
-      self::dump('$tmpResult', $tmpResult);
     }
 
     $sql =

@@ -345,7 +345,6 @@ export default class App extends Vue {
       if (!notif) {
         return;
       }
-      console.log("notif", notif);
 
       this.bgaNotifQueue = this.bgaNotifQueue.then(() => {
         return new Promise<void>((resolve) => {

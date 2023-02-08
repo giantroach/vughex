@@ -70,7 +70,6 @@ export default class Hand extends Vue {
   public created() {
     const def = this.handDef[this.type];
     this.size = def.size;
-    console.log("def", def);
   }
 
   public isSelectable(idx: number): boolean {

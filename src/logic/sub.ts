@@ -201,7 +201,6 @@ export class Sub {
       case "reincarnateCard": {
         // i.e. reincarnation
         const arg = notif.args as BgaReincarnateCardNotif;
-        console.log("reincarnateCard", arg);
         const gridID = Number(arg.gridID);
         const playerID = Number(arg.player_id);
         const c = arg.card;
@@ -249,7 +248,6 @@ export class Sub {
         const table = arg.table;
         const center = arg.center;
         const dayOrNight = arg.day_or_night;
-        console.log("endRound", arg, this.playerID);
         for (const pID in score) {
           if (pID === "center") {
             this.scoreData.centerScore = objToArray(score[pID]);
@@ -265,7 +263,6 @@ export class Sub {
           if (pID === String(this.playerID)) {
             table[pID].forEach((card) => {
               const gridID = Number(card.location_arg);
-              console.log("mine", gridID, card.type_arg);
               const row = Math.floor(gridID / 3) + 3;
               const col = gridID % 3;
               if (this.gridData.cardIDs) {
@@ -277,7 +274,6 @@ export class Sub {
           } else {
             table[pID].forEach((card) => {
               const gridID = Number(card.location_arg);
-              console.log("oppo", gridID, card.type_arg);
               const row = 1 - Math.floor(gridID / 3);
               const col = gridID % 3;
               if (this.gridData.cardIDs) {
@@ -313,7 +309,6 @@ export class Sub {
       }
 
       default:
-        console.log("unhandled notif", notif);
         break;
     }
   }

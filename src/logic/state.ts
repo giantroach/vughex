@@ -87,7 +87,6 @@ class State {
   public throttledRefresh: any;
 
   public refresh() {
-    console.log("this.current", this.current);
     switch (this.current) {
       case "waitingForOtherPlayer":
         this.assign(this.handData, "active", false);
@@ -398,8 +397,6 @@ class State {
       }
 
       case "endRound": {
-        // FIXME:
-        console.log("this.scoreData", this.scoreData);
         if (
           !this.scoreData.myScore.length ||
           !this.scoreData.oppoScore.length
