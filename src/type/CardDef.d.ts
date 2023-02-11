@@ -43,6 +43,7 @@ interface CardDef {
   sprite: string;
   size: SizeDef;
   textDef?: TextLayoutDef;
+  minModalTop?: number;
   details?: {
     [id: number]: CardDetail;
   };
