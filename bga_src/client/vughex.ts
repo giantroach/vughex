@@ -299,8 +299,6 @@ define([
 
     */
     setupNotifications: function () {
-      console.log("notifications subscriptions setup");
-
       // TODO: here, associate your game notifications with local methods
 
       // Example 1: standard notification handling

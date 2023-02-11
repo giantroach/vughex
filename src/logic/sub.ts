@@ -76,7 +76,6 @@ export class Sub {
                   };
                 }),
           });
-          this.handData.selectable?.push(true);
         });
         break;
       }

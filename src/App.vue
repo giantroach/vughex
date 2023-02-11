@@ -404,6 +404,13 @@ export default class App extends Vue {
       this.bgaStateQueue = this.bgaStateQueue.then(() => {
         return new Promise<void>((resolve) => {
           switch (state) {
+            case "endRound":
+              this.state?.setState(state);
+              setTimeout(() => {
+                // secure the least time gap
+                resolve();
+              }, 10000);
+              break;
             default:
               this.state?.setState(state);
               setTimeout(() => {

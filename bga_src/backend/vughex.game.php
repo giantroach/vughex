@@ -919,7 +919,7 @@ class Vughex extends Table
 
     if (!$cardID) {
       self::notifyAllPlayers(
-        "score",
+        "mulligan",
         clienttranslate('${player_name} chose not to discard a card.'),
         [
           "player_name" => self::getActivePlayerName(),
@@ -930,6 +930,30 @@ class Vughex extends Table
       $round_num = intval(self::getUniqueValueFromDB($sql));
       $cardInfo = $this->getCard($cardID);
       $cardDef = $this->card_types[intval($cardInfo["type_arg"])];
+
+      // check if it is creeps
+      if (
+        intval($cardInfo["type_arg"]) === 13 ||
+        intval($cardInfo["type_arg"]) === 14
+      ) {
+        self::notifyPlayer(
+          $playerID,
+          "logError",
+          clienttranslate('"the Creeps" cannot be discarded.'),
+          []
+        );
+      }
+
+      // check if it is in the hand
+      $sql = "SELECT count(*) FROM cards WHERE card_location='hand' AND card_location_arg='" . $playerID . "'";
+      if (!intval(self::getUniqueValueFromDB($sql))) {
+        self::notifyPlayer(
+          $playerID,
+          "logError",
+          clienttranslate('The chosen card is not in your hand, reload the page.'),
+          []
+        );
+      }
 
       // discard and draw a card
       $newCard = $this->cards->pickCard("deck", $playerID);
@@ -1186,11 +1210,13 @@ class Vughex extends Table
     if ($round_side != "day") {
       // either day or '' (initial)
       self::DbQuery(
-        "UPDATE round SET round_side='day', round_num=" . $round_num);
+        "UPDATE round SET round_side='day', round_num=" . $round_num
+      );
       $round_side = "day";
     } else {
       self::DbQuery(
-        "UPDATE round SET round_side='night', round_num=" . $round_num);
+        "UPDATE round SET round_side='night', round_num=" . $round_num
+      );
       $round_side = "night";
     }
 

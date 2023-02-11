@@ -100,10 +100,14 @@ class State {
         this.assign(this.handData, "active", true);
         this.assign(this.handData, "selected", []);
         // filter 13 / 14 (the Creeps)
-        const selectable = this.handData.cardIDs?.map((c) => {
-          return c.cid !== "mainCard13" && c.cid !== "mainCard14";
+        this.handData.cardIDs?.forEach((c, idx) => {
+          // FIXME: push does not work. just replace it
+          if (!this.handData.selectable) {
+            this.handData.selectable = [];
+          }
+          this.handData.selectable[idx] =
+            c.cid !== "mainCard13" && c.cid !== "mainCard14";
         });
-        this.assign(this.handData, "selectable", selectable);
         this.setSubState("beforeCardSelect");
         this.ctrlButtonData.noMulligan.display = true;
         break;
