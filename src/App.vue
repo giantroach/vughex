@@ -197,6 +197,17 @@ export default class App extends Vue {
     oppo_table: [],
     tablespeed: "",
     day_or_night: "day",
+    center: {
+      left: {
+        controller: "",
+      },
+      center: {
+        controller: "",
+      },
+      right: {
+        controller: "",
+      },
+    },
     reincarnated_card_id: null,
   };
 
@@ -309,6 +320,25 @@ export default class App extends Vue {
       this.scoreData,
       this.reincarnationData,
     );
+
+    // update center controller
+    const dayOrNight = this.gamedata.day_or_night;
+    const center = this.gamedata.center;
+    this.gridData.cardIDs[0][2] = {
+      cid:
+        "centerCard" +
+        this.sub.getCenterIdx("left", dayOrNight, center.left.controller),
+    };
+    this.gridData.cardIDs[1][2] = {
+      cid:
+        "centerCard" +
+        this.sub.getCenterIdx("center", dayOrNight, center.center.controller),
+    };
+    this.gridData.cardIDs[2][2] = {
+      cid:
+        "centerCard" +
+        this.sub.getCenterIdx("right", dayOrNight, center.right.controller),
+    };
   }
 
   public cancelState(): void {

@@ -20,8 +20,6 @@ interface Score {
 }
 
 interface Center {
-  id: string;
-  location: "left" | "center" | "right";
   controller: string;
 }
 
@@ -42,6 +40,11 @@ interface Gamedata {
   player_table: Card[];
   oppo_table: Card[];
   day_or_night: "day" | "night";
+  center: {
+    left: Center;
+    center: Center;
+    right: Center;
+  };
   reincarnated_card_id?: string | null;
   reincarnated_col?: string | null;
 }

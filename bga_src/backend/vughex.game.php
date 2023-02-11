@@ -214,6 +214,12 @@ class Vughex extends Table
     $round_side = self::getUniqueValueFromDB($sql);
     $result["day_or_night"] = $round_side;
 
+    // return center controller data
+    $sql =
+      "SELECT center_location location, center_controller controller FROM center";
+    $center = self::getCollectionFromDb($sql);
+    $result["center"] = $center;
+
     // return only when current player is matched
     $sql =
       "SELECT reincarnation_card_id card_id, reincarnation_col col, reincarnation_current_player current_player FROM reincarnation";
