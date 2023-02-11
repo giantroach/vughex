@@ -506,12 +506,10 @@ class Vughex extends Table
     if ($cnt > 0) {
       return false;
     }
-    // FIXME: check reincarnation col
-    $sql =
-      "SELECT reincarnation_col FROM reincarnation";
+    // check reincarnation col
+    $sql = "SELECT reincarnation_col FROM reincarnation";
     $reincarnationCol = self::getUniqueValueFromDB($sql);
-    if (
-      $reincarnationCol != null) {
+    if ($reincarnationCol != null) {
       $reincarnationCol = intval($reincarnationCol);
       if (intval($gridID) % 3 !== $reincarnationCol) {
         return false;
@@ -657,15 +655,19 @@ class Vughex extends Table
 
     // reveal notification
     $msg = clienttranslate(
-      '"the Oracle" disabled stealth and [Combat] ability.'
+      '"the Oracle" disabled stealth and [Combat] ability of "${cardName}".'
     );
     if ($cardName === "watcher") {
-      $msg = clienttranslate('"the Watcher" disabled stealth.');
+      $msg = clienttranslate(
+        '"the Watcher" disabled stealth of "${cardName}".'
+      );
     }
+    $cardDef = $this->card_types[intval($targetCardInfo["type_arg"])];
     self::notifyAllPlayers("updateCard", $msg, [
       "player_id" => $targetPlayerID,
       "player_name" => $this->getPlayerName($targetPlayerID),
       "card" => $targetCardInfo,
+      "cardName" => $cardDef->name,
       "gridID" => intval($targetGridID),
     ]);
   }
