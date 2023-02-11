@@ -674,7 +674,61 @@ class State {
         cssClass: "largeCenter",
       };
     });
-    this.assign(this.gridData, "overlay", overlay);
+
+    // Show Animation
+    const emptyOverlay = [[], [], []] as Overlay[][];
+    for (let i = 0; i < 3; i += 1) {
+      for (let j = 0; j < 5; j += 1) {
+        emptyOverlay[i][j] = {
+          type: "text",
+          data: "",
+          cssClass: "largeCenter",
+        };
+      }
+    }
+    // how many sec per a column,
+    const duration = 1000;
+    // how much step / a column
+    const steps = 10;
+    const stepDuration = duration / steps;
+    const prog = [[], [], []] as string[][];
+    const anim = (p: Promise<void>, progress: number): void => {
+      p.then(() => {
+        const idx = Math.floor(progress / steps);
+        const step = (progress % steps) + 1;
+        if (idx > 2) {
+          return;
+        }
+
+        prog[idx] = [
+          String(Math.floor((Number(overlay[idx][0].data) * step) / steps)),
+          String(Math.floor((Number(overlay[idx][1].data) * step) / steps)),
+          String(Math.floor((Number(overlay[idx][2].data) * step) / steps)),
+          String(Math.floor((Number(overlay[idx][3].data) * step) / steps)),
+          String(Math.floor((Number(overlay[idx][4].data) * step) / steps)),
+        ];
+        // console.log("prog", prog);
+        // this.assign(this.gridData, "overlay", prog);
+        if (this.gridData?.overlay?.[idx]) {
+          for (let i = 0; i < 5; i += 1) {
+            this.gridData.overlay[idx][i].data = prog[idx][i];
+          }
+        } else {
+          // this.assign(this.gridData, "overlay", prog);
+        }
+
+        anim(
+          new Promise((resolve) => {
+            setTimeout(() => {
+              resolve();
+            }, stepDuration);
+          }),
+          progress + 1,
+        );
+      });
+    };
+    this.assign(this.gridData, "overlay", emptyOverlay);
+    anim(Promise.resolve(), 0);
   }
 
   // NOTE: this idx is 0 - 5
