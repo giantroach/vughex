@@ -1346,7 +1346,7 @@ class Vughex extends Table
     $sql = "SELECT round_side FROM round";
     $round_side = self::getUniqueValueFromDB($sql);
     if ($round_side == "night") {
-      $result["score"]["center"] = [1, 4, 5];
+      $result["score"]["center"] = [5, 4, 1];
     }
 
     // get the controller (player) for each center
