@@ -389,7 +389,11 @@ export default class App extends Vue {
               break;
             default:
               this.sub?.handle(notif);
-              resolve();
+              setTimeout(() => {
+                // secure the least time gap
+                resolve();
+              }, 1000);
+              break;
           }
         });
       });
@@ -417,7 +421,7 @@ export default class App extends Vue {
               setTimeout(() => {
                 // secure the least time gap
                 resolve();
-              }, 100);
+              }, 1000);
               break;
           }
         });

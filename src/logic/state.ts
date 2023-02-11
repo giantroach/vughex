@@ -129,6 +129,8 @@ class State {
         this.setSubState("beforeCardSelect");
         this.ctrlButtonData.submit.display = false;
         this.ctrlButtonData.cancel.display = false;
+        this.ctrlButtonData.mulligan.display = false;
+        this.ctrlButtonData.noMulligan.display = false;
         break;
 
       case "reincarnationTurn:init": {
