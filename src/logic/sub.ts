@@ -234,9 +234,8 @@ export class Sub {
         }
 
         this.reincarnationData.reincarnatedCardID = c?.id || null;
-        this.reincarnationData.reincarnatedCol = reincarnatedCol
-          ? Number(reincarnatedCol)
-          : null;
+        this.reincarnationData.reincarnatedCol =
+          reincarnatedCol != null ? Number(reincarnatedCol) : null;
 
         break;
       }

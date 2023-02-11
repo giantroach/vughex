@@ -506,6 +506,17 @@ class Vughex extends Table
     if ($cnt > 0) {
       return false;
     }
+    // FIXME: check reincarnation col
+    $sql =
+      "SELECT reincarnation_col FROM reincarnation";
+    $reincarnationCol = self::getUniqueValueFromDB($sql);
+    if (
+      $reincarnationCol != null) {
+      $reincarnationCol = intval($reincarnationCol);
+      if (intval($gridID) % 3 !== $reincarnationCol) {
+        return false;
+      }
+    }
     return true;
   }
 
@@ -945,12 +956,17 @@ class Vughex extends Table
       }
 
       // check if it is in the hand
-      $sql = "SELECT count(*) FROM cards WHERE card_location='hand' AND card_location_arg='" . $playerID . "'";
+      $sql =
+        "SELECT count(*) FROM cards WHERE card_location='hand' AND card_location_arg='" .
+        $playerID .
+        "'";
       if (!intval(self::getUniqueValueFromDB($sql))) {
         self::notifyPlayer(
           $playerID,
           "logError",
-          clienttranslate('The chosen card is not in your hand, reload the page.'),
+          clienttranslate(
+            "The chosen card is not in your hand, reload the page."
+          ),
           []
         );
       }

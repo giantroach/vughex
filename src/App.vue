@@ -300,9 +300,10 @@ export default class App extends Vue {
     this.reincarnationData.reincarnatedCardID =
       this.gamedata.reincarnated_card_id || null;
 
-    this.reincarnationData.reincarnatedCol = this.gamedata.reincarnated_col
-      ? Number(this.gamedata.reincarnated_col)
-      : null;
+    this.reincarnationData.reincarnatedCol =
+      this.gamedata.reincarnated_col != null
+        ? Number(this.gamedata.reincarnated_col)
+        : null;
 
     this.state = new State(
       this.request,
