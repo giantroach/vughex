@@ -190,6 +190,7 @@ export default class GameCard extends Vue {
   public bgPos = "0 0";
   public bgPosMini = "0 0";
   public onlyMini = false;
+  public minModalTop = 0;
 
   // tweaks related to show details
   public disableShowDetailsUntilMouseOut = false;
@@ -229,6 +230,7 @@ export default class GameCard extends Vue {
     }
     this.bgPosMini = this.getBgPos(def.miniDef.sprite, def.miniDef.size, idx);
     this.onlyMini = def.details?.[idx]?.onlyMini || false;
+    this.minModalTop = def.minModalTop || 0;
   }
 
   public showDetails(evt: MouseEvent) {
@@ -277,7 +279,7 @@ export default class GameCard extends Vue {
       if (mcLeft + mcRect.width > bdRect.width) {
         mcLeft = bdRect.width - mcRect.width;
       }
-      this.modalTop = mcTop > 0 ? mcTop : 0;
+      this.modalTop = mcTop > this.minModalTop ? mcTop : this.minModalTop;
       this.modalLeft = mcLeft > 0 ? mcLeft : 0;
 
       this.$emit("showDetail", this.id);

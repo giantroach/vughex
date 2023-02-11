@@ -9,6 +9,7 @@ const cardDefs: { [cardType: string]: CardDef } = {
       offsetY: "50%",
       padding: "24px",
     },
+    minModalTop: 64,
     details: {
       0: {
         name: "the Oracle",
