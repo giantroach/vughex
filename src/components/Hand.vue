@@ -1,6 +1,7 @@
 <template>
   <ul class="hand">
     <li
+      class="aura"
       v-for="(c, idx) in cardIDs"
       :key="c.cid"
       v-bind:style="{
@@ -16,6 +17,11 @@
       }"
       @click="selectHand(idx)"
     >
+      <Aura
+        :active="isSelectable(idx) || isSelected(idx)"
+        :type="!isSelected(idx) ? 'selectable' : 'selected'"
+        :radius="size.radius"
+      ></Aura>
       <GameCard
         :id="c.cid"
         :prioritizeMini="true"
@@ -39,10 +45,12 @@ import { CardID } from "../type/Hand.d";
 import { HandDef, SizeDef } from "../type/HandDef.d";
 import { CardDef } from "../type/CardDef.d";
 import GameCard from "./GameCard.vue";
+import Aura from "./Aura.vue";
 
 @Options({
   components: {
     GameCard,
+    Aura,
   },
   props: {
     type: String,
@@ -134,19 +142,23 @@ li {
   margin-right: -10px;
   transition: margin-left 0.5s;
   transition: margin-right 0.5s;
+  border: 2px solid transparent;
 }
 .selectable {
   border: 2px solid #00e9eb;
-  box-shadow: 0 0 5px 2px #05fdff;
 }
 .selected {
   border: 2px solid #fffc00;
-  box-shadow: 0 0 5px 2px #ffb644;
 }
 .focued {
   margin-left: 30px;
   margin-right: 30px;
   transition: margin-left 0.5s;
   transition: margin-right 0.5s;
+}
+
+.aura {
+  transition: 0.2s;
+  position: relative;
 }
 </style>

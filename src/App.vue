@@ -30,24 +30,28 @@
         type="submit"
         :active="ctrlButtonData.submit.active"
         :display="ctrlButtonData.submit.display"
+        auraType="submit"
         @btnClick="submitState()"
       ></CtrlButton>
       <CtrlButton
         type="cancel"
         :active="ctrlButtonData.cancel.active"
         :display="ctrlButtonData.cancel.display"
+        auraType="cancel"
         @btnClick="cancelState()"
       ></CtrlButton>
       <CtrlButton
         type="mulligan"
         :active="ctrlButtonData.mulligan.active"
         :display="ctrlButtonData.mulligan.display"
+        auraType="submit"
         @btnClick="submitState('submit')"
       ></CtrlButton>
       <CtrlButton
         type="noMulligan"
         :active="ctrlButtonData.noMulligan.active"
         :display="ctrlButtonData.noMulligan.display"
+        auraType="cancel"
         @btnClick="submitState()"
       ></CtrlButton>
     </div>
@@ -87,6 +91,7 @@ import { HandData } from "./type/Hand.d";
 import { CtrlButtonData } from "./type/CtrlButton.d";
 import { ScoreData } from "./type/Score.d";
 import { ReincarnationData } from "./type/Reincarnation.d";
+import { auraDefs } from "./def/aura";
 import { cardDefs, cardMetaDefs } from "./def/card";
 import { gridDefs } from "./def/grid";
 import { handDefs } from "./def/hand";
@@ -109,6 +114,7 @@ import CtrlButton from "./components/CtrlButton.vue";
     return {
       // provided through main.ts so that it can inject itself
       // urlBase: ref(""),
+      auraDef: auraDefs,
       cardDef: cardDefs,
       cardMetaDef: cardMetaDefs,
       gridDef: gridDefs,
@@ -451,7 +457,7 @@ export default class App extends Vue {
 #ctrl_buttons {
   height: 30px;
 }
-#ctrl_buttons :not(:last-child) {
-  margin-right: 5px;
+#ctrl_buttons > * {
+  margin: 0 10px;
 }
 </style>

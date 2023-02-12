@@ -3,7 +3,7 @@
     <li
       v-for="(gridCol, idx) in grid"
       :key="idx"
-      class="grid-col"
+      class="grid-col aura"
       :class="{
         selectable: isColSelectable(idx),
         selected: isColSelected(idx),
@@ -16,11 +16,16 @@
       }"
       @click="selectCol(idx)"
     >
+      <Aura
+        :active="isColSelectable(idx)"
+        :type="isColSelected(idx) ? 'colSelected' : 'colSelectable'"
+        :radius="size.radius"
+      ></Aura>
       <ul>
         <li
           v-for="(gridCell, idy) in gridCol"
           :key="gridCell"
-          class="grid-cell"
+          class="grid-cell aura"
           :class="{
             selectable0: isSelectable(0, idx, idy),
             selected0: isSelected(0, idx, idy),
@@ -48,6 +53,16 @@
               {{ overlay[idx][idy].data }}
             </div>
           </template>
+          <Aura
+            :active="
+              isSelectable(0, idx, idy) ||
+              isSelectable(1, idx, idy) ||
+              isSelected(0, idx, idy) ||
+              isSelected(1, idx, idy)
+            "
+            :type="getAuraType(idx, idy)"
+            :radius="size.radius"
+          ></Aura>
           <template
             v-if="cardIDs && cardIDs[idx] && cardIDs[idx][idy] !== undefined"
           >
@@ -76,10 +91,12 @@ import { SizeDef, MarginDef, GridDef } from "../type/GridDef.d";
 import { throttle } from "../util/util";
 import { CardDef } from "../type/CardDef.d";
 import GameCard from "./GameCard.vue";
+import Aura from "./Aura.vue";
 
 @Options({
   components: {
     GameCard,
+    Aura,
   },
   props: {
     type: String,
@@ -147,6 +164,26 @@ export default class Grid extends Vue {
     const r = /^(\d+)(.+)/;
     const cm = r.exec(margin.column) || [null, "0", ""];
     return `${Number(cm[1]) / 2}${cm[2]}`;
+  }
+
+  public getAuraType(x: number, y: number): string {
+    if (this.isSelected(0, x, y)) {
+      return "gridSelected";
+    }
+
+    if (this.isSelected(1, x, y)) {
+      return "gridSelected";
+    }
+
+    if (this.isSelectable(1, x, y)) {
+      return "gridSelectable2";
+    }
+
+    if (this.isSelectable(0, x, y)) {
+      return "gridSelectable1";
+    }
+
+    return "";
   }
 
   public isSelectable(idx: number, x: number, y: number): boolean {
@@ -288,37 +325,34 @@ li.grid-cell {
   border: 2px solid rgba(0, 0, 0, 0.5);
   position: relative;
 }
+li.aura {
+  transition: 0.2s;
+  position: relative;
+}
 ul.grid {
   transform: scale(0.6);
   margin: -120px 0;
 }
 li.grid-cell.selectable0 {
   border: 2px solid #00e9eb;
-  box-shadow: 0 0 5px 5px #05fdff;
 }
 li.grid-cell.selected0 {
   border: 2px solid #fffc00;
-  box-shadow: 0 0 5px 5px #ffb644;
 }
 li.grid-cell.selectable1 {
   border: 2px solid #00eb7a;
-  box-shadow: 0 0 5px 5px #05ff92;
 }
 li.grid-cell.selected1 {
   border: 2px solid #fffc00;
-  box-shadow: 0 0 5px 5px #ffb644;
 }
 ul.grid > li.grid-col {
   border: 2px solid transparent;
-  box-shadow: 0 0 5px 5px transparent;
 }
 ul.grid > li.grid-col.selectable {
   border: 2px solid #00e9eb;
-  box-shadow: 0 0 5px 5px #05fdff;
 }
 ul.grid > li.grid-col.selected {
   border: 2px solid #fffc00;
-  box-shadow: 0 0 5px 5px #ffb644;
 }
 .overlay {
   display: flex;

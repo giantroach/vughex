@@ -13,8 +13,11 @@
     :class="{
       selectable: active,
     }"
+    class="aura"
     @click="btnClick()"
-    >{{ i18n(def.label) }}
+  >
+    <Aura :active="true" :type="auraType" :radius="size.radius"></Aura>
+    {{ i18n(def.label) }}
   </Button>
 </template>
 
@@ -26,13 +29,17 @@ import {
   ButtonSizeDef,
   CtrlButtonDef,
 } from "../type/CtrlButtonDef.d";
+import Aura from "./Aura.vue";
 
 @Options({
-  components: {},
+  components: {
+    Aura,
+  },
   props: {
     active: Boolean,
     type: String,
     display: Boolean,
+    auraType: String,
   },
   inject: ["ctrlButtonDef", "i18n"],
   emits: ["btnClick"],
@@ -44,6 +51,7 @@ export default class CtrlButton extends Vue {
   public active!: boolean;
   public display!: boolean;
   public type!: ButtonType;
+  public auraType!: string;
   // etc
   public def!: CtrlButtonDef;
   public size!: ButtonSizeDef;
@@ -65,4 +73,9 @@ export default class CtrlButton extends Vue {
 }
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.aura {
+  transition: 0.2s;
+  position: relative;
+}
+</style>
