@@ -25,17 +25,6 @@
         zIndex: auraDef[type].zIndex || -10,
       }"
     ></div>
-    <template v-if="auraDef[type].base">
-      <div
-        class="base"
-        v-bind:style="{
-          borderRadius: radius,
-          background: auraDef[type].base,
-          border: auraDef[type].border,
-          zIndex: auraDef[type].zIndex || -10,
-        }"
-      ></div>
-    </template>
   </template>
 </template>
 
@@ -109,16 +98,7 @@ export default class Hand extends Vue {
   left: 0;
   transform: translate3d(0, 0, 0);
   box-sizing: border-box;
-}
-.base {
-  position: absolute;
-  z-index: -9;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  box-sizing: border-box;
-  border-width: 4px;
+  pointer-events: none;
 }
 .before {
   animation: anime 2s ease-out infinite;

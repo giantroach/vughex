@@ -390,6 +390,7 @@ export default class GameCard extends Vue {
   border: 1px solid white;
   padding: 2px;
   font-size: x-large;
+  pointer-events: none;
 }
 ul.detail-meta-modal {
   list-style-type: none;
