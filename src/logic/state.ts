@@ -333,6 +333,7 @@ class State {
         }
 
         this.ctrlButtonData.submit.display = true;
+        this.assign(this.gridData, "selectable", []);
         break;
       }
 
