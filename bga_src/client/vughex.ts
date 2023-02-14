@@ -123,6 +123,9 @@ define([
         _("Submit"),
         _("On Table"),
         _("Your Hand"),
+        _("Win!"),
+        _("Lose.."),
+        _("Tie"),
       ].reduce((acc, [text, translated]) => {
         acc[text] = translated;
         return acc;
@@ -322,6 +325,7 @@ define([
         "moveCard",
         "updateCard",
         "reincarnateCard",
+        "score",
         "endRound",
       ];
       notifications.forEach((n) => {

@@ -6,6 +6,7 @@ import {
   BgaUpdateCardNotif,
   BgaMulliganNotif,
   BgaReincarnateCardNotif,
+  BgaScoreNotif,
   BgaEndRoundNotif,
 } from "bga_src/client/type/bga-interface.d";
 import { objToArray } from "../util/util";
@@ -41,6 +42,7 @@ export class Sub {
         this.scoreData.myScore = [];
         this.scoreData.oppoScore = [];
         this.gridData.overlay = [];
+        this.gridData.cellOverlay = [];
 
         // update table
         if (!this.gridData || !this.gridData.cardIDs) {
@@ -240,6 +242,69 @@ export class Sub {
         break;
       }
 
+      case "score": {
+        const arg = notif.args as BgaScoreNotif;
+        const wPlayerID = arg.w_player_id;
+        const lane = arg.lane;
+        if (!this.gridData || !wPlayerID || !lane) {
+          break;
+        }
+        let idx = 0;
+        let delay = 0;
+        let result = "tie";
+        if (lane === "left") {
+          idx = 0;
+          delay = 1000;
+        }
+        if (lane === "center") {
+          idx = 1;
+          delay = 2000;
+        }
+        if (lane === "right") {
+          idx = 2;
+          delay = 3000;
+        }
+        if (Number(wPlayerID) === Number(this.playerID)) {
+          result = "win";
+        }
+        if (
+          wPlayerID !== "tie" &&
+          Number(wPlayerID) !== Number(this.playerID)
+        ) {
+          result = "lose";
+        }
+        setTimeout(() => {
+          if (!this.gridData.overlay) {
+            this.gridData.overlay = [];
+          }
+          if (result === "win") {
+            this.gridData.overlay[idx] = {
+              type: "text",
+              data: "Win!",
+              pos: `col.${idx}.bottom`,
+              cssClass: "largeCenter success",
+            };
+          }
+          if (result === "lose") {
+            this.gridData.overlay[idx] = {
+              type: "text",
+              data: "Lose..",
+              pos: `col.${idx}.bottom`,
+              cssClass: "largeCenter danger",
+            };
+          }
+          if (result === "tie") {
+            this.gridData.overlay[idx] = {
+              type: "text",
+              data: "Tie",
+              pos: `col.${idx}.bottom`,
+              cssClass: "largeCenter",
+            };
+          }
+        }, delay);
+        break;
+      }
+
       case "endRound": {
         const arg = notif.args as BgaEndRoundNotif;
         const score = arg.score;
@@ -284,24 +349,40 @@ export class Sub {
         }
 
         // update center
+        // FIXME: give some delay
         if (!this.gridData || !this.gridData.cardIDs) {
           break;
         }
-        this.gridData.cardIDs[0][2] = {
-          cid:
-            "centerCard" +
-            this.getCenterIdx("left", dayOrNight, center.left.controller),
-        };
-        this.gridData.cardIDs[1][2] = {
-          cid:
-            "centerCard" +
-            this.getCenterIdx("center", dayOrNight, center.center.controller),
-        };
-        this.gridData.cardIDs[2][2] = {
-          cid:
-            "centerCard" +
-            this.getCenterIdx("right", dayOrNight, center.right.controller),
-        };
+        setTimeout(() => {
+          if (!this.gridData.cardIDs) {
+            this.gridData.cardIDs = [[], [], []];
+          }
+          this.gridData.cardIDs[0][2] = {
+            cid:
+              "centerCard" +
+              this.getCenterIdx("left", dayOrNight, center.left.controller),
+          };
+        }, 1000);
+        setTimeout(() => {
+          if (!this.gridData.cardIDs) {
+            this.gridData.cardIDs = [[], [], []];
+          }
+          this.gridData.cardIDs[1][2] = {
+            cid:
+              "centerCard" +
+              this.getCenterIdx("center", dayOrNight, center.center.controller),
+          };
+        }, 2000);
+        setTimeout(() => {
+          if (!this.gridData.cardIDs) {
+            this.gridData.cardIDs = [[], [], []];
+          }
+          this.gridData.cardIDs[2][2] = {
+            cid:
+              "centerCard" +
+              this.getCenterIdx("right", dayOrNight, center.right.controller),
+          };
+        }, 3000);
 
         break;
       }

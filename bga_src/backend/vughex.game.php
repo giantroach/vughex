@@ -1569,6 +1569,7 @@ class Vughex extends Table
               [
                 "lane" => $lane,
                 "score" => $score,
+                "w_player_id" => "tie",
               ]
             );
 
@@ -1587,6 +1588,7 @@ class Vughex extends Table
                 "lane" => $lane,
                 "score" => $score,
                 "score2" => $score2,
+                "w_player_id" => "tie",
               ]
             );
             continue;
@@ -1607,6 +1609,7 @@ class Vughex extends Table
                   "scoreW" => $score2,
                   "scoreL" => $score,
                   "player" => $this->getPlayerName($playerID),
+                  "w_player_id" => $playerID,
                 ]
               );
             } else {
@@ -1620,6 +1623,7 @@ class Vughex extends Table
                   "scoreW" => $score2,
                   "scoreL" => $score,
                   "player" => $this->getPlayerName($playerID),
+                  "w_player_id" => $playerID,
                 ]
               );
             }
@@ -1659,6 +1663,7 @@ class Vughex extends Table
                   "scoreW" => $score,
                   "scoreL" => $score2,
                   "player" => $this->getPlayerName($laneScore["player"]),
+                  "w_player_id" => $laneScore["player"],
                 ]
               );
             } else {
@@ -1672,6 +1677,7 @@ class Vughex extends Table
                   "scoreW" => $score,
                   "scoreL" => $score2,
                   "player" => $this->getPlayerName($laneScore["player"]),
+                  "w_player_id" => $laneScore["player"],
                 ]
               );
             }

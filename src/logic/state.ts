@@ -1,4 +1,4 @@
-import { GridData, Overlay } from "../type/Grid.d";
+import { GridData, CellOverlay } from "../type/Grid.d";
 import { HandData } from "../type/Hand.d";
 import { ScoreData } from "../type/Score.d";
 import { CtrlButtonData } from "../type/CtrlButton.d";
@@ -643,13 +643,13 @@ class State {
   }
 
   private setScore() {
-    const overlay: Overlay[][] = [];
+    const cellOverlay: CellOverlay[][] = [];
     this.scoreData.oppoScore.forEach((score, idx) => {
       const cs = this.getCoodinateFromIdx(idx, "oppo");
-      if (!overlay[cs[0]]) {
-        overlay[cs[0]] = [];
+      if (!cellOverlay[cs[0]]) {
+        cellOverlay[cs[0]] = [];
       }
-      overlay[cs[0]][cs[1]] = {
+      cellOverlay[cs[0]][cs[1]] = {
         type: "text",
         data: score,
         cssClass: "largeCenter",
@@ -657,10 +657,10 @@ class State {
     });
     this.scoreData.myScore.forEach((score, idx) => {
       const cs = this.getCoodinateFromIdx(idx, "me");
-      if (!overlay[cs[0]]) {
-        overlay[cs[0]] = [];
+      if (!cellOverlay[cs[0]]) {
+        cellOverlay[cs[0]] = [];
       }
-      overlay[cs[0]][cs[1]] = {
+      cellOverlay[cs[0]][cs[1]] = {
         type: "text",
         data: score,
         cssClass: "largeCenter",
@@ -668,10 +668,10 @@ class State {
     });
     this.scoreData.centerScore.forEach((score, idx) => {
       const cs = this.getCoodinateFromIdx(idx, "center");
-      if (!overlay[cs[0]]) {
-        overlay[cs[0]] = [];
+      if (!cellOverlay[cs[0]]) {
+        cellOverlay[cs[0]] = [];
       }
-      overlay[cs[0]][cs[1]] = {
+      cellOverlay[cs[0]][cs[1]] = {
         type: "text",
         data: score,
         cssClass: "largeCenter",
@@ -679,7 +679,7 @@ class State {
     });
 
     // Show Animation
-    const emptyOverlay = [[], [], []] as Overlay[][];
+    const emptyOverlay = [[], [], []] as CellOverlay[][];
     for (let i = 0; i < 3; i += 1) {
       for (let j = 0; j < 5; j += 1) {
         emptyOverlay[i][j] = {
@@ -704,20 +704,20 @@ class State {
         }
 
         prog[idx] = [
-          String(Math.floor((Number(overlay[idx][0].data) * step) / steps)),
-          String(Math.floor((Number(overlay[idx][1].data) * step) / steps)),
-          String(Math.floor((Number(overlay[idx][2].data) * step) / steps)),
-          String(Math.floor((Number(overlay[idx][3].data) * step) / steps)),
-          String(Math.floor((Number(overlay[idx][4].data) * step) / steps)),
+          String(Math.floor((Number(cellOverlay[idx][0].data) * step) / steps)),
+          String(Math.floor((Number(cellOverlay[idx][1].data) * step) / steps)),
+          String(Math.floor((Number(cellOverlay[idx][2].data) * step) / steps)),
+          String(Math.floor((Number(cellOverlay[idx][3].data) * step) / steps)),
+          String(Math.floor((Number(cellOverlay[idx][4].data) * step) / steps)),
         ];
         // console.log("prog", prog);
         // this.assign(this.gridData, "overlay", prog);
-        if (this.gridData?.overlay?.[idx]) {
+        if (this.gridData?.cellOverlay?.[idx]) {
           for (let i = 0; i < 5; i += 1) {
-            this.gridData.overlay[idx][i].data = prog[idx][i];
+            this.gridData.cellOverlay[idx][i].data = prog[idx][i];
           }
         } else {
-          // this.assign(this.gridData, "overlay", prog);
+          // this.assign(this.gridData, "cellOverlay", prog);
         }
 
         anim(
@@ -730,7 +730,7 @@ class State {
         );
       });
     };
-    this.assign(this.gridData, "overlay", emptyOverlay);
+    this.assign(this.gridData, "cellOverlay", emptyOverlay);
     anim(Promise.resolve(), 0);
   }
 

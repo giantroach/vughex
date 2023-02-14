@@ -1,6 +1,7 @@
 <template>
   <ul class="grid">
     <li
+      ref="colRef"
       v-for="(gridCol, idx) in grid"
       :key="idx"
       class="grid-col aura"
@@ -43,14 +44,14 @@
         >
           <template
             v-if="
-              overlay &&
-              overlay[idx] &&
-              overlay[idx][idy] &&
-              overlay[idx][idy].type === 'text'
+              cellOverlay &&
+              cellOverlay[idx] &&
+              cellOverlay[idx][idy] &&
+              cellOverlay[idx][idy].type === 'text'
             "
           >
-            <div :class="'overlay ' + overlay[idx][idy].cssClass || ''">
-              {{ overlay[idx][idy].data }}
+            <div :class="'cellOverlay ' + cellOverlay[idx][idy].cssClass || ''">
+              {{ cellOverlay[idx][idy].data }}
             </div>
           </template>
           <Aura
@@ -82,16 +83,39 @@
       </ul>
     </li>
   </ul>
+
+  <teleport to="body" v-if="overlay && overlay.length">
+    <template v-for="(o, i) in getOverlayPos(overlay)" :key="i">
+      <div
+        class="overlay"
+        :class="o.cssClass || ''"
+        v-bind:style="{
+          top: o.top,
+          left: o.left,
+          width: o.width ?? 'initial',
+        }"
+      >
+        {{ i18n(o.data) }}
+      </div>
+    </template>
+  </teleport>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
-import { Overlay } from "../type/Grid.d";
+import { Ref } from "vue";
+import { Overlay, CellOverlay } from "../type/Grid.d";
 import { SizeDef, MarginDef, GridDef } from "../type/GridDef.d";
 import { throttle } from "../util/util";
 import { CardDef } from "../type/CardDef.d";
 import GameCard from "./GameCard.vue";
 import Aura from "./Aura.vue";
+
+interface OverlayWithPos extends Overlay {
+  top: string;
+  left: string;
+  width: null | string;
+}
 
 @Options({
   components: {
@@ -107,10 +131,11 @@ import Aura from "./Aura.vue";
     selectableCol: Array,
     selectedCol: Array,
     exclusiveSelect: Boolean,
+    cellOverlay: Array,
     overlay: Array,
     active: Boolean,
   },
-  inject: ["gridDef", "cardDef"],
+  inject: ["gridDef", "cardDef", "i18n"],
   emits: ["selectGrid", "selectCol"],
 })
 export default class Grid extends Vue {
@@ -127,9 +152,13 @@ export default class Grid extends Vue {
   public selectableCol!: boolean[];
   public selectedCol!: boolean[];
   public exclusiveSelect = true;
-  public overlay!: Overlay[][];
+  public overlay!: Overlay[];
+  public overlayPos!: OverlayWithPos[];
+  public cellOverlay!: CellOverlay[][];
   public active!: boolean;
   public cardDef!: { [cardType: string]: CardDef };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public i18n!: Ref<any>;
 
   public created() {
     const def = this.gridDef[this.type];
@@ -307,6 +336,32 @@ export default class Grid extends Vue {
       this.$emit("selectCol", x);
     }
   }
+
+  public getOverlayPos(overlay: Overlay[]): OverlayWithPos[] {
+    return overlay.map((o) => {
+      const pos = { top: "0px", left: "0px", width: "" };
+      // col mode
+      if (/^col\.\d\.\w+$/.test(o.pos)) {
+        const m = /^col\.(\d+)\.(\w+)$/.exec(o.pos);
+        if (m) {
+          const i = Number(m[1]);
+          const p = m[2];
+          if (this.$refs && this.$refs.colRef) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const colPos = (this.$refs as any).colRef[
+              i
+            ].getBoundingClientRect();
+            if (p === "bottom") {
+              pos.top = colPos.bottom + "px";
+              pos.left = colPos.left + "px";
+              pos.width = colPos.width + "px";
+            }
+          }
+        }
+      }
+      return Object.assign(pos, o);
+    });
+  }
 }
 </script>
 
@@ -354,7 +409,7 @@ ul.grid > li.grid-col.selectable {
 ul.grid > li.grid-col.selected {
   border: 2px solid #fffc00;
 }
-.overlay {
+.cellOverlay {
   display: flex;
   align-items: center;
   flex-direction: column;
@@ -366,11 +421,28 @@ ul.grid > li.grid-col.selected {
   width: 100%;
   z-index: 1;
 }
-.overlay.largeCenter {
+.cellOverlay.largeCenter {
   color: white;
   font-size: 4em;
   font-weight: bolder;
   text-stroke: 2px #000;
   -webkit-text-stroke: 2px #000;
+}
+
+.overlay {
+  pointer-events: none;
+  position: absolute;
+}
+.overlay.largeCenter {
+  text-align: center;
+  color: #666;
+  font-size: 1.5em;
+  font-weight: bolder;
+}
+.overlay.success {
+  color: #00cd6a;
+}
+.overlay.danger {
+  color: #eb7a00;
 }
 </style>

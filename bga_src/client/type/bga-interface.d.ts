@@ -8,6 +8,7 @@ type BgaNotifyName =
   | "updateCard"
   | "mulligan"
   | "reincarnateCard"
+  | "score"
   | "endRound";
 
 interface BgaRequest {
@@ -23,6 +24,7 @@ interface BgaNotification {
     | BgaMoveCardNotif
     | BgaUpdateCardNotif
     | BgaReincarnateCardNotif
+    | BgaScoreNotif
     | BgaEndRoundNotif;
 }
 
@@ -74,6 +76,11 @@ interface BgaReincarnateCardNotif {
   gridID: string;
 }
 
+interface BgaScoreNotif {
+  lane: string;
+  w_player_id: string;
+}
+
 interface BgaEndRoundNotif {
   score: Score;
   table: {
@@ -98,5 +105,6 @@ export {
   BgaDrawCardNotif,
   BgaMulliganNotif,
   BgaReincarnateCardNotif,
+  BgaScoreNotif,
   BgaEndRoundNotif,
 };

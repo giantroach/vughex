@@ -3,10 +3,17 @@ import { CardID } from "./Card.d";
 type OverlayType = "text";
 type OverlayClass = "largeCenter";
 
-interface Overlay {
+interface CellOverlay {
   type: OverlayType;
   data: string;
   cssClass?: OverlayClass;
+}
+
+interface Overlay {
+  type: OverlayType;
+  data: string;
+  pos: string;
+  cssClass?: string;
 }
 
 interface GridData {
@@ -15,10 +22,11 @@ interface GridData {
   selected?: boolean[][][];
   selectableCol?: boolean[];
   selectedCol?: boolean[];
-  overlay?: Overlay[][];
+  overlay?: Overlay[];
+  cellOverlay?: CellOverlay[][];
   exclusiveSelect?: boolean;
   ghosts?: Array<Array<boolean | undefined>>;
   active?: boolean;
 }
 
-export { GridData, Overlay };
+export { GridData, Overlay, CellOverlay };

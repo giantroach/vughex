@@ -21,6 +21,7 @@
         :selectedCol="gridData.selectedCol"
         :active="gridData.active"
         :overlay="gridData.overlay"
+        :cellOverlay="gridData.cellOverlay"
       >
       </Grid>
     </div>
@@ -149,6 +150,7 @@ export default class App extends Vue {
     selectedCol: [],
     exclusiveSelect: true,
     overlay: [],
+    cellOverlay: [],
     active: false,
   };
 
@@ -458,6 +460,6 @@ export default class App extends Vue {
   height: 30px;
 }
 #ctrl_buttons > * {
-  margin: 0 10px;
+  margin: 10px;
 }
 </style>
