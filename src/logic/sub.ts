@@ -349,7 +349,6 @@ export class Sub {
         }
 
         // update center
-        // FIXME: give some delay
         if (!this.gridData || !this.gridData.cardIDs) {
           break;
         }

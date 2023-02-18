@@ -388,6 +388,11 @@ export default class App extends Vue {
       this.bgaNotifQueue = this.bgaNotifQueue.then(() => {
         return new Promise<void>((resolve) => {
           switch (notif.name) {
+            case "score":
+              this.sub?.handle(notif);
+              // without delay
+              resolve();
+              break;
             case "endRound":
               this.sub?.handle(notif);
               // FIXME: this should be configurable
@@ -457,7 +462,7 @@ export default class App extends Vue {
   text-align: left;
 }
 #ctrl_buttons {
-  height: 30px;
+  height: 50px;
 }
 #ctrl_buttons > * {
   margin: 10px;

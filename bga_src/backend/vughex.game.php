@@ -442,11 +442,12 @@ class Vughex extends Table
           "score",
           clienttranslate('"the Evil" dealt 1 damage to ${playerName}.'),
           [
-            "playerID" => $wPlayerID,
             "playerName" => $playerName,
           ]
         );
-        return $this->addScore($wPlayerID);
+        if ($this->addScore($wPlayerID)) {
+          return true;
+        }
       }
     }
     if ($hasAgent) {
@@ -457,11 +458,12 @@ class Vughex extends Table
           "score",
           clienttranslate('"the Agent" dealt 1 damage to ${playerName}.'),
           [
-            "playerID" => $wPlayerID,
             "playerName" => $playerName,
           ]
         );
-        return $this->addScore($wPlayerID);
+        if ($this->addScore($wPlayerID)) {
+          return true;
+        }
       }
     }
     return false;
@@ -901,6 +903,37 @@ class Vughex extends Table
       "');";
     self::DbQuery($sql);
     return true;
+  }
+
+  function notifyScore($msg, $lane, $scores, $wPlayerID)
+  {
+    $p1 = self::getActivePlayerId();
+    $p1Name = $this->getPlayerName($p1);
+    $p2 = $this->getOppoID($p1);
+    $p2Name = $this->getPlayerName($p2);
+    $wPlayerName = null;
+    if (intval($wPlayerID) === intval($p1)) {
+      $wPlayerName = $p1Name;
+    }
+    if (intval($wPlayerID) === intval($p2)) {
+      $wPlayerName = $p2Name;
+    }
+
+    self::notifyPlayer($p1, "score", $msg, [
+      "lane" => $lane,
+      "scoreA" => $scores[$p2],
+      "scoreB" => $scores[$p1],
+      "wPlayerName" => $wPlayerName,
+      "w_player_id" => $wPlayerID,
+    ]);
+
+    self::notifyPlayer($p2, "score", $msg, [
+      "lane" => $lane,
+      "scoreA" => $scores[$p1],
+      "scoreB" => $scores[$p2],
+      "wPlayerName" => $wPlayerName,
+      "w_player_id" => $wPlayerID,
+    ]);
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -1465,11 +1498,7 @@ class Vughex extends Table
       $tmpResult = [];
 
       foreach ($tableCards[$playerID] as $c) {
-        $cardInfo = $this->card_types[intval($c["type_arg"])];
         $posID = $c["location_arg"];
-
-        $powerFixed = $cardInfo->powerFixed;
-        $powerCenter = $cardInfo->powerCenter;
 
         // 0 - 1 - 2
         // 3 - 4 - 5
@@ -1549,7 +1578,8 @@ class Vughex extends Table
         $laneScore[2] = $tmpResult[2] + $tmpResult[5];
         $laneScore["player"] = $playerID;
       } else {
-        foreach ($laneScore as $pos => $score) {
+        $playerID2 = $laneScore["player"];
+        foreach ($laneScore as $pos => $score2) {
           if ($pos === "player") {
             continue;
           }
@@ -1562,75 +1592,60 @@ class Vughex extends Table
             $lane = "right";
           }
 
-          if ($score == $tmpResult[$pos] + $tmpResult[$pos + 3]) {
-            self::notifyAllPlayers(
-              "score",
-              clienttranslate('[${lane} lane] is tied by ${score}.'),
-              [
-                "lane" => $lane,
-                "score" => $score,
-                "w_player_id" => "tie",
-              ]
-            );
+          $score1 = $tmpResult[$pos] + $tmpResult[$pos + 3];
+          $scores = [];
+          $scores[$playerID] = $score1;
+          $scores[$playerID2] = $score2;
 
+          if ($score2 == $score1) {
+            $this->notifyScore(
+              clienttranslate('[${lane} lane] ${scoreA} vs ${scoreB}. Tied.'),
+              $lane,
+              $scores,
+              "tie"
+            );
             continue;
           }
 
-          $score2 = $tmpResult[$pos] + $tmpResult[$pos + 3];
-
-          if ($hasEclipse[$pos] && abs($score - $score2) >= 4) {
-            self::notifyAllPlayers(
-              "score",
+          if ($hasEclipse[$pos] && abs($score2 - $score1) >= 4) {
+            $this->notifyScore(
               clienttranslate(
-                '[${lane} lane] is tied by ${score} vs ${score2} (tied by "the Eclipse").'
+                '[${lane} lane] ${scoreA} vs ${scoreB}. Tied (tied by "the Eclipse").'
               ),
-              [
-                "lane" => $lane,
-                "score" => $score,
-                "score2" => $score2,
-                "w_player_id" => "tie",
-              ]
+              $lane,
+              $scores,
+              "tie"
             );
             continue;
           }
 
           if (
-            (!$hasTitan[$pos] && $score < $score2) ||
-            ($hasTitan[$pos] && $score > $score2)
+            (!$hasTitan[$pos] && $score2 < $score1) ||
+            ($hasTitan[$pos] && $score2 > $score1)
           ) {
             if ($hasTitan[$pos]) {
-              self::notifyAllPlayers(
-                "score",
+              $this->notifyScore(
                 clienttranslate(
-                  '[${lane} lane] ${player} won: ${scoreW} (vs ${scoreL}, lower won due to "the Titan").'
+                  '[${lane} lane] ${scoreA} vs ${scoreB}. ${wPlayerName} won. (lower won due to "the Titan").'
                 ),
-                [
-                  "lane" => $lane,
-                  "scoreW" => $score2,
-                  "scoreL" => $score,
-                  "player" => $this->getPlayerName($playerID),
-                  "w_player_id" => $playerID,
-                ]
+                $lane,
+                $scores,
+                $playerID
               );
             } else {
-              self::notifyAllPlayers(
-                "score",
+              $this->notifyScore(
                 clienttranslate(
-                  '[${lane} lane] ${player} won: ${scoreW} (vs ${scoreL}).'
+                  '[${lane} lane] ${scoreA} vs ${scoreB}. ${wPlayerName} won.'
                 ),
-                [
-                  "lane" => $lane,
-                  "scoreW" => $score2,
-                  "scoreL" => $score,
-                  "player" => $this->getPlayerName($playerID),
-                  "w_player_id" => $playerID,
-                ]
+                $lane,
+                $scores,
+                $playerID
               );
             }
             if (
               $this->hndlEvilAndAgent(
                 $playerID,
-                $laneScore["player"],
+                $playerID2,
                 $hasEvil[$pos],
                 $hasAgent[$pos]
               )
@@ -1649,41 +1664,31 @@ class Vughex extends Table
           }
 
           if (
-            (!$hasTitan[$pos] && $score > $score2) ||
-            ($hasTitan[$pos] && $score < $score2)
+            (!$hasTitan[$pos] && $score2 > $score1) ||
+            ($hasTitan[$pos] && $score2 < $score1)
           ) {
             if ($hasTitan[$pos]) {
-              self::notifyAllPlayers(
-                "score",
+              $this->notifyScore(
                 clienttranslate(
-                  '[${lane} lane] ${player} won: ${scoreW} (vs ${scoreL}, lower won due to "the Titan").'
+                  '[${lane} lane] ${scoreA} vs ${scoreB}. ${wPlayerName} won (lower won due to "the Titan").'
                 ),
-                [
-                  "lane" => $lane,
-                  "scoreW" => $score,
-                  "scoreL" => $score2,
-                  "player" => $this->getPlayerName($laneScore["player"]),
-                  "w_player_id" => $laneScore["player"],
-                ]
+                $lane,
+                $scores,
+                $playerID2
               );
             } else {
-              self::notifyAllPlayers(
-                "score",
+              $this->notifyScore(
                 clienttranslate(
-                  '[${lane} lane] ${player} won: ${scoreW} (vs ${scoreL}).'
+                  '[${lane} lane] ${scoreA} vs ${scoreB}. ${wPlayerName} won.'
                 ),
-                [
-                  "lane" => $lane,
-                  "scoreW" => $score,
-                  "scoreL" => $score2,
-                  "player" => $this->getPlayerName($laneScore["player"]),
-                  "w_player_id" => $laneScore["player"],
-                ]
+                $lane,
+                $scores,
+                $playerID2
               );
             }
             if (
               $this->hndlEvilAndAgent(
-                $laneScore["player"],
+                $playerID2,
                 $playerID,
                 $hasEvil[$pos],
                 $hasAgent[$pos]
