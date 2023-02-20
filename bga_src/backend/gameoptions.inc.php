@@ -57,9 +57,9 @@ $game_options = [
     "values" => [
       // A simple value for this option:
       1 => ["name" => totranslate("1 scores")],
-      2 => ["name" => totranslate("2 scores")],
-      3 => ["name" => totranslate("3 scores (default)")],
+      2 => ["name" => totranslate("2 scores (default)")],
+      3 => ["name" => totranslate("3 scores")],
     ],
-    "default" => 3,
+    "default" => 2,
   ],
 ];
