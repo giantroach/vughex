@@ -252,7 +252,6 @@ export default class App extends Vue {
     });
 
     // init grid data
-    // FIXME: this should apply who controls
     if (this.gamedata.day_or_night === "night") {
       this.gridData.cardIDs = [
         [undefined, undefined, { cid: "centerCard3" }],
