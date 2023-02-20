@@ -1508,60 +1508,72 @@ class Vughex extends Table
             $tmpResult[$posID] = $this->getPower($c, $center, "left");
             $hasEclipse[0] = $hasEclipse[0] || $this->isEnabledCard($c, 7);
             $hasTitan[0] = $hasTitan[0] || $this->isEnabledCard($c, 10);
-            $hasEvil[0] =
-              $hasEvil[0] || $this->isEnabledCard($c, 3) ? $playerID : false;
-            $hasAgent[0] =
-              $hasAgent[0] || $this->isEnabledCard($c, 11) ? $playerID : false;
+            if (!$hasEvil[0]) {
+              $hasEvil[0] = $this->isEnabledCard($c, 3) ? $playerID : false;
+            }
+            if (!$hasAgent[0]) {
+              $hasAgent[0] = $this->isEnabledCard($c, 11) ? $playerID : false;
+            }
             break;
           case 1:
             $center = $result["score"]["center"][1];
             $tmpResult[$posID] = $this->getPower($c, $center, "center");
             $hasEclipse[1] = $hasEclipse[1] || $this->isEnabledCard($c, 7);
             $hasTitan[1] = $hasTitan[1] || $this->isEnabledCard($c, 10);
-            $hasEvil[1] =
-              $hasEvil[1] || $this->isEnabledCard($c, 3) ? $playerID : false;
-            $hasAgent[1] =
-              $hasAgent[1] || $this->isEnabledCard($c, 11) ? $playerID : false;
+            if (!$hasEvil[1]) {
+              $hasEvil[1] = $this->isEnabledCard($c, 3) ? $playerID : false;
+            }
+            if (!$hasAgent[1]) {
+              $hasAgent[1] = $this->isEnabledCard($c, 11) ? $playerID : false;
+            }
             break;
           case 2:
             $center = $result["score"]["center"][2];
             $tmpResult[$posID] = $this->getPower($c, $center, "right");
             $hasEclipse[2] = $hasEclipse[2] || $this->isEnabledCard($c, 7);
             $hasTitan[2] = $hasTitan[2] || $this->isEnabledCard($c, 10);
-            $hasEvil[2] =
-              $hasEvil[2] || $this->isEnabledCard($c, 3) ? $playerID : false;
-            $hasAgent[2] =
-              $hasAgent[2] || $this->isEnabledCard($c, 11) ? $playerID : false;
+            if (!$hasEvil[2]) {
+              $hasEvil[2] = $this->isEnabledCard($c, 3) ? $playerID : false;
+            }
+            if (!$hasAgent[2]) {
+              $hasAgent[2] = $this->isEnabledCard($c, 11) ? $playerID : false;
+            }
             break;
           case 3:
             $center = $result["score"]["center"][0];
             $tmpResult[$posID] = $this->getPower($c, $center, "left");
             $hasEclipse[0] = $hasEclipse[0] || $this->isEnabledCard($c, 7);
             $hasTitan[0] = $hasTitan[0] || $this->isEnabledCard($c, 10);
-            $hasEvil[0] =
-              $hasEvil[0] || $this->isEnabledCard($c, 3) ? $playerID : false;
-            $hasAgent[0] =
-              $hasAgent[0] || $this->isEnabledCard($c, 11) ? $playerID : false;
+            if (!$hasEvil[0]) {
+              $hasEvil[0] = $this->isEnabledCard($c, 3) ? $playerID : false;
+            }
+            if (!$hasAgent[0]) {
+              $hasAgent[0] = $this->isEnabledCard($c, 11) ? $playerID : false;
+            }
             break;
           case 4:
             $center = $result["score"]["center"][1];
             $tmpResult[$posID] = $this->getPower($c, $center, "center");
             $hasEclipse[1] = $hasEclipse[1] || $this->isEnabledCard($c, 7);
             $hasTitan[1] = $hasTitan[1] || $this->isEnabledCard($c, 10);
-            $hasEvil[1] =
-              $hasEvil[1] || $this->isEnabledCard($c, 3) ? $playerID : false;
-            $hasAgent[1] =
-              $hasAgent[1] || $this->isEnabledCard($c, 11) ? $playerID : false;
+            if (!$hasEvil[1]) {
+              $hasEvil[1] = $this->isEnabledCard($c, 3) ? $playerID : false;
+            }
+            if (!$hasAgent[1]) {
+              $hasAgent[1] = $this->isEnabledCard($c, 11) ? $playerID : false;
+            }
             break;
           case 5:
             $center = $result["score"]["center"][2];
             $tmpResult[$posID] = $this->getPower($c, $center, "right");
             $hasEclipse[2] = $hasEclipse[2] || $this->isEnabledCard($c, 7);
             $hasTitan[2] = $hasTitan[2] || $this->isEnabledCard($c, 10);
-            $hasEvil[2] =
-              $hasEvil[2] || $this->isEnabledCard($c, 3) ? $playerID : false;
-            $hasAgent[2] =
-              $hasAgent[2] || $this->isEnabledCard($c, 11) ? $playerID : false;
+            if (!$hasEvil[2]) {
+              $hasEvil[2] = $this->isEnabledCard($c, 3) ? $playerID : false;
+            }
+            if (!$hasAgent[2]) {
+              $hasAgent[2] = $this->isEnabledCard($c, 11) ? $playerID : false;
+            }
             break;
         }
       }
