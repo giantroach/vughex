@@ -67,7 +67,7 @@ define([
     */
 
     setup: function (gamedatas: Gamedata) {
-      console.log("Starting game setup");
+      // console.log("Starting game setup");
 
       // Setting up player boards
       for (var player_id in gamedatas.players) {
@@ -121,6 +121,8 @@ define([
         _("Stealth is disabled."),
         _("Cancel"),
         _("Submit"),
+        _("Discard and draw"),
+        _("No discard"),
         _("On Table"),
         _("Your Hand"),
         _("Win!"),
@@ -131,7 +133,7 @@ define([
         return acc;
       }, {} as { [key: string]: string });
 
-      console.log("Ending game setup");
+      // console.log("Ending game setup");
     },
 
     refreshGamedata: function (gamedatas: Gamedata) {
@@ -147,7 +149,7 @@ define([
     //                  You can use this method to perform some user interface changes at this moment.
     //
     onEnteringState: function (stateName: string, args: any) {
-      console.log("Entering state: " + stateName);
+      // console.log("Entering state: " + stateName);
 
       switch (stateName) {
         case "roundSetup":
@@ -185,7 +187,7 @@ define([
     //                 You can use this method to perform some user interface changes at this moment.
     //
     onLeavingState: function (stateName: string) {
-      console.log("Leaving state: " + stateName);
+      // console.log("Leaving state: " + stateName);
 
       switch (stateName) {
         case "mulliganTurn":
@@ -209,7 +211,7 @@ define([
     //                        action status bar (ie: the HTML links in the status bar).
     //
     onUpdateActionButtons: function (stateName: string, args: any) {
-      console.log("onUpdateActionButtons: " + stateName);
+      // console.log("onUpdateActionButtons: " + stateName);
 
       if (this.isCurrentPlayerActive()) {
         switch (
