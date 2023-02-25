@@ -367,7 +367,12 @@ define([
         vue.bgaRequestPromise = new Promise((resolve, reject) => {
           this.ajaxcall(
             url,
-            req.args,
+            Object.assign(
+              {
+                lock: true,
+              },
+              req.args,
+            ),
             this,
             (result: any) => {
               resolve(result);

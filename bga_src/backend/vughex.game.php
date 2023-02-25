@@ -947,6 +947,8 @@ class Vughex extends Table
 
   function mulligan($cardID)
   {
+    self::checkAction("mulligan");
+
     $playerID = intval(self::getActivePlayerId());
 
     $sql = "SELECT round_side FROM round";
@@ -1074,6 +1076,8 @@ class Vughex extends Table
     $targetGridSide,
     $targetCol
   ) {
+    self::checkAction("playCard");
+
     $cardInfo = $this->getCard($cardID);
     $actorID = self::getActivePlayerId();
     $oppoID = $this->getOppoID($actorID);
@@ -1744,10 +1748,6 @@ class Vughex extends Table
     } else {
       $this->gamestate->nextState("roundSetup");
     }
-  }
-
-  function stGameEnd()
-  {
   }
 
   //////////////////////////////////////////////////////////////////////////////
