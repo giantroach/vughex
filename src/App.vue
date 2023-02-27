@@ -123,7 +123,7 @@ import CtrlButton from "./components/CtrlButton.vue";
       ctrlButtonDef: ctrlButtonDefs,
     };
   },
-  inject: ["urlBase", "i18n", "translation"],
+  inject: ["urlBase", "i18n", "translation", "animation"],
 })
 export default class App extends Vue {
   public bgaRequest: BgaRequest | null = null;
@@ -141,6 +141,7 @@ export default class App extends Vue {
   public i18n!: Ref<any>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public translation!: Ref<any>;
+  public animation!: Ref<boolean>;
   public gridData: GridData = {
     cardIDs: [],
     ghosts: [],

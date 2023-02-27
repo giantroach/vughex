@@ -18,7 +18,7 @@
       @click="selectHand(idx)"
     >
       <Aura
-        :active="isSelectable(idx) || isSelected(idx)"
+        :active="animation.value && (isSelectable(idx) || isSelected(idx))"
         :type="!isSelected(idx) ? 'selectable' : 'selected'"
         :radius="size.radius"
       ></Aura>
@@ -41,6 +41,7 @@
 
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
+import { Ref } from "vue";
 import { CardID } from "../type/Hand.d";
 import { HandDef, SizeDef } from "../type/HandDef.d";
 import { CardDef } from "../type/CardDef.d";
@@ -60,7 +61,7 @@ import Aura from "./Aura.vue";
     exclusiveSelect: Boolean,
     active: Boolean,
   },
-  inject: ["cardDef", "handDef"],
+  inject: ["cardDef", "handDef", "animation"],
   emits: ["selectHand"],
 })
 export default class Hand extends Vue {
@@ -74,6 +75,7 @@ export default class Hand extends Vue {
   public active!: boolean;
   public size!: SizeDef;
   public cardDef!: { [cardType: string]: CardDef };
+  public animation!: Ref<boolean>;
 
   public created() {
     const def = this.handDef[this.type];
@@ -146,9 +148,11 @@ li {
 }
 .selectable {
   border: 2px solid #00e9eb;
+  box-shadow: 0 0 5px 5px rgb(0 233 235 / 50%);
 }
 .selected {
   border: 2px solid #fffc00;
+  box-shadow: 0 0 5px 5px rgb(255 252 0 / 50%);
 }
 .focued {
   margin-left: 30px;

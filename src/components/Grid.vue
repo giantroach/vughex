@@ -18,7 +18,7 @@
       @click="selectCol(idx)"
     >
       <Aura
-        :active="isColSelectable(idx)"
+        :active="animation.value && isColSelectable(idx)"
         :type="isColSelected(idx) ? 'colSelected' : 'colSelectable'"
         :radius="size.radius"
       ></Aura>
@@ -56,10 +56,11 @@
           </template>
           <Aura
             :active="
-              isSelectable(0, idx, idy) ||
-              isSelectable(1, idx, idy) ||
-              isSelected(0, idx, idy) ||
-              isSelected(1, idx, idy)
+              animation.value &&
+              (isSelectable(0, idx, idy) ||
+                isSelectable(1, idx, idy) ||
+                isSelected(0, idx, idy) ||
+                isSelected(1, idx, idy))
             "
             :type="getAuraType(idx, idy)"
             :radius="size.radius"
@@ -135,7 +136,7 @@ interface OverlayWithPos extends Overlay {
     overlay: Array,
     active: Boolean,
   },
-  inject: ["gridDef", "cardDef", "i18n"],
+  inject: ["gridDef", "cardDef", "i18n", "animation"],
   emits: ["selectGrid", "selectCol"],
 })
 export default class Grid extends Vue {
@@ -159,6 +160,7 @@ export default class Grid extends Vue {
   public cardDef!: { [cardType: string]: CardDef };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public i18n!: Ref<any>;
+  public animation!: Ref<boolean>;
 
   public created() {
     const def = this.gridDef[this.type];
@@ -390,24 +392,30 @@ ul.grid {
 }
 li.grid-cell.selectable0 {
   border: 2px solid #00e9eb;
+  box-shadow: 0 0 5px 5px rgb(0 233 235 / 50%);
 }
 li.grid-cell.selected0 {
   border: 2px solid #fffc00;
+  box-shadow: 0 0 5px 5px rgb(255 252 0 / 50%);
 }
 li.grid-cell.selectable1 {
   border: 2px solid #00eb7a;
+  box-shadow: 0 0 5px 5px rgb(0 235 122 / 50%);
 }
 li.grid-cell.selected1 {
   border: 2px solid #fffc00;
+  box-shadow: 0 0 5px 5px rgb(255 252 0 / 50%);
 }
 ul.grid > li.grid-col {
   border: 2px solid transparent;
 }
 ul.grid > li.grid-col.selectable {
   border: 2px solid #00e9eb;
+  box-shadow: 0 0 5px 5px rgb(0 233 235 / 50%);
 }
 ul.grid > li.grid-col.selected {
   border: 2px solid #fffc00;
+  box-shadow: 0 0 5px 5px rgb(255 252 0 / 50%);
 }
 .cellOverlay {
   display: flex;
