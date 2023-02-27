@@ -23,7 +23,7 @@ import { BgaRequest } from "./type/bga-interface.d";
 declare const define: any;
 declare const ebg: any;
 declare const $: any;
-// declare const _: any;
+declare const _: any;
 declare const dojo: Dojo;
 declare const g_gamethemeurl: string;
 declare const window: any;
@@ -31,9 +31,6 @@ declare const window: any;
 const appName = "vughex";
 
 let i18n: any;
-const _ = (text: string): string[] => {
-  return [text, i18n(text)];
-};
 
 define([
   "dojo",
@@ -86,52 +83,69 @@ define([
 
       // inject translation
       i18n = window["_"];
-      vue.translation = [
-        _(
-          "[Placement] Choose a unit already placed in this lane. Disable stealth and [Combat] ability from the unit.",
+      vue.translation = {
+        "[Placement] Choose a unit already placed in this lane. Disable stealth and [Combat] ability from the unit.":
+          _(
+            "[Placement] Choose a unit already placed in this lane. Disable stealth and [Combat] ability from the unit.",
+          ),
+        "[Placement] Discard a non-stealth unit in this lane. The owner draws a unit card from the pile and immediately places it on the same lane.":
+          _(
+            "[Placement] Discard a non-stealth unit in this lane. The owner draws a unit card from the pile and immediately places it on the same lane.",
+          ),
+        "[Combat] Increases ◆ in this lane by 1.": _(
+          "[Combat] Increases ◆ in this lane by 1.",
         ),
-        _(
-          "[Placement] Discard a non-stealth unit in this lane. The owner draws a unit card from the pile and immediately places it on the same lane.",
+        "[Combat] Receive 1 damage if you lose in this lane.": _(
+          "[Combat] Receive 1 damage if you lose in this lane.",
         ),
-        _("[Combat] Increases ◆ in this lane by 1."),
-        _("[Combat] Receive 1 damage if you lose in this lane."),
-        _(
-          "[Combat] Power of this unit becomes 15 if ◆ in this lane is either 6+ or 0-.",
+        "[Combat] Power of this unit becomes 15 if ◆ in this lane is either 6+ or 0-.":
+          _(
+            "[Combat] Power of this unit becomes 15 if ◆ in this lane is either 6+ or 0-.",
+          ),
+        "[Placement] Choose and disable stealth from a unit (regardless of the lane).":
+          _(
+            "[Placement] Choose and disable stealth from a unit (regardless of the lane).",
+          ),
+        "None.": _("None."),
+        "[Combat] Ties the Combat in this lane if the power gap is 4+. (Prior to the Titan).":
+          _(
+            "[Combat] Ties the Combat in this lane if the power gap is 4+. (Prior to the Titan).",
+          ),
+        "[Placement] Choose a stealth unit in this lane. Move it to another lane.":
+          _(
+            "[Placement] Choose a stealth unit in this lane. Move it to another lane.",
+          ),
+        "[Combat] Change ◆ in this lane to 0. (Apply this before any other abilities)":
+          _(
+            "[Combat] Change ◆ in this lane to 0. (Apply this before any other abilities)",
+          ),
+        "[Combat] The lower power wins in this lane. (Unless the combat is tied by the Eclipseʼs ability).":
+          _(
+            "[Combat] The lower power wins in this lane. (Unless the combat is tied by the Eclipseʼs ability).",
+          ),
+        "[Combat] Deals 1 damage to the opponent if you win this lane.": _(
+          "[Combat] Deals 1 damage to the opponent if you win this lane.",
         ),
-        _(
-          "[Placement] Choose and disable stealth from a unit (regardless of the lane).",
+        "[Combat] Reduces ◆ in this lane by 2.": _(
+          "[Combat] Reduces ◆ in this lane by 2.",
         ),
-        _("None."),
-        _(
-          "[Combat] Ties the Combat in this lane if the power gap is 4+. (Prior to the Titan).",
+        "(Reviealed at the battle phase!)": _(
+          "(Reviealed at the battle phase!)",
         ),
-        _(
-          "[Placement] Choose a stealth unit in this lane. Move it to another lane.",
+        "Stealth and the [Combat] ability are disabled.": _(
+          "Stealth and the [Combat] ability are disabled.",
         ),
-        _(
-          "[Combat] Change ◆ in this lane to 0. (Apply this before any other abilities)",
-        ),
-        _(
-          "[Combat] The lower power wins in this lane. (Unless the combat is tied by the Eclipseʼs ability).",
-        ),
-        _("[Combat] Deals 1 damage to the opponent if you win this lane."),
-        _("[Combat] Reduces ◆ in this lane by 2."),
-        _("(Reviealed at the battle phase!)"),
-        _("Stealth and the [Combat] ability are disabled."),
-        _("Stealth is disabled."),
-        _("Cancel"),
-        _("Submit"),
-        _("Discard and draw"),
-        _("No discard"),
-        _("On Table"),
-        _("Your Hand"),
-        _("Win!"),
-        _("Lose.."),
-        _("Tie"),
-      ].reduce((acc, [text, translated]) => {
-        acc[text] = translated;
-        return acc;
-      }, {} as { [key: string]: string });
+        "Stealth is disabled.": _("Stealth is disabled."),
+        Cancel: _("Cancel"),
+        Submit: _("Submit"),
+        "Discard and draw": _("Discard and draw"),
+        "No discard": _("No discard"),
+        "On Table": _("On Table"),
+        "Your Hand": _("Your Hand"),
+        "Win!": _("Win!"),
+        "Lose..": _("Lose.."),
+        Tie: _("Tie"),
+      };
 
       // console.log("Ending game setup");
     },
