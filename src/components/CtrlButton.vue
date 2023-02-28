@@ -16,7 +16,11 @@
     class="aura"
     @click="btnClick()"
   >
-    <Aura :active="true" :type="auraType" :radius="size.radius"></Aura>
+    <Aura
+      :active="animation.value"
+      :type="auraType"
+      :radius="size.radius"
+    ></Aura>
     {{ i18n(def.label) }}
   </Button>
 </template>
@@ -41,7 +45,7 @@ import Aura from "./Aura.vue";
     display: Boolean,
     auraType: String,
   },
-  inject: ["ctrlButtonDef", "i18n"],
+  inject: ["ctrlButtonDef", "i18n", "animation"],
   emits: ["btnClick"],
 })
 export default class CtrlButton extends Vue {
@@ -57,6 +61,7 @@ export default class CtrlButton extends Vue {
   public size!: ButtonSizeDef;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public i18n!: Ref<any>;
+  public animation!: Ref<boolean>;
 
   public created() {
     this.def = this.ctrlButtonDef[this.type];

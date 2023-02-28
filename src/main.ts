@@ -15,6 +15,8 @@ app.provide("i18n", (text: string) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (mountedApp as any)?.translation?.[text] || text;
 });
+const animation = ref(false);
+app.provide("animation", animation);
 const mountedApp = app.mount("#app");
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (window as any)["vue"] = mountedApp;
