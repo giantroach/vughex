@@ -6,6 +6,7 @@
         "build": "npm run clear:dist && npm run build:dev && npm run build:bgaBackend && npm run build:bgaClient",
         "build:bgaBackend": "cp -f ./bga_src/backend/* ./dist/",
         "build:bgaClient": "webpack --config ./bga_src/client/webpack.config.js",
+        "build:bgaCpImg": "cp -f ./bga_src/img/* ./dist/img",
         "build:dev": "vue-cli-service build --mode development",
         "clear:dist": "rm -rf ./dist/*",
         "lint": "vue-cli-service lint",
