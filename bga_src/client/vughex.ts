@@ -147,6 +147,21 @@ define([
         Tie: _("Tie"),
       };
 
+      // update player area
+      gamedatas.playerorder.forEach((pID, idx) => {
+        // append sun / moon icon
+        const icon = document.createElement("div");
+        icon.style.height = "20px";
+        icon.style.width = "20px";
+        icon.style.display = "inline-block";
+        icon.style.backgroundImage = `url(${g_gamethemeurl}img/player_icon.png)`;
+        icon.style.backgroundPosition = idx ? "0 0" : "-20px 0";
+        icon.style.marginBottom = "-2px";
+        document
+          .querySelector(`#player_board_${pID} .player_score`)
+          ?.prepend(icon);
+      });
+
       // console.log("Ending game setup");
     },
 
