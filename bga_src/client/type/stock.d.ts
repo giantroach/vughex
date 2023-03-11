@@ -1,5 +1,5 @@
 import { Game } from "./framework.d";
-import { Card } from "./vughex.d";
+import { Card } from "./gamedata.d";
 
 interface StockItems {
   id: string;

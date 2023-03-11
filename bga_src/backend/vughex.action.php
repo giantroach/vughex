@@ -43,9 +43,7 @@ class action_vughex extends APP_GameAction
     self::setAjaxMode();
     $cardID = self::getArg("card", AT_alphanum, false);
 
-    $this->game->mulligan(
-      $cardID,
-    );
+    $this->game->mulligan($cardID);
     self::ajaxResponse();
   }
 
@@ -65,6 +63,13 @@ class action_vughex extends APP_GameAction
       $targetGridSide,
       $targetCol
     );
+    self::ajaxResponse();
+  }
+
+  public function endRoundConfirm()
+  {
+    self::setAjaxMode();
+    $this->game->endRoundConfirm();
     self::ajaxResponse();
   }
 }

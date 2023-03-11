@@ -29,6 +29,13 @@ const ctrlButtonDefs: { [cardType in ButtonType]: CtrlButtonDef } = {
     background: "#3d50ff",
     border: "2px solid #adc1ff",
   },
+  confirm: {
+    label: "Confirm",
+    size: { width: "138px", height: "30px", radius: "15px" },
+    textColor: "white",
+    background: "#ff621f",
+    border: "2px solid #ffb571",
+  },
 };
 
 export { ctrlButtonDefs };

@@ -39,8 +39,10 @@ type CurrentState =
   | "reincarnationTurn:afterTargetSelect"
   | "reincarnationTurn:submit"
   | "reincarnationTurn:afterSubmit"
-  | "endRound"
+  | "endRound:init"
+  | "endRound:submit"
   | "endRound:afterAnim"
+  | "endRound:afterSubmit"
   | "otherPlayerTurn";
 
 type SubState =
@@ -53,6 +55,7 @@ type SubState =
   | "beforeTargetSelect2"
   | "afterTargetSelect"
   | "submit"
+  | "afterAnim"
   | "afterSubmit";
 
 type BoardSide = "player" | "oppo";
@@ -403,7 +406,7 @@ class State {
         break;
       }
 
-      case "endRound": {
+      case "endRound:init": {
         if (
           !this.scoreData.myScore.length ||
           !this.scoreData.oppoScore.length
@@ -411,11 +414,24 @@ class State {
           return;
         }
         this.setScore();
-        this.setState("endRound:afterAnim");
+        this.setSubState("afterAnim");
         break;
       }
 
       case "endRound:afterAnim": {
+        this.ctrlButtonData.confirm.display = true;
+        break;
+      }
+
+      case "endRound:submit": {
+        this.ctrlButtonData.confirm.display = false;
+        this.request("endRoundConfirm", {});
+        this.setSubState("afterSubmit");
+        break;
+      }
+
+      case "endRound:afterSubmit": {
+        this.assign(this.handData, "selected", []);
         break;
       }
     }
@@ -469,6 +485,11 @@ class State {
       this.current = "reincarnationTurn:submit";
       this.ctrlButtonData.cancel.display = false;
       this.ctrlButtonData.submit.display = false;
+      this.throttledRefresh();
+    }
+    if (/^endRound/.test(this.current)) {
+      this.current = "endRound:submit";
+      this.ctrlButtonData.confirm.display = false;
       this.throttledRefresh();
     }
   }
@@ -699,6 +720,42 @@ class State {
       p.then(() => {
         const idx = Math.floor(progress / steps);
         const step = (progress % steps) + 1;
+
+        if (idx > 0 && step === 1) {
+          // show who won first
+          if (!this.scoreData.result) {
+            this.scoreData.result = [];
+          }
+          if (!this.gridData.overlay) {
+            this.gridData.overlay = [];
+          }
+          const result = this.scoreData.result[idx - 1];
+          if (result === "win") {
+            this.gridData.overlay[idx - 1] = {
+              type: "text",
+              data: "Win!",
+              pos: `col.${idx - 1}.bottom`,
+              cssClass: "largeCenter success",
+            };
+          }
+          if (result === "lose") {
+            this.gridData.overlay[idx - 1] = {
+              type: "text",
+              data: "Lose..",
+              pos: `col.${idx - 1}.bottom`,
+              cssClass: "largeCenter danger",
+            };
+          }
+          if (result === "tie") {
+            this.gridData.overlay[idx - 1] = {
+              type: "text",
+              data: "Tie",
+              pos: `col.${idx - 1}.bottom`,
+              cssClass: "largeCenter",
+            };
+          }
+        }
+
         if (idx > 2) {
           return;
         }

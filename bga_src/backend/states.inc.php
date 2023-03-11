@@ -138,9 +138,13 @@ $machinestates = [
 
   51 => [
     "name" => "endRound",
-    "type" => "game",
+    "descriptionmyturn" => clienttranslate(
+      'Waiting for all the players to confirm the result'
+    ),
+    "type" => "multipleactiveplayer",
     "action" => "stEndRound",
     "updateGameProgression" => true,
+    "possibleactions" => ["endRoundConfirm"],
     "transitions" => ["roundSetup" => 2, "endGame" => 99],
   ],
 

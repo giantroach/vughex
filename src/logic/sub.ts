@@ -13,7 +13,7 @@ import { objToArray } from "../util/util";
 
 import { GridData } from "../type/Grid.d";
 import { HandData } from "../type/Hand.d";
-import { ScoreData } from "../type/Score.d";
+import { ScoreData, ScoreResult } from "../type/Score.d";
 import { ReincarnationData } from "../type/Reincarnation.d";
 
 //
@@ -249,21 +249,7 @@ export class Sub {
         if (!this.gridData || !wPlayerID || !lane) {
           break;
         }
-        let idx = 0;
-        let delay = 0;
-        let result = "tie";
-        if (lane === "left") {
-          idx = 0;
-          delay = 1000;
-        }
-        if (lane === "center") {
-          idx = 1;
-          delay = 2000;
-        }
-        if (lane === "right") {
-          idx = 2;
-          delay = 3000;
-        }
+        let result: ScoreResult = "tie";
         if (Number(wPlayerID) === Number(this.playerID)) {
           result = "win";
         }
@@ -273,35 +259,19 @@ export class Sub {
         ) {
           result = "lose";
         }
-        setTimeout(() => {
-          if (!this.gridData.overlay) {
-            this.gridData.overlay = [];
-          }
-          if (result === "win") {
-            this.gridData.overlay[idx] = {
-              type: "text",
-              data: "Win!",
-              pos: `col.${idx}.bottom`,
-              cssClass: "largeCenter success",
-            };
-          }
-          if (result === "lose") {
-            this.gridData.overlay[idx] = {
-              type: "text",
-              data: "Lose..",
-              pos: `col.${idx}.bottom`,
-              cssClass: "largeCenter danger",
-            };
-          }
-          if (result === "tie") {
-            this.gridData.overlay[idx] = {
-              type: "text",
-              data: "Tie",
-              pos: `col.${idx}.bottom`,
-              cssClass: "largeCenter",
-            };
-          }
-        }, delay);
+
+        if (!this.scoreData.result) {
+          this.scoreData.result = [];
+        }
+        if (lane === "left") {
+          this.scoreData.result[0] = result;
+        }
+        if (lane === "center") {
+          this.scoreData.result[1] = result;
+        }
+        if (lane === "right") {
+          this.scoreData.result[2] = result;
+        }
         break;
       }
 

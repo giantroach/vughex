@@ -55,6 +55,13 @@
         auraType="cancel"
         @btnClick="submitState()"
       ></CtrlButton>
+      <CtrlButton
+        type="confirm"
+        :active="ctrlButtonData.confirm.active"
+        :display="ctrlButtonData.confirm.display"
+        auraType="submit"
+        @btnClick="submitState()"
+      ></CtrlButton>
     </div>
 
     <div id="player_hand" class="whiteblock">
@@ -103,6 +110,7 @@ import GameCard from "./components/GameCard.vue";
 import Hand from "./components/Hand.vue";
 import Grid from "./components/Grid.vue";
 import CtrlButton from "./components/CtrlButton.vue";
+import { objToArray } from "./util/util";
 
 @Options({
   components: {
@@ -179,12 +187,17 @@ export default class App extends Vue {
       active: true,
       display: false,
     },
+    confirm: {
+      active: true,
+      display: false,
+    },
   };
 
   public scoreData: ScoreData = {
     centerScore: [],
     oppoScore: [],
     myScore: [],
+    result: [],
   };
 
   public reincarnationData: ReincarnationData = {
@@ -305,6 +318,34 @@ export default class App extends Vue {
       };
     });
 
+    // restore score
+    if (this.gamedata.score) {
+      const score = this.gamedata.score;
+      for (const pID in score) {
+        if (pID === "center") {
+          this.scoreData.centerScore = objToArray(score[pID]);
+        } else if (pID === String(this.playerID)) {
+          this.scoreData.myScore = objToArray(score[pID]);
+        } else {
+          this.scoreData.oppoScore = objToArray(score[pID]);
+        }
+      }
+    }
+    if (this.gamedata.winner) {
+      this.gamedata.winner.forEach((winner, idx: number) => {
+        if (!this.scoreData.result) {
+          this.scoreData.result = [];
+        }
+        if (Number(winner) === 0) {
+          this.scoreData.result[idx] = "tie";
+        } else if (Number(winner) === Number(this.playerID)) {
+          this.scoreData.result[idx] = "win";
+        } else {
+          this.scoreData.result[idx] = "lose";
+        }
+      });
+    }
+
     this.reincarnationData.reincarnatedCardID =
       this.gamedata.reincarnated_card_id || null;
 
@@ -393,13 +434,14 @@ export default class App extends Vue {
               // without delay
               resolve();
               break;
-            case "endRound":
-              this.sub?.handle(notif);
-              // FIXME: this should be configurable
-              setTimeout(() => {
-                resolve();
-              }, 10000);
-              break;
+            // case "endRound": {
+            //   this.sub?.handle(notif);
+            //   // FIXME: this should be configurable
+            //   setTimeout(() => {
+            //     resolve();
+            //   }, 10000);
+            //   break;
+            // }
             default:
               this.sub?.handle(notif);
               setTimeout(() => {
@@ -422,13 +464,14 @@ export default class App extends Vue {
       this.bgaStateQueue = this.bgaStateQueue.then(() => {
         return new Promise<void>((resolve) => {
           switch (state) {
-            case "endRound":
-              this.state?.setState(state);
-              setTimeout(() => {
-                // secure the least time gap
-                resolve();
-              }, 10000);
-              break;
+            // case "endRound": {
+            //   this.state?.setState(state);
+            //   setTimeout(() => {
+            //     // secure the least time gap
+            //     resolve();
+            //   }, 10000);
+            //   break;
+            // }
             default:
               this.state?.setState(state);
               setTimeout(() => {

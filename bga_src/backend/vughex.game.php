@@ -197,7 +197,12 @@ class Vughex extends Table
 
     foreach ($this->getCardsInLocation("table" . $oppo_id) as $card) {
       $c = $this->card_types[intval($card["type_arg"])];
-      if ($c->stealth && !$card["meta"]) {
+      // return raw card at the end of round
+      if (
+        $c->stealth &&
+        !$card["meta"] &&
+        $this->getStateName() !== "endRound"
+      ) {
         $result["oppo_table"][] = [
           "id" => "0",
           "type" => "stealth",
@@ -230,6 +235,25 @@ class Vughex extends Table
     ) {
       $result["reincarnated_card_id"] = $reincarnation["card_id"];
       $result["reincarnated_col"] = $reincarnation["col"];
+    }
+
+    $sql =
+      "SELECT " .
+      "score_round round, " .
+      "score_center_list center_list, " .
+      "score_sun_list sun_list, " .
+      "score_night_list night_list, " .
+      "score_winner winner" .
+      " FROM score ORDER BY score_round DESC LIMIT 1";
+    $scores = self::getObjectFromDB($sql);
+    if ($scores) {
+      $result["score"] = [];
+      $sunPlayerID = $this->getSunPlayerID();
+      $nightPlayerID = $this->getNightPlayerID();
+      $result["score"]["center"] = explode(",", $scores["center_list"]);
+      $result["score"][$sunPlayerID] = explode(",", $scores["sun_list"]);
+      $result["score"][$nightPlayerID] = explode(",", $scores["night_list"]);
+      $result["winner"] = explode(",", $scores["winner"]);
     }
 
     return $result;
@@ -273,6 +297,36 @@ class Vughex extends Table
   /*
       In this space, you can put any utility methods useful for your game logic
     */
+
+  public function getStateName()
+  {
+    $state = $this->gamestate->state();
+    return $state["name"];
+  }
+
+  function getSunPlayerID()
+  {
+    $players = self::getCollectionFromDb(
+      "SELECT player_id id, player_no FROM player"
+    );
+    foreach ($players as $playerID => $player) {
+      if ($player["player_no"] == 1) {
+        return $player["id"];
+      }
+    }
+  }
+
+  function getNightPlayerID()
+  {
+    $players = self::getCollectionFromDb(
+      "SELECT player_id id, player_no FROM player"
+    );
+    foreach ($players as $playerID => $player) {
+      if ($player["player_no"] == 2) {
+        return $player["id"];
+      }
+    }
+  }
 
   function getOppoID($playerID)
   {
@@ -1238,6 +1292,15 @@ class Vughex extends Table
     $this->gamestate->nextState("nextPlayer");
   }
 
+  function endRoundConfirm()
+  {
+    self::checkAction("endRoundConfirm");
+    $this->gamestate->setPlayerNonMultiactive(
+      $this->getCurrentPlayerId(),
+      "roundSetup"
+    );
+  }
+
   //////////////////////////////////////////////////////////////////////////////
   //////////// Game state arguments
   ////////////
@@ -1590,6 +1653,7 @@ class Vughex extends Table
 
       // update center controller
       $gameEnded = false;
+      $winLose = [];
       if (count($laneScore) == 0) {
         $laneScore[0] = $tmpResult[0] + $tmpResult[3];
         $laneScore[1] = $tmpResult[1] + $tmpResult[4];
@@ -1622,6 +1686,7 @@ class Vughex extends Table
               $scores,
               "tie"
             );
+            $winLose[$pos] = 0;
             continue;
           }
 
@@ -1634,6 +1699,7 @@ class Vughex extends Table
               $scores,
               "tie"
             );
+            $winLose[$pos] = 0;
             continue;
           }
 
@@ -1650,6 +1716,7 @@ class Vughex extends Table
                 $scores,
                 $playerID
               );
+              $winLose[$pos] = $playerID;
             } else {
               $this->notifyScore(
                 clienttranslate(
@@ -1659,6 +1726,7 @@ class Vughex extends Table
                 $scores,
                 $playerID
               );
+              $winLose[$pos] = $playerID;
             }
             if (
               $this->hndlEvilAndAgent(
@@ -1694,6 +1762,7 @@ class Vughex extends Table
                 $scores,
                 $playerID2
               );
+              $winLose[$pos] = $playerID2;
             } else {
               $this->notifyScore(
                 clienttranslate(
@@ -1703,6 +1772,7 @@ class Vughex extends Table
                 $scores,
                 $playerID2
               );
+              $winLose[$pos] = $playerID2;
             }
             if (
               $this->hndlEvilAndAgent(
@@ -1745,10 +1815,37 @@ class Vughex extends Table
       $result
     );
 
+    // update score table
+    ksort($result["score"]["center"], SORT_NUMERIC);
+    $centerScore = implode(",", $result["score"]["center"]);
+    ksort($result["score"][$this->getSunPlayerID()], SORT_NUMERIC);
+    $sunScore = implode(",", $result["score"][$this->getSunPlayerID()]);
+    ksort($result["score"][$this->getNightPlayerID()], SORT_NUMERIC);
+    $nightScore = implode(",", $result["score"][$this->getNightPlayerID()]);
+    ksort($winLose, SORT_NUMERIC);
+    $winner = implode(",", $winLose);
+
+    $sql =
+      "INSERT INTO score (" .
+      "score_center_list, " .
+      "score_sun_list, " .
+      "score_night_list, " .
+      "score_winner" .
+      ") VALUES ('" .
+      $centerScore .
+      "','" .
+      $sunScore .
+      "','" .
+      $nightScore .
+      "','" .
+      $winner .
+      "')";
+    self::DbQuery($sql);
+
     if ($gameEnded) {
       $this->gamestate->nextState("endGame");
     } else {
-      $this->gamestate->nextState("roundSetup");
+      $this->gamestate->setAllPlayersMultiactive();
     }
   }
 
