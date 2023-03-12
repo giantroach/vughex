@@ -47,6 +47,11 @@ interface Gamedata {
   };
   reincarnated_card_id?: string | null;
   reincarnated_col?: string | null;
+  score?: {
+    [playerId: number | "center"]: number[];
+  };
+  winner?: string[];
+
 }
 
 export { CardMeta, Card, Score, Gamedata };

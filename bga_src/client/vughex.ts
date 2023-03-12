@@ -204,7 +204,7 @@ define([
           break;
 
         case "endRound":
-          vue.bgaStates.push("endRound");
+          vue.bgaStates.push("endRound:init");
           break;
 
         case "dummmy":

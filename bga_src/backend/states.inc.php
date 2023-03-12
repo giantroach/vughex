@@ -72,10 +72,10 @@ $machinestates = [
   11 => [
     "name" => "mulliganTurn",
     "description" => clienttranslate(
-      '${actplayer} may discard to draw a new card'
+      '${actplayer} may discard to draw a new card.'
     ),
     "descriptionmyturn" => clienttranslate(
-      '${you} may discard a card to draw a new card'
+      '${you} may discard a card to draw a new card.'
     ),
     "type" => "activeplayer",
     "possibleactions" => ["mulligan"],
@@ -96,8 +96,8 @@ $machinestates = [
 
   21 => [
     "name" => "playerTurn",
-    "description" => clienttranslate('${actplayer} must play a card'),
-    "descriptionmyturn" => clienttranslate('${you} must play a card'),
+    "description" => clienttranslate('${actplayer} must play a card.'),
+    "descriptionmyturn" => clienttranslate('${you} must play a card.'),
     "type" => "activeplayer",
     "possibleactions" => ["playCard"],
     "transitions" => [
@@ -118,10 +118,10 @@ $machinestates = [
   31 => [
     "name" => "reincarnationTurn",
     "description" => clienttranslate(
-      '${actplayer} must play the reincarnated card'
+      '${actplayer} must play the reincarnated card.'
     ),
     "descriptionmyturn" => clienttranslate(
-      '${you} must play the reincarnated card'
+      '${you} must play the reincarnated card.'
     ),
     "type" => "activeplayer",
     "possibleactions" => ["playCard"],
@@ -138,9 +138,12 @@ $machinestates = [
 
   51 => [
     "name" => "endRound",
-    "type" => "game",
+    "description" => clienttranslate('${actplayer} is confirming the result.'),
+    "descriptionmyturn" => clienttranslate('Press "Confirm" to continue.'),
+    "type" => "multipleactiveplayer",
     "action" => "stEndRound",
     "updateGameProgression" => true,
+    "possibleactions" => ["endRoundConfirm"],
     "transitions" => ["roundSetup" => 2, "endGame" => 99],
   ],
 
