@@ -434,14 +434,6 @@ export default class App extends Vue {
               // without delay
               resolve();
               break;
-            // case "endRound": {
-            //   this.sub?.handle(notif);
-            //   // FIXME: this should be configurable
-            //   setTimeout(() => {
-            //     resolve();
-            //   }, 10000);
-            //   break;
-            // }
             default:
               this.sub?.handle(notif);
               setTimeout(() => {
@@ -464,14 +456,6 @@ export default class App extends Vue {
       this.bgaStateQueue = this.bgaStateQueue.then(() => {
         return new Promise<void>((resolve) => {
           switch (state) {
-            // case "endRound": {
-            //   this.state?.setState(state);
-            //   setTimeout(() => {
-            //     // secure the least time gap
-            //     resolve();
-            //   }, 10000);
-            //   break;
-            // }
             default:
               this.state?.setState(state);
               setTimeout(() => {
