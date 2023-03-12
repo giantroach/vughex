@@ -693,7 +693,13 @@ class Vughex extends Table
       "' AND card_location='table" .
       $targetPlayerID .
       "'";
+    // query fails when oracle targeted itself since it is not yet on table
     $targetCardID = self::getUniqueValueFromDB($sql);
+    if (!$targetCardID && $cardName === 'oracle') {
+      $sql =
+        "SELECT card_id FROM cards WHERE card_type_arg=0";
+      $targetCardID = self::getUniqueValueFromDB($sql);
+    }
     $targetCardInfo = $this->getCard($targetCardID);
 
     // append meta
