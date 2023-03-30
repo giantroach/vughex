@@ -215,9 +215,10 @@ class Vughex extends Table
       }
     }
 
-    $sql = "SELECT round_side FROM round";
-    $round_side = self::getUniqueValueFromDB($sql);
-    $result["day_or_night"] = $round_side;
+    $sql = "SELECT round_side, round_num FROM round";
+    $round = self::getObjectFromDB($sql);
+    $result["day_or_night"] = $round["round_side"];
+    $result["round"] = $round["round_num"];
 
     // return center controller data
     $sql =
@@ -695,9 +696,8 @@ class Vughex extends Table
       "'";
     // query fails when oracle targeted itself since it is not yet on table
     $targetCardID = self::getUniqueValueFromDB($sql);
-    if (!$targetCardID && $cardName === 'oracle') {
-      $sql =
-        "SELECT card_id FROM cards WHERE card_type_arg=0";
+    if (!$targetCardID && $cardName === "oracle") {
+      $sql = "SELECT card_id FROM cards WHERE card_type_arg=0";
       $targetCardID = self::getUniqueValueFromDB($sql);
     }
     $targetCardInfo = $this->getCard($targetCardID);
@@ -1410,7 +1410,7 @@ class Vughex extends Table
           "players" => $players,
           "day_or_night" => $round_side,
           "center" => $center,
-          "round_num" => $round_num,
+          "round" => $round_num,
         ]
       );
     }

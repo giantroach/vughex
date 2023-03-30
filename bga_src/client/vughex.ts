@@ -145,6 +145,7 @@ define([
         "Win!": _("Win!"),
         "Lose..": _("Lose.."),
         Tie: _("Tie"),
+        Round: _("Round"),
       };
 
       // update player area
