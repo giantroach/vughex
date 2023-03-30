@@ -7,9 +7,13 @@
 
   <div>
     <div id="common_table" class="whiteblock">
-      <h3 id="ontable_header">
-        <span>{{ i18n("On Table") }}:</span>
-      </h3>
+      <div class="card-header">
+        <h3 id="ontable_header">
+          <span>{{ i18n("On Table") }}:</span>
+        </h3>
+        <div class="round-info">{{ i18n("Round") }}:{{ roundData.round }}</div>
+      </div>
+
       <Grid
         ref="grid"
         type="table"
@@ -65,9 +69,11 @@
     </div>
 
     <div id="player_hand" class="whiteblock">
-      <h3 id="inhand_header">
-        <span>{{ i18n("Your Hand") }}:</span>
-      </h3>
+      <div class="card-header">
+        <h3 id="inhand_header">
+          <span>{{ i18n("Your Hand") }}:</span>
+        </h3>
+      </div>
 
       <Hand
         ref="hand"
@@ -99,6 +105,7 @@ import { HandData } from "./type/Hand.d";
 import { CtrlButtonData } from "./type/CtrlButton.d";
 import { ScoreData } from "./type/Score.d";
 import { ReincarnationData } from "./type/Reincarnation.d";
+import { RoundData } from "./type/Round.d";
 import { auraDefs } from "./def/aura";
 import { cardDefs, cardMetaDefs } from "./def/card";
 import { gridDefs } from "./def/grid";
@@ -204,6 +211,11 @@ export default class App extends Vue {
     reincarnatedCardID: null,
   };
 
+  public roundData: RoundData = {
+    round: 0,
+    side: "Day",
+  };
+
   public gamedata: Gamedata = {
     current_player_id: "",
     decision: { decision_type: "" },
@@ -219,6 +231,7 @@ export default class App extends Vue {
     oppo_table: [],
     tablespeed: "",
     day_or_night: "day",
+    round: "0",
     center: {
       left: {
         controller: "",
@@ -346,6 +359,11 @@ export default class App extends Vue {
       });
     }
 
+    this.roundData = {
+      round: Number(this.gamedata.round),
+      side: this.gamedata.day_or_night === "day" ? "Day" : "Night",
+    };
+
     this.reincarnationData.reincarnatedCardID =
       this.gamedata.reincarnated_card_id || null;
 
@@ -369,6 +387,7 @@ export default class App extends Vue {
       this.handData,
       this.scoreData,
       this.reincarnationData,
+      this.roundData,
     );
 
     // update center controller
@@ -493,5 +512,29 @@ export default class App extends Vue {
 }
 #ctrl_buttons > * {
   margin: 10px;
+}
+
+.whiteblock {
+  margin-bottom: 10px;
+  margin-top: 10px;
+  padding: 10px;
+}
+
+.card-header {
+  display: flex;
+
+  > h3 {
+    flex: 1 1 auto;
+    text-align: left;
+    margin: 0;
+  }
+
+  > .round-info {
+    flex: 1 1 auto;
+    text-align: right;
+    margin: 5px;
+    color: #555;
+    font-weight: bold;
+  }
 }
 </style>

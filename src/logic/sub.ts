@@ -15,6 +15,7 @@ import { GridData } from "../type/Grid.d";
 import { HandData } from "../type/Hand.d";
 import { ScoreData, ScoreResult } from "../type/Score.d";
 import { ReincarnationData } from "../type/Reincarnation.d";
+import { RoundData } from "../type/Round.d";
 
 //
 // Sub handles BGA notifications and apply data accordingly.
@@ -27,6 +28,7 @@ export class Sub {
     private handData: HandData,
     private scoreData: ScoreData,
     private reincarnationData: ReincarnationData,
+    private roundData: RoundData,
   ) {}
 
   public handle(notif: BgaNotification) {
@@ -36,6 +38,7 @@ export class Sub {
         const cards = arg.player_cards;
         const center = arg.center;
         const dayOrNight = arg.day_or_night;
+        const roundNum = Number(arg.round);
 
         // reset score
         this.scoreData.centerScore = [];
@@ -79,6 +82,10 @@ export class Sub {
                 }),
           });
         });
+
+        // update round
+        this.roundData.round = roundNum;
+        this.roundData.side = dayOrNight === "day" ? "Day" : "Night";
         break;
       }
 

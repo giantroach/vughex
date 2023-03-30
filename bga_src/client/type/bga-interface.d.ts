@@ -39,6 +39,7 @@ interface BgaNewRoundNotif {
     right: Center;
   };
   day_or_night: "day" | "night";
+  round: string;
 }
 
 interface BgaPlayCardNotif {

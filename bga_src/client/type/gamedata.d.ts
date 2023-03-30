@@ -40,6 +40,7 @@ interface Gamedata {
   player_table: Card[];
   oppo_table: Card[];
   day_or_night: "day" | "night";
+  round: string;
   center: {
     left: Center;
     center: Center;
