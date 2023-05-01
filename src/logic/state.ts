@@ -621,7 +621,7 @@ class State {
       if (ix === x) {
         continue;
       }
-      let ymax = 5;
+      let ymax = 4;
       if (y < 2) {
         ymax = 0;
       }
