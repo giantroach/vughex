@@ -379,7 +379,7 @@ li {
   list-style-type: none;
 }
 li.grid-cell {
-  border: 2px solid rgba(0, 0, 0, 0.5);
+  border: 3px solid rgba(0, 0, 0, 0.3);
   position: relative;
 }
 li.aura {
@@ -391,30 +391,30 @@ ul.grid {
   margin: -120px 0;
 }
 li.grid-cell.selectable0 {
-  border: 2px solid #00e9eb;
+  border: 3px solid #00e9eb;
   box-shadow: 0 0 5px 5px rgb(0 233 235 / 50%);
 }
 li.grid-cell.selected0 {
-  border: 2px solid #fffc00;
+  border: 3px solid #fffc00;
   box-shadow: 0 0 5px 5px rgb(255 252 0 / 50%);
 }
 li.grid-cell.selectable1 {
-  border: 2px solid #00eb7a;
+  border: 3px solid #00eb7a;
   box-shadow: 0 0 5px 5px rgb(0 235 122 / 50%);
 }
 li.grid-cell.selected1 {
-  border: 2px solid #fffc00;
+  border: 3px solid #fffc00;
   box-shadow: 0 0 5px 5px rgb(255 252 0 / 50%);
 }
 ul.grid > li.grid-col {
-  border: 2px solid transparent;
+  border: 3px solid transparent;
 }
 ul.grid > li.grid-col.selectable {
-  border: 2px solid #00e9eb;
+  border: 3px solid #00e9eb;
   box-shadow: 0 0 5px 5px rgb(0 233 235 / 50%);
 }
 ul.grid > li.grid-col.selected {
-  border: 2px solid #fffc00;
+  border: 3px solid #fffc00;
   box-shadow: 0 0 5px 5px rgb(255 252 0 / 50%);
 }
 .cellOverlay {

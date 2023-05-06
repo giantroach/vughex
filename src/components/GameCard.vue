@@ -371,11 +371,11 @@ export default class GameCard extends Vue {
   position: absolute;
 }
 .selectable {
-  border: 2px solid #00e9eb;
+  border: 3px solid #00e9eb;
   box-shadow: 0 0 5px 2px #05fdff;
 }
 .selected {
-  border: 2px solid #fffc00;
+  border: 3px solid #fffc00;
   box-shadow: 0 0 5px 2px #ffb644;
 }
 .ghost {
