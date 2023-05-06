@@ -589,6 +589,10 @@ class State {
   private setTargetSameLaneStealth(x: number): boolean {
     const selectable: boolean[][] = [[], [], []];
     let result = false;
+    if (!this.hasAnotherLaneToSelect(x)) {
+      this.gridData.selectable = [[], []];
+      return false;
+    }
     for (let iy = 0; iy < 5; iy += 1) {
       if (iy !== 2) {
         const c = this.gridData?.cardIDs?.[x][iy];
@@ -607,6 +611,61 @@ class State {
     }
     this.gridData.selectable[1] = selectable;
     return result;
+  }
+
+  private hasAnotherLaneToSelect(x: number): boolean {
+    const selectableCol = [
+      [false, false, false],
+      [false, false, false],
+    ];
+
+    // oppo
+    let hasOppoStealth = false;
+    for (let y = 0; y < 2; y += 1) {
+      if (this.isStealth(x, y)) {
+        hasOppoStealth = true;
+        break;
+      }
+    }
+
+    // player
+    let hasPlayerStealth = false;
+    for (let y = 3; y < 5; y += 1) {
+      if (this.isStealth(x, y)) {
+        hasPlayerStealth = true;
+        break;
+      }
+    }
+
+    for (let ix = 0; ix < 3; ix += 1) {
+      if (ix === x) {
+        continue;
+      }
+      if (hasOppoStealth) {
+        if (!this.gridData.cardIDs?.[ix]?.[0]) {
+          selectableCol[0][ix] = true;
+        }
+      }
+      if (hasPlayerStealth) {
+        if (!this.gridData.cardIDs?.[ix]?.[4]) {
+          selectableCol[1][ix] = true;
+        }
+      }
+    }
+
+    return selectableCol[0].includes(true) || selectableCol[1].includes(true);
+  }
+
+  private isStealth(x: number, y: number): boolean {
+    const c = this.gridData?.cardIDs?.[x][y];
+    const cid = c?.cid;
+    if (cid) {
+      const cDetail = cardUtil.getCard(cid);
+      if (cDetail.stealth && !c.meta?.length) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private setTargetAnotherLane(x: number, y: number): boolean {
