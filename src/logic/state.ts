@@ -539,14 +539,10 @@ class State {
     let result = false;
     for (let iy = 0; iy < 5; iy += 1) {
       if (iy !== 2) {
-        const c = this.gridData?.cardIDs?.[x][iy];
-        const cid = c?.cid;
-        if (cid) {
-          const cDetail = cardUtil.getCard(cid);
-          if (!cDetail.stealth || c.meta?.length) {
-            selectable[x][iy] = true;
-            result = true;
-          }
+        const isStealth = this.isStealth(x, iy);
+        if (isStealth !== null && isStealth !== true) {
+          selectable[x][iy] = true;
+          result = true;
         }
         if (this.gridData?.ghosts?.[x][y]) {
           selectable[x][y] = true;
@@ -567,14 +563,9 @@ class State {
     for (let ix = 0; ix < 3; ix += 1) {
       for (let iy = 0; iy < 5; iy += 1) {
         if (iy !== 2) {
-          const c = this.gridData?.cardIDs?.[ix][iy];
-          const cid = c?.cid;
-          if (cid) {
-            const cDetail = cardUtil.getCard(cid);
-            if (cDetail.stealth && !c.meta?.length) {
-              selectable[ix][iy] = true;
-              result = true;
-            }
+          if (this.isStealth(ix, iy)) {
+            selectable[ix][iy] = true;
+            result = true;
           }
         }
       }
@@ -595,14 +586,9 @@ class State {
     }
     for (let iy = 0; iy < 5; iy += 1) {
       if (iy !== 2) {
-        const c = this.gridData?.cardIDs?.[x][iy];
-        const cid = c?.cid;
-        if (cid) {
-          const cDetail = cardUtil.getCard(cid);
-          if (cDetail.stealth && !c.meta?.length) {
-            selectable[x][iy] = true;
-            result = true;
-          }
+        if (this.isStealth(x, iy)) {
+          selectable[x][iy] = true;
+          result = true;
         }
       }
     }
@@ -656,14 +642,15 @@ class State {
     return selectableCol[0].includes(true) || selectableCol[1].includes(true);
   }
 
-  private isStealth(x: number, y: number): boolean {
+  private isStealth(x: number, y: number): boolean | null {
     const c = this.gridData?.cardIDs?.[x][y];
     const cid = c?.cid;
-    if (cid) {
-      const cDetail = cardUtil.getCard(cid);
-      if (cDetail.stealth && !c.meta?.length) {
-        return true;
-      }
+    if (!cid) {
+      return null;
+    }
+    const cDetail = cardUtil.getCard(cid);
+    if (cDetail.stealth && !c.meta?.length) {
+      return true;
     }
     return false;
   }
