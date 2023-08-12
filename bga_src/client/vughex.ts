@@ -157,6 +157,13 @@ define([
         icon.style.display = "inline-block";
         icon.style.backgroundImage = `url(${g_gamethemeurl}img/player_icon.png)`;
         icon.style.backgroundPosition = idx ? "0 0" : "-20px 0";
+        if (this.player_id === Number(pID)) {
+          icon.style.backgroundPosition =
+            gamedatas.player_side === 'night' ? '0 0' : '-20px 0';
+        } else {
+          icon.style.backgroundPosition =
+            gamedatas.player_side === 'night' ? '-20px 0' : '0 0';
+        }
         icon.style.marginBottom = "-2px";
         document
           .querySelector(`#player_board_${pID} .player_score`)

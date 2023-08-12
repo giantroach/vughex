@@ -257,6 +257,10 @@ class Vughex extends Table
       $result["winner"] = explode(",", $scores["winner"]);
     }
 
+    // identifier
+    $result['player_side'] = $this->getPlayerSide($current_player_id);
+    $result['player_id'] = intval($current_player_id);
+
     return $result;
   }
 
@@ -327,6 +331,21 @@ class Vughex extends Table
         return $player["id"];
       }
     }
+  }
+
+  function getPlayerSide($playerID)
+  {
+    $sql = "SELECT player_no from player where player_id='" . $playerID . "'";
+    $playerNo = self::getUniqueValueFromDB($sql);
+
+    if ($playerNo == 1) {
+      return 'sun';
+    }
+    if ($playerNo == 2) {
+      return 'night';
+    }
+
+    die('ok');
   }
 
   function getOppoID($playerID)
@@ -1893,7 +1912,7 @@ class Vughex extends Table
       return;
     }
 
-    throw new feException(
+    throw new Exception(
       "Zombie mode not supported at this game state: " . $statename
     );
   }
