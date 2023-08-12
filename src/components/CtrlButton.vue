@@ -1,14 +1,15 @@
 <template>
-  <Button
+  <div
     v-bind:style="{
       width: size.width,
       height: size.height,
+      lineHeight: size.height,
       borderRadius: size.radius,
       color: def.textColor,
       background: def.background,
       border: def.border,
       cursor: active ? 'pointer' : '',
-      display: display ? 'initial' : 'none',
+      display: display ? 'inline-block' : 'none',
     }"
     :class="{
       selectable: active,
@@ -22,7 +23,7 @@
       :radius="size.radius"
     ></Aura>
     {{ i18n(def.label) }}
-  </Button>
+  </div>
 </template>
 
 <script lang="ts">

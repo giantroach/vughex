@@ -2,7 +2,7 @@
   <link
     rel="preload"
     as="image"
-    :href="urlBase.value + require('@/assets/cardset.png')"
+    :href="urlBase + require('@/assets/cardset.png')"
   />
 
   <div>

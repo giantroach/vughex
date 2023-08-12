@@ -509,7 +509,7 @@ class State {
         selectable[0][i][4] = true;
       }
     }
-    this.gridData.selectable = selectable;
+    this.assign(this.gridData, "selectable", selectable);
   }
 
   private setTargetSameLane(x: number): boolean {
@@ -915,7 +915,9 @@ class State {
   // avoid unnecessary update
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private assign(obj: any, key: string, val: any): void {
-    if (obj[key] !== val) {
+    const v1 = JSON.stringify(obj[key]);
+    const v2 = JSON.stringify(val);
+    if (v1 !== v2) {
       obj[key] = val;
     }
   }

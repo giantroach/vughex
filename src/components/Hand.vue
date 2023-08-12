@@ -7,7 +7,6 @@
       v-bind:style="{
         width: size.width,
         borderRadius: size.radius,
-        margin: margin,
         zIndex: idx,
       }"
       :class="{
