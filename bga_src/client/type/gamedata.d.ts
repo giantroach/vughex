@@ -52,7 +52,7 @@ interface Gamedata {
     [playerId: number | "center"]: number[];
   };
   winner?: string[];
-
+  player_side?: 'sun' | 'night';
 }
 
 export { CardMeta, Card, Score, Gamedata };
