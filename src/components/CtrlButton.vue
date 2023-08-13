@@ -1,28 +1,32 @@
 <template>
   <div
     v-bind:style="{
-      width: size.width,
-      height: size.height,
-      lineHeight: size.height,
-      borderRadius: size.radius,
-      color: def.textColor,
-      background: def.background,
-      border: def.border,
-      cursor: active ? 'pointer' : '',
-      display: display ? 'inline-block' : 'none',
+      display: display ? 'block' : 'none',
     }"
-    :class="{
-      selectable: active,
-    }"
-    class="aura"
-    @click="btnClick()"
   >
-    <Aura
-      :active="animation.value"
-      :type="auraType"
-      :radius="size.radius"
-    ></Aura>
-    {{ i18n(def.label) }}
+    <button
+      v-bind:style="{
+        width: size.width,
+        height: size.height,
+        borderRadius: size.radius,
+        color: def.textColor,
+        background: def.background,
+        border: def.border,
+        cursor: active ? 'pointer' : '',
+      }"
+      :class="{
+        selectable: active,
+      }"
+      class="aura"
+      @click="btnClick()"
+    >
+      <Aura
+        :active="animation.value"
+        :type="auraType"
+        :radius="size.radius"
+      ></Aura>
+      {{ i18n(def.label) }}
+    </button>
   </div>
 </template>
 

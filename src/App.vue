@@ -509,6 +509,8 @@ export default class App extends Vue {
 }
 #ctrl_buttons {
   height: 50px;
+  display: flex;
+  justify-content: center;
 }
 #ctrl_buttons > * {
   margin: 10px;
