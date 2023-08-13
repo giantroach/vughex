@@ -6,6 +6,10 @@ import App from "./App.vue";
 // (window as any)["vue"] = app;
 
 const app = createApp(App);
+
+// for future version
+app.config.unwrapInjectedRef = true;
+
 const urlBase = ref("");
 app.provide("urlBase", urlBase);
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

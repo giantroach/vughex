@@ -7,7 +7,7 @@
         v-bind:style="{
           width: size.width,
           height: size.height,
-          backgroundImage: 'url(' + urlBase.value + image + ')',
+          backgroundImage: 'url(' + urlBase + image + ')',
           borderRadius: size.radius,
           backgroundPosition: bgPos,
         }"
@@ -38,14 +38,14 @@
         v-bind:style="{
           width: miniDef.size.width,
           height: miniDef.size.height,
-          backgroundImage: 'url(' + urlBase.value + miniDef.image + ')',
+          backgroundImage: 'url(' + urlBase + miniDef.image + ')',
           borderRadius: miniDef.size.radius,
           backgroundPosition: bgPosMini,
         }"
         @click="[showDetails($event), selectCard($event)]"
         v-on:mouseenter="showDetails"
         v-on:mouseout="mouseOutFromMini"
-        v-on:touchstart="showDetails"
+        v-on:touchstart.passive="showDetails"
       >
         <div
           class="detail-meta-mini"
@@ -71,7 +71,7 @@
         height: size.height,
         top: modalTop + 'px',
         left: modalLeft + 'px',
-        backgroundImage: 'url(' + urlBase.value + image + ')',
+        backgroundImage: 'url(' + urlBase + image + ')',
         borderRadius: size.radius,
         backgroundPosition: bgPos,
       }"
