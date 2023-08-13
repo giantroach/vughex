@@ -2,7 +2,7 @@
   <link
     rel="preload"
     as="image"
-    :href="urlBase.value + require('@/assets/cardset.png')"
+    :href="urlBase + require('@/assets/cardset.png')"
   />
 
   <div>
@@ -509,6 +509,8 @@ export default class App extends Vue {
 }
 #ctrl_buttons {
   height: 50px;
+  display: flex;
+  justify-content: center;
 }
 #ctrl_buttons > * {
   margin: 10px;
